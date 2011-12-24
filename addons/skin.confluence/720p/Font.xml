@@ -3,6 +3,202 @@
 	<!-- Normal Fonts -->
 	 	<font>
 			<name>font10</name>
+			<filename>NanumGothic.ttf</filename>
+			<size>12</size>
+		</font>
+	 	<font>
+			<name>font12</name>
+			<filename>NanumGothic.ttf</filename>
+			<size>16</size>
+		</font>
+	 	<font>
+			<name>font12caps</name>
+			<filename>NanumGothic.ttf</filename>
+			<size>16</size>
+		</font>
+	 	<font>
+			<name>font13</name>
+			<filename>NanumGothicBold.ttf</filename>
+			<size>20</size>
+		</font>
+	 	<font>
+			<name>font13caps</name>
+			<filename>NanumGothicBold.ttf</filename>
+			<size>20</size>
+		</font>
+	 	<font>
+			<name>font16caps</name>
+			<filename>NanumGothic.ttf</filename>
+			<size>25</size>
+		</font>
+	 	<font>
+			<name>font30</name>
+			<filename>NanumGothic.ttf</filename>
+			<size>30</size>
+		</font>
+	 	<font>
+			<name>fontContextMenu</name>
+			<filename>NanumGothic.ttf</filename>
+			<size>18</size>
+		</font>
+
+
+	<!-- Title Fonts -->
+	 	<font>
+			<name>font10_title</name>
+			<filename>NanumGothicBold.ttf</filename>
+			<size>12</size>
+		</font>
+	 	<font>
+			<name>font12_title</name>
+			<filename>NanumGothicBold.ttf</filename>
+			<size>16</size>
+		</font>
+	 	<font>
+			<name>font13_title</name>
+			<filename>NanumGothicBold.ttf</filename>
+			<size>20</size>
+		</font>
+	 	<font>
+			<name>font24_title</name>
+			<filename>NanumGothicBold.ttf</filename>
+			<size>24</size>
+		</font>
+	 	<font>
+			<name>font28_title</name>
+			<filename>NanumGothicBold.ttf</filename>
+			<size>28</size>
+		</font>
+	 	<font>
+			<name>font30_title</name>
+			<filename>NanumGothicBold.ttf</filename>
+			<size>30</size>
+		</font>
+	 	<font>
+			<name>font35_title</name>
+			<filename>NanumGothicBold.ttf</filename>
+			<size>35</size>
+		</font>
+	 	<font>
+			<name>font50caps_title</name>
+			<filename>NanumGothicExtraBold.ttf</filename>
+			<size>45</size>
+		</font>
+	 	<font>
+			<name>font45caps_title</name>
+			<filename>NanumGothicBold.ttf</filename>
+			<size>45</size>
+		</font>
+
+	 	<font>
+			<name>WeatherTemp</name>
+			<filename>NanumGothicBold.ttf</filename>
+			<size>80</size>
+		</font>
+	</fontset>
+
+	<fontset id="Big" unicode="true"> 
+	<!-- Normal Fonts -->
+	 	<font>
+			<name>font10</name>
+			<filename>NanumGothic.ttf</filename>
+			<size>14</size>
+		</font>
+	 	<font>
+			<name>font12</name>
+			<filename>NanumGothic.ttf</filename>
+			<size>22</size>
+		</font>
+	 	<font>
+			<name>font12caps</name>
+			<filename>NanumGothic.ttf</filename>
+			<size>22</size>
+		</font>
+	 	<font>
+			<name>font13</name>
+			<filename>NanumGothicBold.ttf</filename>
+			<size>26</size>
+		</font>
+	 	<font>
+			<name>font13caps</name>
+			<filename>NanumGothicBold.ttf</filename>
+			<size>26</size>
+		</font>
+	 	<font>
+			<name>font16caps</name>
+			<filename>NanumGothic.ttf</filename>
+			<size>30</size>
+		</font>
+	 	<font>
+			<name>font30</name>
+			<filename>NanumGothic.ttf</filename>
+			<size>30</size>
+		</font>
+	 	<font>
+			<name>fontContextMenu</name>
+			<filename>NanumGothic.ttf</filename>
+			<size>26</size>
+		</font>
+
+
+	<!-- Title Fonts -->
+	 	<font>
+			<name>font10_title</name>
+			<filename>NanumGothicBold.ttf</filename>
+			<size>18</size>
+		</font>
+	 	<font>
+			<name>font12_title</name>
+			<filename>NanumGothicBold.ttf</filename>
+			<size>24</size>
+		</font>
+	 	<font>
+			<name>font13_title</name>
+			<filename>NanumGothicBold.ttf</filename>
+			<size>26</size>
+		</font>
+	 	<font>
+			<name>font24_title</name>
+			<filename>NanumGothicBold.ttf</filename>
+			<size>30</size>
+		</font>
+	 	<font>
+			<name>font28_title</name>
+			<filename>NanumGothicBold.ttf</filename>
+			<size>32</size>
+		</font>
+	 	<font>
+			<name>font30_title</name>
+			<filename>NanumGothicBold.ttf</filename>
+			<size>34</size>
+		</font>
+	 	<font>
+			<name>font35_title</name>
+			<filename>NanumGothicBold.ttf</filename>
+			<size>38</size>
+		</font>
+	 	<font>
+			<name>font50caps_title</name>
+			<filename>NanumGothicExtraBold.ttf</filename>
+			<size>45</size>
+		</font>
+	 	<font>
+			<name>font45caps_title</name>
+			<filename>NanumGothicBold.ttf</filename>
+			<size>45</size>
+		</font>
+
+	 	<font>
+			<name>WeatherTemp</name>
+			<filename>NanumGothicBold.ttf</filename>
+			<size>80</size>
+		</font>
+	</fontset>
+
+	<fontset id="Default Original" unicode="true"> 
+	<!-- Normal Fonts -->
+	 	<font>
+			<name>font10</name>
 			<filename>DejaVuSans.ttf</filename>
 			<size>12</size>
 		</font>

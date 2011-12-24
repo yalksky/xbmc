@@ -269,8 +269,8 @@ void CGUISettings::Initialize()
   AddBool(ml, "musiclibrary.showcompilationartists", 13414, true);
   AddSeparator(ml,"musiclibrary.sep1");
   AddBool(ml,"musiclibrary.downloadinfo", 20192, false);
-  AddDefaultAddon(ml, "musiclibrary.albumsscraper", 20193, "metadata.albums.allmusic.com", ADDON_SCRAPER_ALBUMS);
-  AddDefaultAddon(ml, "musiclibrary.artistsscraper", 20194, "metadata.artists.allmusic.com", ADDON_SCRAPER_ARTISTS);
+  AddDefaultAddon(ml, "musiclibrary.albumsscraper", 20193, "metadata.albums.daum.net", ADDON_SCRAPER_ALBUMS);
+  AddDefaultAddon(ml, "musiclibrary.artistsscraper", 20194, "metadata.artists.daum.net", ADDON_SCRAPER_ARTISTS);
   AddBool(ml, "musiclibrary.updateonstartup", 22000, false);
   AddBool(ml, "musiclibrary.backgroundupdate", 22001, false);
   AddSeparator(ml,"musiclibrary.sep2");
@@ -674,7 +674,7 @@ void CGUISettings::Initialize()
   AddBool(NULL, "myvideos.extractthumb",20433, true);
 
   CSettingsCategory* sub = AddCategory(5, "subtitles", 287);
-  AddString(sub, "subtitles.font", 14089, "arial.ttf", SPIN_CONTROL_TEXT);
+  AddString(sub, "subtitles.font", 14089, "NanumGothic.ttf", SPIN_CONTROL_TEXT);
   AddInt(sub, "subtitles.height", 289, 28, 16, 2, 74, SPIN_CONTROL_TEXT); // use text as there is a disk based lookup needed
 
   map<int, int> fontStyles;
@@ -703,8 +703,8 @@ void CGUISettings::Initialize()
   AddInt(dvd, "dvds.playerregion", 21372, 0, 0, 1, 8, SPIN_CONTROL_INT_PLUS, -1, TEXT_OFF);
   AddBool(dvd, "dvds.automenu", 21882, false);
 
-  AddDefaultAddon(NULL, "scrapers.moviesdefault", 21413, "metadata.themoviedb.org", ADDON_SCRAPER_MOVIES);
-  AddDefaultAddon(NULL, "scrapers.tvshowsdefault", 21414, "metadata.tvdb.com", ADDON_SCRAPER_TVSHOWS);
+  AddDefaultAddon(NULL, "scrapers.moviesdefault", 21413, "metadata.movie.daum.net", ADDON_SCRAPER_MOVIES);
+  AddDefaultAddon(NULL, "scrapers.tvshowsdefault", 21414, "metadata.tv.daum.net", ADDON_SCRAPER_TVSHOWS);
   AddDefaultAddon(NULL, "scrapers.musicvideosdefault", 21415, "metadata.yahoomusic.com", ADDON_SCRAPER_MUSICVIDEOS);
   AddBool(NULL, "scrapers.langfallback", 21416, false);
 
@@ -814,8 +814,8 @@ void CGUISettings::Initialize()
   AddString(laf, "lookandfeel.rssedit", 21450, "", BUTTON_CONTROL_STANDARD);
 
   CSettingsCategory* loc = AddCategory(7, "locale", 14090);
-  AddString(loc, "locale.language",248,"english", SPIN_CONTROL_TEXT);
-  AddString(loc, "locale.country", 20026, "USA", SPIN_CONTROL_TEXT);
+  AddString(loc, "locale.language",248,"korean", SPIN_CONTROL_TEXT);
+  AddString(loc, "locale.country", 20026, "Korea", SPIN_CONTROL_TEXT);
   AddString(loc, "locale.charset", 14091, "DEFAULT", SPIN_CONTROL_TEXT); // charset is set by the language file
   
   bool use_timezone = false;
