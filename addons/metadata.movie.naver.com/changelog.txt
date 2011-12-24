@@ -1,0 +1,14 @@
+1.0.5
+
+Changes
+- follow Naver page changes
+
+1.0.4
+
+Changes
+- version fix
+
+1.0.3
+
+Changes
+- Initial addon version

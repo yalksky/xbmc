@@ -1,0 +1,25 @@
+1.0.4
+
+Changes
+- Change to eden
+
+1.0.3
+
+Changes
+- Hashes enable
+
+
+1.0.2
+
+Changes
+- Add Korean Translation
+
+1.0.1
+
+Changes
+- Move addons repo to new google code
+
+1.0.0
+
+Changes
+- Initial addon version
