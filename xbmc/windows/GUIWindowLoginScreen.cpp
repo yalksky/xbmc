@@ -29,6 +29,9 @@
 #ifdef HAS_PYTHON
 #include "interfaces/python/XBPython.h"
 #endif
+#ifdef HAS_JSONRPC
+#include "interfaces/json-rpc/JSONRPC.h"
+#endif
 #include "interfaces/Builtins.h"
 #include "utils/Weather.h"
 #include "network/Network.h"
@@ -42,6 +45,7 @@
 #include "settings/GUISettings.h"
 #include "FileItem.h"
 #include "guilib/LocalizeStrings.h"
+#include "addons/AddonManager.h"
 
 #define CONTROL_BIG_LIST               52
 #define CONTROL_LABEL_HEADER            2
@@ -288,6 +292,13 @@ void CGUIWindowLoginScreen::LoadProfile(unsigned int profile)
 #ifdef HAS_PYTHON
   g_pythonParser.m_bLogin = true;
 #endif
+
+#ifdef HAS_JSONRPC
+  JSONRPC::CJSONRPC::Initialize();
+#endif
+
+  ADDON::CAddonMgr::Get().StartServices(false);
+
   g_windowManager.ChangeActiveWindow(g_SkinInfo->GetFirstWindow());
 
   g_application.UpdateLibraries();

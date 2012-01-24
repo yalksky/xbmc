@@ -93,6 +93,7 @@ void CAdvancedSettings::Initialize()
   m_videoEnableHighQualityHwScalers = false;
   m_videoAutoScaleMaxFps = 30.0f;
   m_videoAllowMpeg4VDPAU = false;
+  m_videoAllowMpeg4VAAPI = false;  
   m_videoDisableBackgroundDeinterlace = false;
   m_videoCaptureUseOcclusionQuery = -1; //-1 is auto detect
   m_DXVACheckCompatibility = false;
@@ -314,7 +315,7 @@ void CAdvancedSettings::ParseSettingsFile(const CStdString &file)
   TiXmlDocument advancedXML;
   if (!CFile::Exists(file))
   {
-    CLog::Log(LOGNOTICE, "No settings file to load to load (%s)", file.c_str());
+    CLog::Log(LOGNOTICE, "No settings file to load (%s)", file.c_str());
     return;
   }
 
@@ -456,6 +457,7 @@ void CAdvancedSettings::ParseSettingsFile(const CStdString &file)
     XMLUtils::GetBoolean(pElement,"enablehighqualityhwscalers", m_videoEnableHighQualityHwScalers);
     XMLUtils::GetFloat(pElement,"autoscalemaxfps",m_videoAutoScaleMaxFps, 0.0f, 1000.0f);
     XMLUtils::GetBoolean(pElement,"allowmpeg4vdpau",m_videoAllowMpeg4VDPAU);
+    XMLUtils::GetBoolean(pElement,"allowmpeg4vaapi",m_videoAllowMpeg4VAAPI);    
     XMLUtils::GetBoolean(pElement, "disablebackgrounddeinterlace", m_videoDisableBackgroundDeinterlace);
     XMLUtils::GetInt(pElement, "useocclusionquery", m_videoCaptureUseOcclusionQuery, -1, 1);
 
