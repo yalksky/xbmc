@@ -1209,7 +1209,7 @@
   <string id="13409">인기 250</string>
   <string id="13410">Last.fm 에 채널을 맞춤</string>
   <string id="13411">최소 팬 속도</string>
-  <string id="13412">Play from here</string>
+  <string id="13412">이 항목부터 재생</string>
   <string id="13413">다운로드</string>
   <string id="13414">컴필레이션에만 있는 아티스트 포함</string>
   <string id="13415">렌더링 방식</string>
@@ -1878,8 +1878,8 @@
   <string id="20431">기존 파일에 덮어쓰겠습니까?</string>
   <string id="20432">라이브러리 업데이트 제외 경로</string>
   <string id="20433">미리보기 및 비디오 정보 추출</string>
-  <string id="20434">세트</string>
-  <string id="20435">영화세트 미리보기 설정</string>
+  <string id="20434">시리즈</string>
+  <string id="20435">영화 시리즈 미리보기 설정</string>
   <string id="20436">배우 미리보기 내보내기?</string>
   <string id="20437">팬아트 선택</string>
   <string id="20438">로컬 팬아트</string>
@@ -1902,7 +1902,7 @@
   <string id="20455">청취자</string>
   <string id="20456">시리즈 영화 팬아트 설정</string>
   <string id="20457">시리즈 영화</string>
-  <string id="20458">Group movies in sets</string>
+  <string id="20458">시리즈 영화 묶기</string>
   <!-- up to 21329 is reserved for the video db !! !-->
 
   <string id="21330">숨김 파일 및 디렉토리 보이기</string>
@@ -2332,7 +2332,7 @@
   <string id="33102">이벤트 서버</string>
   <string id="33103">원격 커뮤니케이션 서버</string>
   
-  <string id="33200">Detected New Connection</string>
+  <string id="33200">새 연결 검색됨</string>
 
   <!-- translators: no need to add these to your language files -->
   <string id="34000">Lame</string>
@@ -2361,10 +2361,10 @@
   <string id="34300">Failed to start zeroconf</string>
   <string id="34301">Is Apple's Bonjour Service installed? See log for more info.</string>
   
-  <string id="34400">Video Rendering</string>
-  <string id="34401">Failed to init video filters/scalers, falling back to bilinear scaling</string>
-  <string id="34402">Failed to initialize audio device</string>
-  <string id="34403">Check your audiosettings</string>
+  <string id="34400">비디오 렌더링</string>
+  <string id="34401">비디오 필터/스케일러 초기화 실패. 이중선형 스케일링으로 변경합니다.</string>
+  <string id="34402">오디오 장치 초기화 실패</string>
+  <string id="34403">오디오 설정을 확인하세요</string>
 
   <string id="35000">주변장치</string>
 
