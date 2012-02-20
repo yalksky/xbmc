@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<strings>
+    <string id="30000">Select Fanart from Photos</string>
+    <string id="30001">Prefer More Casts</string>
+    <string id="30002">Use Agent server to fetch episode</string>
+    <string id="30003">Basic</string>
+    <string id="30004">Advanced</string>
+</strings>
