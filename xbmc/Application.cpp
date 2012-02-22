@@ -269,7 +269,6 @@
 #ifdef TARGET_WINDOWS
 #include <shlobj.h>
 #include "win32util.h"
-#include "storage/DetectDVDType.h"
 #endif
 #ifdef HAS_XRANDR
 #include "windowing/X11/XRandR.h"
@@ -1257,20 +1256,6 @@ bool CApplication::Initialize()
   // reset our screensaver (starts timers etc.)
   ResetScreenSaver();
 
-#ifdef TARGET_WINDOWS
-  // check for a DVD drive
-  VECSOURCES vShare;
-  CWIN32Util::GetDrivesByType(vShare, DVD_DRIVES);
-  if(!vShare.empty())
-    g_mediaManager.SetHasOpticalDrive(true);
-
-  // Can be removed once the StorageHandler supports optical media
-  VECSOURCES::const_iterator it;
-  for(it=vShare.begin();it!=vShare.end();++it)
-    if(g_mediaManager.GetDriveStatus(it->strPath) == DRIVE_CLOSED_MEDIA_PRESENT)
-      CJobManager::GetInstance().AddJob(new CDetectDisc(it->strPath, false), NULL);
-  // remove end
-#endif
   return true;
 }
 
@@ -3695,7 +3680,10 @@ bool CApplication::PlayFile(const CFileItem& item, bool bRestart)
   
   if( item.HasProperty("StartPercent") )
   {
-    options.startpercent = item.GetProperty("StartPercent").asDouble();
+    double fallback = 0.0f;
+    if(item.GetProperty("StartPercent").isString())
+      fallback = (double)atof(item.GetProperty("StartPercent").asString().c_str());
+    options.startpercent = item.GetProperty("StartPercent").asDouble(fallback);
   }
   
   PLAYERCOREID eNewCore = EPC_NONE;
