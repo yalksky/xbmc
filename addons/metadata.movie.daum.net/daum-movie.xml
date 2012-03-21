@@ -1,42 +1,38 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
-<scraper framework="1.1" date="2011-11-01" language="ko">
+﻿<?xml version="1.0" encoding="utf-8"?><scraper framework="1.1" date="2012-03-09">
 	<NfoUrl dest="3">
 		<RegExp input="$$1" output="&lt;url&gt;http://movie.daum.net/moviedetail/moviedetailMain.do?movieId=\1&lt;/url&gt;" dest="3">
 			<expression>movie\.daum\.net[^\?]*\?movieId=(\d*)</expression>
 		</RegExp>
 	</NfoUrl>
 	<CreateSearchUrl SearchStringEncoding="UTF-8" dest="3">
-		<RegExp input="$$1 $$2" output="&lt;url&gt;http://movie.daum.net/search.do?type=movie&amp;q=\1&lt;/url&gt;" dest="3">
-			<expression noclean="1"/>
+		<RegExp input="$$1" output="&lt;url&gt;http://movie.daum.net/search.do?type=movie&amp;q=\1&lt;/url&gt;" dest="3">
+			<expression noclean="1" />
 		</RegExp>
 	</CreateSearchUrl>
 	<GetSearchResults dest="8">
 		<RegExp input="$$5" output="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;yes&quot;?&gt;&lt;results&gt;\1&lt;/results&gt;" dest="8">
 			<RegExp input="$$1" output="&lt;entity&gt;&lt;title&gt;\2&lt;/title&gt;&lt;year&gt;\3&lt;/year&gt;&lt;id&gt;\1&lt;/id&gt;&lt;url&gt;http://movie.daum.net/moviedetail/moviedetailMain.do?movieId=\1&lt;/url&gt;&lt;/entity&gt;" dest="5">
-				<expression clear="yes" repeat="yes">class="fl srch"&gt;&lt;a href="http://movie.daum.net/moviedetail/moviedetailMain.do\?movieId=(\d+)"[^&gt;]*&gt;([^"]*)&lt;/a&gt;\s*\((\d+)\)&lt;/span&gt;[^\(]*"fs13"&gt;\s*&lt;/span</expression>
+				<expression repeat="yes" clear="yes">class="fl srch"&gt;&lt;a href="http://movie.daum.net/moviedetail/moviedetailMain.do\?movieId=(\d+)"[^&gt;]*&gt;([^"]*)&lt;/a&gt;\s*\((\d+)\)&lt;/span&gt;[^\(]*"fs13"&gt;\s*&lt;/span</expression>
 			</RegExp>
 			<RegExp input="$$1" output="&lt;entity&gt;&lt;title&gt;\2(\4)&lt;/title&gt;&lt;year&gt;\3&lt;/year&gt;&lt;id&gt;\1&lt;/id&gt;&lt;url&gt;http://movie.daum.net/moviedetail/moviedetailMain.do?movieId=\1&lt;/url&gt;&lt;/entity&gt;" dest="5+">
 				<expression repeat="yes">class="fl srch"&gt;&lt;a href="http://movie.daum.net/moviedetail/moviedetailMain.do\?movieId=(\d+)"[^&gt;]*&gt;([^"]*)&lt;/a&gt;\s*\((\d+)\)&lt;/span&gt;[^\(]*"fs13"&gt;\s*([^"]+)&lt;/span</expression>
 			</RegExp>
-			<expression noclean="1"/>
+			<expression noclean="1" />
 		</RegExp>
 	</GetSearchResults>
 	<GetDetails dest="3">
 		<RegExp input="$$8" output="&lt;details&gt;\1&lt;/details&gt;" dest="3">
 			<RegExp input="$$2" output="&lt;id&gt;\1&lt;/id&gt;" dest="8">
-				<expression/>
+				<expression />
 			</RegExp>
 			<RegExp input="$$1" output="&lt;title&gt;\1&lt;/title&gt;&lt;year&gt;\2&lt;/year&gt;" dest="8+">
 				<expression trim="1">"title_kor"[^&gt;]*&gt;([^&lt;]+)&lt;/strong&gt;[^\(]*\(&lt;a [^&gt;]*&gt;(\d+)&lt;/a&gt;\).*?"title_AKA"\s*\S*&gt;\s*&lt;span class="eng"&gt;\s*&lt;/span</expression>
 			</RegExp>
 			<RegExp input="$$1" output="&lt;title&gt;\1 (\3)&lt;/title&gt;&lt;year&gt;\2&lt;/year&gt;" dest="8+">
-				<expression trim="1,3">"title_kor"[^&gt;]*&gt;([^&lt;]+)&lt;/strong&gt;[^\(]*\(&lt;a [^&gt;]*&gt;(\d+)&lt;/a&gt;\).*?"title_AKA"\s*\S*&gt;\s*&lt;span class="eng"&gt;\s*(\S[^&lt;]*)&lt;/span</expression>
+				<expression trim="1,3">"title_kor"[^&gt;]*&gt;([^&lt;]+)&lt;[^\(]*\(&lt;a [^&gt;]*&gt;(\d+)&lt;/a&gt;\).*?"title_AKA"[^&gt;]+&gt;[^\S][^&lt;]*&lt;span class="eng"&gt;(\S[^&lt;]*)&lt;/span</expression>
 			</RegExp>
-			<RegExp input="$$1" output="&lt;title&gt;\1 (\3)&lt;/title&gt;&lt;year&gt;\2&lt;/year&gt;" dest="8+">
-				<expression trim="1,3">"title_kor"[^&gt;]*&gt;([^&lt;]+)&lt;/strong&gt;[^\(]*\(&lt;a [^&gt;]*&gt;(\d+)&lt;/a&gt;\).*?"title_AKA"\s*\S*&gt;\s*(\S[^&lt;]*)&lt;span class="eng"&gt;\s*&lt;/span</expression>
-			</RegExp>
-			<RegExp input="$$1" output="&lt;title&gt;\1 (\4, \5)&lt;/title&gt;&lt;year&gt;\2&lt;/year&gt;" dest="8+">
-				<expression trim="1,4,5">"title_kor"[^&gt;]*&gt;([^&lt;]+)&lt;/strong&gt;[^\(]*\(&lt;a [^&gt;]*&gt;(\d+)&lt;/a&gt;\).*?"title_AKA"\s*([^&lt;]+)&gt;\s*(\S[^&lt;]*)&lt;span class="eng"&gt;\s*(\S[^&lt;]*)&lt;/span</expression>
+			<RegExp input="$$1" output="&lt;title&gt;\1 (\3, \4)&lt;/title&gt;&lt;year&gt;\2&lt;/year&gt;" dest="8+">
+				<expression trim="1,3,4">"title_kor"[^&gt;]*&gt;([^&lt;]+)&lt;[^\(]*\(&lt;a [^&gt;]*&gt;(\d+)&lt;/a&gt;\).*?"title_AKA"[^&gt;]+&gt;(\S[^&lt;]*)&lt;span class="eng"&gt;(\S[^&lt;]*)&lt;/span</expression>
 			</RegExp>
 			<RegExp input="$$7" output="&lt;director&gt;\1&lt;/director&gt;" dest="8+">
 				<RegExp input="$$1" output="\1" dest="7">
@@ -105,13 +101,16 @@
 				<expression>&lt;a class="tab4" href="([^"]*)"</expression>
 			</RegExp>
 			<RegExp conditional="EnableTMDBFanart" input="$$7" output="&lt;url function=&quot;GetTMDBFanartById&quot;&gt;http://www.google.com/search?q=site:imdb.com\1&lt;/url&gt;" dest="8+">
+				<RegExp input="$$1" output="\3 \2" dest="6">
+					<expression trim="1,3,4">"title_kor"[^&gt;]*&gt;([^&lt;]+)&lt;[^\(]*\(&lt;a [^&gt;]*&gt;(\d+)&lt;/a&gt;\).*?"title_AKA"[^&gt;]+&gt;[^\S][^&lt;]*&lt;span class="eng"&gt;(\S[^&lt;]*)&lt;/span</expression>
+				</RegExp>
 				<RegExp input="$$1" output="\4 \2" dest="6">
-					<expression trim="1,3,4">"title_kor"\s*&gt;([^&lt;]*)&lt;/strong&gt;[^\(]*\(&lt;a [^&gt;]*&gt;(\d+)&lt;/a&gt;\).*?"title_AKA"\s*&gt;([^&lt;]*)&lt;span class="eng"&gt;([^&lt;]+)&lt;/span</expression>
+					<expression>"title_kor"[^&gt;]*&gt;([^&lt;]+)&lt;[^\(]*\(&lt;a [^&gt;]*&gt;(\d+)&lt;/a&gt;\).*?"title_AKA"[^&gt;]+&gt;(\S[^&lt;]*)&lt;span class="eng"&gt;(\S[^&lt;]*)&lt;/span</expression>
 				</RegExp>
 				<RegExp input="$$6" output="+\1" dest="7">
 					<expression repeat="yes">([^ ,]+)</expression>
 				</RegExp>
-				<expression/>
+				<expression />
 			</RegExp>
 			<RegExp conditional="EnableFanart" input="$$1" output="&lt;url cache=&quot;daum-photo-$$2.htm&quot; function=&quot;GetDaumFanart&quot;&gt;\1&amp;order=recommend&lt;/url&gt;" dest="8+">
 				<expression>&lt;a class="tab4" href="([^"]*)"</expression>
@@ -119,7 +118,7 @@
 			<RegExp input="$$1" output="&lt;url cache=&quot;daum-video-$$2.htm&quot; function=&quot;GetDaumTrailer&quot;&gt;\1&lt;/url&gt;" dest="8+">
 				<expression>&lt;a class="tab5" href="([^"]*)"</expression>
 			</RegExp>
-			<expression noclean="1"/>
+			<expression noclean="1" />
 		</RegExp>
 	</GetDetails>
 </scraper>
