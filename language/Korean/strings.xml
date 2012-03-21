@@ -519,7 +519,7 @@
   <string id="567">재생 횟수</string>
   <string id="568">마지막 재생</string>
   <string id="569">설명</string>
-  <string id="570">날짜 추가됨</string>
+  <string id="570">추가한 날짜</string>
   <string id="571">기본</string>
   <string id="572">스튜디오</string>
   <string id="573">경로</string>
@@ -732,7 +732,7 @@
   <string id="1021">미디어 위치의 경로를 입력하거나 찾아보세요.</string>
   <string id="1022">미디어 소스의 이름을 입력하세요.</string>
   <string id="1023">새 공유 찾기</string>
-  <string id="1024">찾기</string>
+  <string id="1024">탐색</string>
   <string id="1025">디렉토리 정보를 검색할수 없습니다.</string>
   <string id="1026">소스 추가</string>
   <string id="1027">소스 수정</string>
@@ -878,7 +878,7 @@
   <string id="10028">비디오/재생목록</string>
   <string id="10029">로그인 화면</string>
   <string id="10034">설정 - 프로파일</string>
-  <string id="10040">애드온 탐색기</string>
+  <string id="10040">추가기능 탐색기</string>
 
   <string id="10100">예/아니오 대화창</string>
   <string id="10101">진행 대화창</string>
@@ -1163,7 +1163,7 @@
   <string id="13349">새 컨텐츠 검색</string>
   <string id="13350">지금 재생중...</string>
   <string id="13351">앨범 정보</string>
-  <string id="13352">라이브러리에 항목 검색</string>
+  <string id="13352">라이브러리에 항목 추가</string>
   <string id="13353">검색 중지</string>
   <string id="13354">렌더링 방식</string>
   <string id="13355">저화질 픽셀 셰이더</string>
@@ -1349,7 +1349,7 @@
   <string id="14087">DVD</string>
   <string id="14088">자동으로 DVD 재생</string>
   <string id="14089">텍스트 자막에 사용할 글끌</string>
-  <string id="14090">국제</string>
+  <string id="14090">언어</string>
   <string id="14091">문자 집합</string>
   <string id="14092">디버깅</string>
   <string id="14093">보안</string>
@@ -1690,7 +1690,7 @@
   <string id="20150">사용자 지정 종료 타이머</string>
   <string id="20151">종료 타이머 취소</string>
   <string id="20152">%s 선택 잠금</string>
-  <string id="20153">찾기...</string>
+  <string id="20153">탐색...</string>
   <string id="20154">요약 정보</string>
   <string id="20155">저장장치 정보</string>
   <string id="20156">하드디스크 정보</string>
@@ -1881,7 +1881,7 @@
   <string id="20432">라이브러리 업데이트 제외 경로</string>
   <string id="20433">미리보기 및 비디오 정보 추출</string>
   <string id="20434">세트</string>
-  <string id="20435">영화세트 미리보기 설정</string>
+  <string id="20435">시리즈 영화 미리보기 설정</string>
   <string id="20436">배우 미리보기 내보내기?</string>
   <string id="20437">팬아트 선택</string>
   <string id="20438">로컬 팬아트</string>
@@ -2085,7 +2085,7 @@
   <string id="21885">앨범 정보 다운로드</string>
   <string id="21886">아티스트 정보 다운로드</string>
   <string id="21887">약력</string>
-  <string id="21888">목차</string>
+  <string id="21888">디스코그래피</string>
   <string id="21889">아티스트 찾기</string>
   <string id="21890">아티스트 선택</string>
   <string id="21891">아티스트 정보</string>
@@ -2198,14 +2198,14 @@
   <string id="24036">변경 로그</string>
   <string id="24037">제거</string>
   <string id="24038">설치</string>
-  <string id="24039">사용되지않는 추가기능</string>
+  <string id="24039">사용하지 않는 추가기능</string>
   <string id="24040">(현재 설정 지우기)</string>
   <string id="24041">압축 파일에서 설치</string>
   <string id="24042">%i%% 다운로드중</string>
   <string id="24043">사용가능한 업데이트</string>
   <string id="24044">설치 요구조건을 충족하지 않습니다</string>
-  <string id="24045">애드온의 구조가 바르지 않습니다</string>
-  <string id="24046">%s 을 설치된 애드온이 사용합니다.</string>
+  <string id="24045">추가기능의 구조가 바르지 않습니다</string>
+  <string id="24046">%s 을(를) 다음 추가기능이 사용중입니다.</string>
   <string id="24047">이 추가기능은 제거할 수 없습니다</string>
   <string id="24048">되돌리기</string>
 
