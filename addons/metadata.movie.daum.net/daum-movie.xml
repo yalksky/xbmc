@@ -79,7 +79,7 @@
 				</RegExp>
 				<expression repeat="yes">&lt;a href='[^']*'&gt;([^&lt;]*)&lt;/a&gt;</expression>
 			</RegExp>
-			<RegExp input="$$7" output="&lt;runtime&gt;\1 분&lt;/runtime&gt;" dest="8+">
+			<RegExp input="$$7" output="&lt;runtime&gt;\1&lt;/runtime&gt;" dest="8+">
 				<RegExp input="$$1" output="\1" dest="7">
 					<expression noclean="1">&lt;strong&gt;요약정보&lt;/strong&gt;(.*)&lt;strong&gt;감독&lt;/strong&gt;</expression>
 				</RegExp>
