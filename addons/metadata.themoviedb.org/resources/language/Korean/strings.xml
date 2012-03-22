@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <strings>
     <string id="30000">팬아트 사용</string>
+    <string id="30004">팬아트 사용 (유투브)</string>
     <string id="30001">HD-Trailers.net 에서 예고편 가져오기</string>
+    <string id="30002">선호 언어</string>
+    <string id="30003">평점을 가져올 곳</string>
+    <string id="30005">원래 제목 유지</string>
 </strings>
