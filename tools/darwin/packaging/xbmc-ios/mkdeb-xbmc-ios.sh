@@ -43,7 +43,7 @@ if [ -f "/Users/Shared/xbmc-depends/toolchain/bin/dpkg-deb" ]; then
   export PATH=${bin_path}:${PATH}
 fi
 
-PACKAGE=org.xbmc.xbmc-ios
+PACKAGE=com.xbmc-korea.xbmc-ios
 
 VERSION=11.0                                                                                                                                                                                                    
 REVISION=0
