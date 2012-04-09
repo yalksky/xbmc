@@ -42,11 +42,11 @@ if [ -f "/Users/Shared/xbmc-depends/toolchain/bin/dpkg-deb" ]; then
   export PATH=${bin_path}:${PATH}
 fi
 
-PACKAGE=org.xbmc.xbmc-atv2
+PACKAGE=com.xbmc-korea.xbmc-atv2
 
 VERSION=11.0
-REVISION=0~rc2
-ARCHIVE=${PACKAGE}_${VERSION}-${REVISION}_iphoneos-arm.deb
+REVISION=0
+ARCHIVE=${PACKAGE}_${VERSION}-${REVISION}_iphoneos-arm-patched.deb
 
 echo Creating $PACKAGE package version $VERSION revision $REVISION
 ${SUDO} rm -rf $DIRNAME/$PACKAGE

@@ -43,10 +43,10 @@ if [ -f "/Users/Shared/xbmc-depends/toolchain/bin/dpkg-deb" ]; then
   export PATH=${bin_path}:${PATH}
 fi
 
-PACKAGE=org.xbmc.xbmc-ios
+PACKAGE=com.xbmc-korea.xbmc-ios
 
 VERSION=11.0                                                                                                                                                                                                    
-REVISION=0~rc2
+REVISION=0
 ARCHIVE=${PACKAGE}_${VERSION}-${REVISION}_iphoneos-arm.deb
 
 echo Creating $PACKAGE package version $VERSION revision $REVISION
