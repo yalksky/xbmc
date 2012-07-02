@@ -9,6 +9,7 @@ SRCS=AlarmClock.cpp \
      CPUInfo.cpp \
      Crc32.cpp \
      CryptThreading.cpp \
+     DatabaseUtils.cpp \
      DownloadQueue.cpp \
      DownloadQueueManager.cpp \
      Fanart.cpp \
@@ -35,16 +36,16 @@ SRCS=AlarmClock.cpp \
      log.cpp \
      md5.cpp \
      Mime.cpp \
-     PCMAmplifier.cpp \
-     PCMRemap.cpp \
      PerformanceSample.cpp \
      PerformanceStats.cpp \
+     POUtils.cpp \
      RecentlyAddedJob.cpp \
      RegExp.cpp \
      RingBuffer.cpp \
      RssReader.cpp \
      ScraperParser.cpp \
      ScraperUrl.cpp \
+     SortUtils.cpp \
      Splash.cpp \
      ssrc.cpp \
      Stopwatch.cpp \
@@ -58,7 +59,7 @@ SRCS=AlarmClock.cpp \
      URIUtils.cpp \
      Variant.cpp \
      Weather.cpp \
-     Win32Exception.cpp \
+     XBMCTinyXML.cpp \
      XMLUtils.cpp \
 
 LIB=utils.a

@@ -376,16 +376,17 @@ namespace INFO
 #define LIBRARY_HAS_MUSIC           720
 #define LIBRARY_HAS_VIDEO           721
 #define LIBRARY_HAS_MOVIES          722
-#define LIBRARY_HAS_TVSHOWS         723
-#define LIBRARY_HAS_MUSICVIDEOS     724
-#define LIBRARY_IS_SCANNING         725
-#define LIBRARY_IS_SCANNING_VIDEO   726
-#define LIBRARY_IS_SCANNING_MUSIC   727
+#define LIBRARY_HAS_MOVIE_SETS      723
+#define LIBRARY_HAS_TVSHOWS         724
+#define LIBRARY_HAS_MUSICVIDEOS     725
+#define LIBRARY_IS_SCANNING         726
+#define LIBRARY_IS_SCANNING_VIDEO   727
+#define LIBRARY_IS_SCANNING_MUSIC   728
 
 #define SYSTEM_PLATFORM_XBOX        740
 #define SYSTEM_PLATFORM_LINUX       741
 #define SYSTEM_PLATFORM_WINDOWS     742
-#define SYSTEM_PLATFORM_OSX         743
+#define SYSTEM_PLATFORM_DARWIN      743
 #define SYSTEM_PLATFORM_DARWIN_OSX  744
 #define SYSTEM_PLATFORM_DARWIN_IOS  745
 #define SYSTEM_PLATFORM_DARWIN_ATV2 746
@@ -423,7 +424,7 @@ namespace INFO
 
 #define VERSION_MAJOR 12
 #define VERSION_MINOR 0
-#define VERSION_TAG "-ALPHA1"
+#define VERSION_TAG "-ALPHA4"
 
 #define LISTITEM_START              35000
 #define LISTITEM_THUMB              (LISTITEM_START)
@@ -507,6 +508,9 @@ namespace INFO
 #define LISTITEM_FILE_EXTENSION     (LISTITEM_START + 75)
 #define LISTITEM_IS_RESUMABLE       (LISTITEM_START + 76)
 #define LISTITEM_PERCENT_PLAYED     (LISTITEM_START + 77)
+#define LISTITEM_DATE_ADDED         (LISTITEM_START + 78)
+#define LISTITEM_DBTYPE             (LISTITEM_START + 79)
+#define LISTITEM_DBID               (LISTITEM_START + 80)
 
 #define LISTITEM_PROPERTY_START     (LISTITEM_START + 200)
 #define LISTITEM_PROPERTY_END       (LISTITEM_PROPERTY_START + 1000)
@@ -644,7 +648,7 @@ public:
   const CStdString GetMusicPlaylistInfo(const GUIInfo& info);
   CStdString GetPictureLabel(int item);
 
-  __int64 GetPlayTime() const;  // in ms
+  int64_t GetPlayTime() const;  // in ms
   CStdString GetCurrentPlayTime(TIME_FORMAT format = TIME_FORMAT_GUESS) const;
   int GetPlayTimeRemaining() const;
   int GetTotalPlayTime() const;
@@ -798,6 +802,7 @@ protected:
   int m_libraryHasMovies;
   int m_libraryHasTVShows;
   int m_libraryHasMusicVideos;
+  int m_libraryHasMovieSets;
 
   CCriticalSection m_critInfo;
 };

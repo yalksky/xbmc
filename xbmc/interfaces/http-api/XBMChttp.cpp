@@ -52,6 +52,7 @@
 #include "utils/log.h"
 #include "TextureCache.h"
 #include "ThumbnailCache.h"
+#include "ThumbLoader.h"
 
 #ifdef _WIN32
 extern "C" FILE *fopen_utf8(const char *_Filename, const char *_Mode);
@@ -407,7 +408,7 @@ int CXbmcHttp::displayDir(int numParas, CStdString paras[])
     tmp.Format("%i", dirItems.Size());
     return SetResponse(openTag+tmp);
   }
-  dirItems.Sort(SORT_METHOD_LABEL, SORT_ORDER_ASC);
+  dirItems.Sort(SORT_METHOD_LABEL, SortOrderAscending);
   if (lineStart > dirItems.Size() || lineStart < 0)
     return SetResponse(openTag+"Error:Line start value out of range");
   if (numLines == -1)
@@ -494,7 +495,7 @@ void CXbmcHttp::AddItemToPlayList(const CFileItemPtr &pItem, int playList, int s
     CStdString strDirectory=pItem->GetPath();
     CFileItemList items;
     CDirectory::GetDirectory(pItem->GetPath(), items, mask);
-    items.Sort(SORT_METHOD_LABEL, SORT_ORDER_ASC);
+    items.Sort(SORT_METHOD_LABEL, SortOrderAscending);
     for (int i=0; i < items.Size(); ++i)
       if (!(CFileItem*)items[i]->m_bIsFolder || recursive)
         AddItemToPlayList(items[i], playList, sortMethod, mask, recursive);
@@ -761,7 +762,7 @@ int CXbmcHttp::xbmcGetMediaLocation(int numParas, CStdString paras[])
     tmp.Format("%i",items.Size());
     return SetResponse(openTag+tmp);
   }    
-  items.Sort(SORT_METHOD_LABEL, SORT_ORDER_ASC);
+  items.Sort(SORT_METHOD_LABEL, SortOrderAscending);
   CStdString strLine;
   if (lineStart>items.Size() || lineStart<0)
     return SetResponse(openTag+"Error:Line start value out of range");
@@ -1024,13 +1025,14 @@ int CXbmcHttp::xbmcAddToPlayListFromDB(int numParas, CStdString paras[])
   // Perform open query if empty where clause
   if (paras[1] == "")
     paras[1] = "1 = 1";
-  CStdString where = "where " + paras[1];
+  CStdString where = paras[1];
 
   int playList;
   CFileItemList filelist;
   if (type.Equals("songs"))
   {
     playList = PLAYLIST_MUSIC;
+    where = " where " + where;
 
     CMusicDatabase musicdatabase;
     if (!musicdatabase.Open())
@@ -1049,11 +1051,11 @@ int CXbmcHttp::xbmcAddToPlayListFromDB(int numParas, CStdString paras[])
       return SetResponse(openTag+"Error: Could not open video database");
 
     if (type.Equals("movies"))
-      videodatabase.GetMoviesByWhere("", where, "", filelist);
+      videodatabase.GetMoviesByWhere("videodb://1/2/", where, filelist);
     else if (type.Equals("episodes"))
-      videodatabase.GetEpisodesByWhere("", where, filelist);
+      videodatabase.GetEpisodesByWhere("videodb://2/2/", where, filelist);
     else if (type.Equals("musicvideos"))
-      videodatabase.GetMusicVideosByWhere("", where, filelist);
+      videodatabase.GetMusicVideosByWhere("videodb://3/2/", where, filelist);
     videodatabase.Close();
   }
   else
@@ -1255,11 +1257,10 @@ int CXbmcHttp::xbmcGetMovieDetails(int numParas, CStdString paras[])
           cast += character;
         }*/
         output += closeTag+openTag+"Cast:" + cast;
-        item->SetVideoThumb();
-        if (!item->HasThumbnail())
+        if (!CVideoThumbLoader::FillThumb(*item))
           thumb = "[None]";
         else
-          thumb = item->GetCachedVideoThumb();
+          thumb = CTextureCache::GetWrappedImageURL(item->GetThumbnailImage());
         output += closeTag+openTag+"Thumb:" + thumb;
         m_database.Close();
         delete item;
@@ -1322,9 +1323,9 @@ int CXbmcHttp::xbmcGetCurrentlyPlaying(int numParas, CStdString paras[])
         resolution = slide->GetPictureInfoTag()->GetInfo(SLIDE_RESOLUTION);
       slideOutput+=closeTag+openTag+prefix+"Resolution:" + resolution;
       CFileItem item(*slide);
-      thumb = CTextureCache::Get().GetCachedImage(CTextureCache::GetWrappedThumbURL(item.GetPath()));
-      if (autoGetPictureThumbs && thumb.IsEmpty())
-        thumb = CTextureCache::Get().CheckAndCacheImage(CTextureCache::GetWrappedThumbURL(item.GetPath()), false);
+      CStdString thumbURL = CTextureCache::GetWrappedThumbURL(item.GetPath());
+      if (autoGetPictureThumbs || CTextureCache::Get().HasCachedImage(thumbURL))
+        thumb = thumbURL;
       if (thumb.IsEmpty())
       {
         thumb = "[None]";
@@ -1597,7 +1598,7 @@ int CXbmcHttp::xbmcSetVolume(int numParas, CStdString paras[])
   else
   {
     int iPercent = atoi(paras[0].c_str());
-    g_application.SetVolume(iPercent);
+    g_application.SetVolume((float)iPercent, true);
     return SetResponse(openTag+"OK");
   }
 }
@@ -2612,11 +2613,7 @@ int CXbmcHttp::xbmcSTSetting(int numParas, CStdString paras[])
       else if (paras[i]=="httpapibroadcastlevel")
         tmp.Format("%i",g_settings.m_HttpApiBroadcastLevel);
       else if (paras[i]=="volumelevel")
-        tmp.Format("%i",g_settings.m_nVolumeLevel);
-      else if (paras[i]=="dynamicrangecompressionlevel")
-        tmp.Format("%i",g_settings.m_dynamicRangeCompressionLevel);
-      else if (paras[i]=="premutevolumelevel")
-        tmp.Format("%i",g_settings.m_iPreMuteVolumeLevel);
+        tmp.Format("%i",g_application.GetVolume());
       else if (paras[i]=="systemtimetotalup")
         tmp.Format("%i",g_settings.m_iSystemTimeTotalUp);
       else if (paras[i]=="mute")

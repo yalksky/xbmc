@@ -58,7 +58,7 @@ using namespace MUSIC_INFO;
 using namespace XFILE;
 using namespace MUSIC_GRABBER;
 
-CMusicInfoScanner::CMusicInfoScanner()
+CMusicInfoScanner::CMusicInfoScanner() : CThread("CMusicInfoScanner")
 {
   m_bRunning = false;
   m_pObserver = NULL;
@@ -100,7 +100,7 @@ void CMusicInfoScanner::Process()
 
       // Create the thread to count all files to be scanned
       SetPriority( GetMinPriority() );
-      CThread fileCountReader(this);
+      CThread fileCountReader(this, "CMusicInfoScanner");
       if (m_pObserver)
         fileCountReader.Create();
 
@@ -233,7 +233,8 @@ void CMusicInfoScanner::Start(const CStdString& strDirectory)
   m_bRunning = true;
 }
 
-void CMusicInfoScanner::FetchAlbumInfo(const CStdString& strDirectory)
+void CMusicInfoScanner::FetchAlbumInfo(const CStdString& strDirectory,
+                                       bool refresh)
 {
   m_albumsToScan.clear();
   m_albumsScanned.clear();
@@ -256,6 +257,7 @@ void CMusicInfoScanner::FetchAlbumInfo(const CStdString& strDirectory)
     }
   }
 
+  m_musicDatabase.Open();
   for (int i=0;i<items.Size();++i)
   {
     if (CMusicDatabaseDirectory::IsAllItem(items[i]->GetPath()) || items[i]->IsParentFolder())
@@ -266,7 +268,14 @@ void CMusicInfoScanner::FetchAlbumInfo(const CStdString& strDirectory)
     album.artist = items[i]->GetMusicInfoTag()->GetArtist();
     album.genre.push_back(items[i]->GetPath()); // a bit hacky use of field
     m_albumsToScan.insert(album);
+    if (refresh)
+    {
+      int id = m_musicDatabase.GetAlbumByName(album.strAlbum, album.artist);
+      if (id > -1)
+        m_musicDatabase.DeleteAlbumInfo(id);
+    }
   }
+  m_musicDatabase.Close();
 
   m_scanType = 1;
   StopThread();
@@ -274,7 +283,8 @@ void CMusicInfoScanner::FetchAlbumInfo(const CStdString& strDirectory)
   m_bRunning = true;
 }
 
-void CMusicInfoScanner::FetchArtistInfo(const CStdString& strDirectory)
+void CMusicInfoScanner::FetchArtistInfo(const CStdString& strDirectory,
+                                        bool refresh)
 {
   m_artistsToScan.clear();
   m_artistsScanned.clear();
@@ -297,6 +307,7 @@ void CMusicInfoScanner::FetchArtistInfo(const CStdString& strDirectory)
     }
   }
 
+  m_musicDatabase.Open();
   for (int i=0;i<items.Size();++i)
   {
     if (CMusicDatabaseDirectory::IsAllItem(items[i]->GetPath()) || items[i]->IsParentFolder())
@@ -306,7 +317,14 @@ void CMusicInfoScanner::FetchArtistInfo(const CStdString& strDirectory)
     artist.strArtist = StringUtils::Join(items[i]->GetMusicInfoTag()->GetArtist(), g_advancedSettings.m_musicItemSeparator);
     artist.genre.push_back(items[i]->GetPath()); // a bit hacky use of field
     m_artistsToScan.insert(artist);
+    if (refresh)
+    {
+      int id = m_musicDatabase.GetArtistByName(artist.strArtist);
+      if (id > -1)
+        m_musicDatabase.DeleteArtistInfo(id);
+    }
   }
+  m_musicDatabase.Close();
 
   m_scanType = 2;
   StopThread();
@@ -360,7 +378,7 @@ bool CMusicInfoScanner::DoScan(const CStdString& strDirectory)
   // sort and get the path hash.  Note that we don't filter .cue sheet items here as we want
   // to detect changes in the .cue sheet as well.  The .cue sheet items only need filtering
   // if we have a changed hash.
-  items.Sort(SORT_METHOD_LABEL, SORT_ORDER_ASC);
+  items.Sort(SORT_METHOD_LABEL, SortOrderAscending);
   CStdString hash;
   GetPathHash(items, hash);
 
@@ -378,7 +396,7 @@ bool CMusicInfoScanner::DoScan(const CStdString& strDirectory)
 
     // filter items in the sub dir (for .cue sheet support)
     items.FilterCueItems();
-    items.Sort(SORT_METHOD_LABEL, SORT_ORDER_ASC);
+    items.Sort(SORT_METHOD_LABEL, SortOrderAscending);
 
     // and then scan in the new information
     if (RetrieveMusicInfo(items, strDirectory) > 0)
@@ -1124,7 +1142,11 @@ bool CMusicInfoScanner::DownloadArtistInfo(const CStdString& strPath, const CStd
             if (!scraper.GetArtist(i).GetArtist().strBorn.IsEmpty())
               strTemp += " ("+scraper.GetArtist(i).GetArtist().strBorn+")";
             if (!scraper.GetArtist(i).GetArtist().genre.empty())
-              strTemp.Format("[%s] %s",StringUtils::Join(scraper.GetArtist(i).GetArtist().genre, g_advancedSettings.m_musicItemSeparator).c_str(),strTemp.c_str());
+            {
+              CStdString genres = StringUtils::Join(scraper.GetArtist(i).GetArtist().genre, g_advancedSettings.m_musicItemSeparator);
+              if (!genres.empty())
+                strTemp.Format("[%s] %s", genres.c_str(), strTemp.c_str());
+            }
             item.SetLabel(strTemp);
             item.m_idepth = i; // use this to hold the index of the album in the scraper
             pDlg->Add(&item);

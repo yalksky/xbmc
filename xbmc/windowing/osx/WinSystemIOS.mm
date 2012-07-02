@@ -19,7 +19,7 @@
  *
  */
 
-#if defined(__APPLE__) && defined(__arm__)
+#if defined(TARGET_DARWIN_IOS)
 //hack around problem with xbmc's typedef int BOOL
 // and obj-c's typedef unsigned char BOOL
 #define BOOL XBMC_BOOL 
@@ -251,7 +251,7 @@ void CWinSystemIOS::FillInVideoModes()
       w = mode.size.width;
       h = mode.size.height;
       UpdateDesktopResolution(res, disp, w, h, refreshrate);
-      CLog::Log(LOGINFO, "Found possible resolution for display %d with %d x %d\n", disp, w, h);      
+      CLog::Log(LOGNOTICE, "Found possible resolution for display %d with %d x %d\n", disp, w, h);      
 
       //overwrite the mode str because  UpdateDesktopResolution adds a
       //"Full Screen". Since the current resolution is there twice

@@ -383,7 +383,7 @@ void CMusicInfoTag::SetAlbum(const CAlbum& album)
   SetAlbum(album.strAlbum);
   SetAlbumArtist(StringUtils::Join(album.artist, g_advancedSettings.m_musicItemSeparator));
   SetGenre(album.genre);
-  SetRating('0' + (album.iRating + 1) / 2);
+  SetRating('0' + album.iRating);
   SYSTEMTIME stTime;
   stTime.wYear = album.iYear;
   SetReleaseDate(stTime);
@@ -428,12 +428,13 @@ void CMusicInfoTag::Serialize(CVariant& value)
      JSON-RPC v4 can be broken */
   value["url"] = m_strURL;
   value["title"] = m_strTitle;
-  value["artist"] = StringUtils::Join(m_artist, g_advancedSettings.m_musicItemSeparator);
+  value["artist"] = StringUtils::Join(m_artist, " / ");
   value["album"] = m_strAlbum;
-  value["albumartist"] = StringUtils::Join(m_albumArtist, g_advancedSettings.m_musicItemSeparator);
-  value["genre"] = StringUtils::Join(m_genre, g_advancedSettings.m_musicItemSeparator);
+  value["albumartist"] = StringUtils::Join(m_albumArtist, " / ");
+  value["genre"] = StringUtils::Join(m_genre, " / ");
   value["duration"] = m_iDuration;
-  value["track"] = m_iTrack;
+  value["track"] = GetTrackNumber();
+  value["disc"] = GetDiscNumber();
   value["loaded"] = m_bLoaded;
   value["year"] = m_dwReleaseDate.wYear;
   value["musicbrainztrackid"] = m_strMusicBrainzTrackID;
@@ -442,12 +443,32 @@ void CMusicInfoTag::Serialize(CVariant& value)
   value["musicbrainzalbumartistid"] = m_strMusicBrainzAlbumArtistID;
   value["musicbrainztrmid"] = m_strMusicBrainzTRMID;
   value["comment"] = m_strComment;
-  value["rating"] = m_rating;
+  value["rating"] = (int)(m_rating - '0');
   value["playcount"] = m_iTimesPlayed;
+  value["lastplayed"] = m_lastPlayed.IsValid() ? m_lastPlayed.GetAsDBDateTime() : StringUtils::EmptyString;
   value["lyrics"] = m_strLyrics;
   value["artistid"] = m_iArtistId;
   value["albumid"] = m_iAlbumId;
 }
+
+void CMusicInfoTag::ToSortable(SortItem& sortable)
+{
+  sortable[FieldTitle] = m_strTitle;
+  sortable[FieldArtist] = m_artist;
+  sortable[FieldAlbum] = m_strAlbum;
+  sortable[FieldAlbumArtist] = FieldAlbumArtist;
+  sortable[FieldGenre] = m_genre;
+  sortable[FieldTime] = m_iDuration;
+  sortable[FieldTrackNumber] = m_iTrack;
+  sortable[FieldYear] = m_dwReleaseDate.wYear;
+  sortable[FieldComment] = m_strComment;
+  sortable[FieldRating] = (float)(m_rating - '0');
+  sortable[FieldPlaycount] = m_iTimesPlayed;
+  sortable[FieldLastPlayed] = m_lastPlayed.IsValid() ? m_lastPlayed.GetAsDBDateTime() : StringUtils::EmptyString;
+  sortable[FieldListeners] = m_listeners;
+  sortable[FieldId] = (int64_t)m_iDbId;
+}
+
 void CMusicInfoTag::Archive(CArchive& ar)
 {
   if (ar.IsStoring())
@@ -545,7 +566,7 @@ void CMusicInfoTag::AppendAlbumArtist(const CStdString &albumArtist)
       return;
   }
 
-  m_artist.push_back(albumArtist);
+  m_albumArtist.push_back(albumArtist);
 }
 
 void CMusicInfoTag::AppendGenre(const CStdString &genre)

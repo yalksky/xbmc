@@ -35,6 +35,7 @@
 #include "filesystem/Directory.h"
 #include "filesystem/File.h"
 #include "TextureCache.h"
+#include "ThumbLoader.h"
 
 using namespace MUSIC_INFO;
 using namespace JSONRPC;
@@ -47,6 +48,8 @@ void CFileItemHandler::FillDetails(ISerializable* info, CFileItemPtr item, const
 
   CVariant serialization;
   info->Serialize(serialization);
+
+  bool fetchedArt = false;
 
   for (unsigned int i = 0; i < fields.size(); i++)
   {
@@ -88,16 +91,61 @@ void CFileItemHandler::FillDetails(ISerializable* info, CFileItemPtr item, const
         continue;
       }
 
-      if (field == "fanart" && !item->HasPictureInfoTag())
+      if (field == "thumbnail")
       {
-        CStdString fanart;
-        if (item->HasProperty("fanart_image"))
-          fanart = item->GetProperty("fanart_image").asString();
-        if (fanart.empty())
-          fanart = item->GetCachedFanart();
-        if (!fanart.empty())
-          result["fanart"] = fanart.c_str();
+        if (item->HasVideoInfoTag())
+        {
+          if (!item->HasThumbnail() && !fetchedArt && item->GetVideoInfoTag()->m_iDbId > -1)
+          {
+            CVideoThumbLoader loader;
+            loader.FillLibraryArt(item.get());
+            fetchedArt = true;
+          }
+          if (item->HasThumbnail())
+            result["thumbnail"] = CTextureCache::GetWrappedImageURL(item->GetThumbnailImage());
+        }
+        else if (item->HasPictureInfoTag())
+        {
+          if (!item->HasThumbnail())
+            item->SetThumbnailImage(CTextureCache::GetWrappedThumbURL(item->GetPath()));
+          if (item->HasThumbnail())
+            result["thumbnail"] = CTextureCache::GetWrappedImageURL(item->GetThumbnailImage());
+        }
+        else
+        { // TODO: music art is not currently wrapped
+          if (item->HasThumbnail())
+            result["thumbnail"] = item->GetThumbnailImage();
+        }
+        if (!result.isMember("thumbnail"))
+          result["thumbnail"] = "";
+        continue;
+      }
 
+      if (field == "fanart")
+      {
+        if (item->HasVideoInfoTag())
+        {
+          if (!item->HasProperty("fanart_image") && !fetchedArt && item->GetVideoInfoTag()->m_iDbId > -1)
+          {
+            CVideoThumbLoader loader;
+            loader.FillLibraryArt(item.get());
+            fetchedArt = true;
+          }
+          if (item->HasProperty("fanart_image"))
+            result["fanart"] = CTextureCache::GetWrappedImageURL(item->GetProperty("fanart_image").asString());
+        }
+        else if (item->HasMusicInfoTag())
+        { // TODO: music art is not currently wrapped
+          CStdString fanart;
+          if (item->HasProperty("fanart_image"))
+            fanart = item->GetProperty("fanart_image").asString();
+          if (fanart.empty())
+            fanart = item->GetCachedFanart();
+          if (!fanart.empty())
+            result["fanart"] = fanart.c_str();
+        }
+        if (!result.isMember("fanart"))
+          result["fanart"] = "";
         continue;
       }
 
@@ -127,19 +175,30 @@ void CFileItemHandler::FillDetails(ISerializable* info, CFileItemPtr item, const
   }
 }
 
-void CFileItemHandler::HandleFileItemList(const char *ID, bool allowFile, const char *resultname, CFileItemList &items, const CVariant &parameterObject, CVariant &result)
+void CFileItemHandler::HandleFileItemList(const char *ID, bool allowFile, const char *resultname, CFileItemList &items, const CVariant &parameterObject, CVariant &result, bool sortLimit /* = true */)
 {
-  int size  = items.Size();
+  HandleFileItemList(ID, allowFile, resultname, items, parameterObject, result, items.Size(), sortLimit);
+}
+
+void CFileItemHandler::HandleFileItemList(const char *ID, bool allowFile, const char *resultname, CFileItemList &items, const CVariant &parameterObject, CVariant &result, int size, bool sortLimit /* = true */)
+{
   int start = (int)parameterObject["limits"]["start"].asInteger();
   int end   = (int)parameterObject["limits"]["end"].asInteger();
   end = (end <= 0 || end > size) ? size : end;
   start = start > end ? end : start;
 
-  Sort(items, parameterObject["sort"]);
+  if (sortLimit)
+    Sort(items, parameterObject["sort"]);
 
   result["limits"]["start"] = start;
   result["limits"]["end"]   = end;
   result["limits"]["total"] = size;
+
+  if (!sortLimit)
+  {
+    start = 0;
+    end = items.Size();
+  }
 
   for (int i = start; i < end; i++)
   {
@@ -153,7 +212,6 @@ void CFileItemHandler::HandleFileItem(const char *ID, bool allowFile, const char
 {
   CVariant object;
   bool hasFileField = false;
-  bool hasThumbnailField = false;
 
   if (item.get())
   {
@@ -163,8 +221,6 @@ void CFileItemHandler::HandleFileItem(const char *ID, bool allowFile, const char
 
       if (field == "file")
         hasFileField = true;
-      if (field == "thumbnail")
-        hasThumbnailField = true;
     }
 
     if (allowFile && hasFileField)
@@ -224,30 +280,6 @@ void CFileItemHandler::HandleFileItem(const char *ID, bool allowFile, const char
         if (!object.isMember("type"))
           object["type"] = "unknown";
       }
-    }
-
-    if (hasThumbnailField)
-    {
-      if (item->HasThumbnail())
-        object["thumbnail"] = CTextureCache::Get().CheckAndCacheImage(item->GetThumbnailImage());
-      else if (item->HasVideoInfoTag())
-      {
-        CStdString strPath, strFileName;
-        URIUtils::Split(item->GetCachedVideoThumb(), strPath, strFileName);
-        CStdString cachedThumb = strPath + "auto-" + strFileName;
-
-        if (CFile::Exists(cachedThumb))
-          object["thumbnail"] = cachedThumb;
-      }
-      else if (item->HasPictureInfoTag())
-      {
-        CStdString thumb = CTextureCache::Get().CheckAndCacheImage(CTextureCache::GetWrappedThumbURL(item->GetPath()));
-        if (!thumb.empty())
-          object["thumbnail"] = thumb;
-      }
-
-      if (!object.isMember("thumbnail"))
-        object["thumbnail"] = "";
     }
 
     FillDetails(item.get(), item, validFields, object);
@@ -310,12 +342,105 @@ bool CFileItemHandler::FillFileItemList(const CVariant &parameterObject, CFileIt
   return (list.Size() > 0);
 }
 
-bool CFileItemHandler::ParseSortMethods(const CStdString &method, const bool &ignorethe, const CStdString &order, SORT_METHOD &sortmethod, SORT_ORDER &sortorder)
+bool CFileItemHandler::ParseSorting(const CVariant &parameterObject, SortBy &sortBy, SortOrder &sortOrder, SortAttribute &sortAttributes)
+{
+  CStdString method = parameterObject["sort"]["method"].asString();
+  CStdString order = parameterObject["sort"]["order"].asString();
+  method.ToLower();
+  order.ToLower();
+
+  sortAttributes = SortAttributeNone;
+  if (parameterObject["sort"]["ignorearticle"].asBoolean())
+    sortAttributes = SortAttributeIgnoreArticle;
+  else
+    sortAttributes = SortAttributeNone;
+
+  if (order.Equals("ascending"))
+    sortOrder = SortOrderAscending;
+  else if (order.Equals("descending"))
+    sortOrder = SortOrderDescending;
+  else
+    return false;
+
+  if (method.Equals("none"))
+    sortBy = SortByNone;
+  else if (method.Equals("label"))
+    sortBy = SortByLabel;
+  else if (method.Equals("date"))
+    sortBy = SortByDate;
+  else if (method.Equals("size"))
+    sortBy = SortBySize;
+  else if (method.Equals("file"))
+    sortBy = SortByFile;
+  else if (method.Equals("drivetype"))
+    sortBy = SortByDriveType;
+  else if (method.Equals("track"))
+    sortBy = SortByTrackNumber;
+  else if (method.Equals("duration") ||
+           method.Equals("videoruntime"))
+    sortBy = SortByTime;
+  else if (method.Equals("title") ||
+           method.Equals("videotitle"))
+    sortBy = SortByTitle;
+  else if (method.Equals("artist"))
+    sortBy = SortByArtist;
+  else if (method.Equals("album"))
+    sortBy = SortByAlbum;
+  else if (method.Equals("genre"))
+    sortBy = SortByGenre;
+  else if (method.Equals("country"))
+    sortBy = SortByCountry;
+  else if (method.Equals("year"))
+    sortBy = SortByYear;
+  else if (method.Equals("videorating") ||
+           method.Equals("songrating"))
+    sortBy = SortByRating;
+  else if (method.Equals("dateadded"))
+    sortBy = SortByDateAdded;
+  else if (method.Equals("programcount"))
+    sortBy = SortByProgramCount;
+  else if (method.Equals("playlist"))
+    sortBy = SortByPlaylistOrder;
+  else if (method.Equals("episode"))
+    sortBy = SortByEpisodeNumber;
+  else if (method.Equals("sorttitle"))
+    sortBy = SortBySortTitle;
+  else if (method.Equals("productioncode"))
+    sortBy = SortByProductionCode;
+  else if (method.Equals("mpaarating"))
+    sortBy = SortByMPAA;
+  else if (method.Equals("studio"))
+    sortBy = SortByStudio;
+  else if (method.Equals("fullpath"))
+    sortBy = SortByPath;
+  else if (method.Equals("lastplayed"))
+    sortBy = SortByLastPlayed;
+  else if (method.Equals("playcount"))
+    sortBy = SortByPlaycount;
+  else if (method.Equals("listeners"))
+    sortBy = SortByListeners;
+  else if (method.Equals("unsorted"))
+    sortBy = SortByRandom;
+  else if (method.Equals("bitrate"))
+    sortBy = SortByBitrate;
+  else
+    return false;
+
+  return true;
+}
+
+void CFileItemHandler::ParseLimits(const CVariant &parameterObject, int &limitStart, int &limitEnd)
+{
+  limitStart = (int)parameterObject["limits"]["start"].asInteger();
+  limitEnd = (int)parameterObject["limits"]["end"].asInteger();
+}
+
+bool CFileItemHandler::ParseSortMethods(const CStdString &method, const bool &ignorethe, const CStdString &order, SORT_METHOD &sortmethod, SortOrder &sortorder)
 {
   if (order.Equals("ascending"))
-    sortorder = SORT_ORDER_ASC;
+    sortorder = SortOrderAscending;
   else if (order.Equals("descending"))
-    sortorder = SORT_ORDER_DESC;
+    sortorder = SortOrderDescending;
   else
     return false;
 
@@ -398,7 +523,7 @@ void CFileItemHandler::Sort(CFileItemList &items, const CVariant &parameterObjec
   order  = order.ToLower();
 
   SORT_METHOD sortmethod = SORT_METHOD_NONE;
-  SORT_ORDER  sortorder  = SORT_ORDER_ASC;
+  SortOrder   sortorder  = SortOrderAscending;
 
   if (ParseSortMethods(method, parameterObject["ignorearticle"].asBoolean(), order, sortmethod, sortorder))
     items.Sort(sortmethod, sortorder);

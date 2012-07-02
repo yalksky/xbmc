@@ -3,6 +3,18 @@
     "type": [ "null", "boolean" ],
     "default": null
   },
+  "Optional.String": {
+    "type": [ "null", "string" ], 
+    "default": null
+  },
+  "Optional.Integer": {
+    "type": [ "null", "integer" ], 
+    "default": null
+  },
+  "Optional.Number": {
+    "type": [ "null", "number" ], 
+    "default": null
+  },
   "Array.String": {
     "type": "array",
     "items": { "type": "string", "minLength": 1 }
@@ -318,7 +330,7 @@
                 "lyrics", "musicbrainztrackid", "musicbrainzartistid",
                 "musicbrainzalbumid", "musicbrainzalbumartistid",
                 "playcount", "fanart", "thumbnail", "file", "artistid",
-                "albumid" ]
+                "albumid", "lastplayed", "disc" ]
     }
   },
   "Audio.Details.Base": {
@@ -383,7 +395,9 @@
       "musicbrainztrackid": { "type": "string" },
       "musicbrainzartistid": { "type": "string" },
       "artistid": { "$ref": "Library.Id" },
-      "albumid": { "$ref": "Library.Id" }
+      "albumid": { "$ref": "Library.Id" },
+      "lastplayed": { "type": "string" },
+      "disc": { "type": "integer" }
     }
   },
   "Video.Fields.Movie": {
@@ -680,7 +694,8 @@
                 "mpaa", "cast", "country", "imdbnumber", "premiered", "productioncode",
                 "runtime", "set", "showlink", "streamdetails", "top250", "votes",
                 "firstaired", "season", "episode", "showtitle", "thumbnail", "file",
-                "resume", "artistid", "albumid", "tvshowid", "setid", "watchedepisodes" ]
+                "resume", "artistid", "albumid", "tvshowid", "setid", "watchedepisodes",
+                "disc" ]
     }
   },
   "List.Item.All": {
@@ -720,7 +735,8 @@
       "albumid": { "$ref": "Library.Id" },
       "setid": { "$ref": "Array.Integer" },
       "tvshowid": { "$ref": "Library.Id" },
-      "watchedepisodes": { "type": "integer" }
+      "watchedepisodes": { "type": "integer" },
+      "disc": { "type": "integer" }
     }
   },
   "List.Fields.Files": {
@@ -735,7 +751,7 @@
                 "runtime", "set", "showlink", "streamdetails", "top250", "votes",
                 "firstaired", "season", "episode", "showtitle", "thumbnail", "file",
                 "resume", "artistid", "albumid", "tvshowid", "setid", "size",
-                "lastmodified", "mimetype", "watchedepisodes" ]
+                "lastmodified", "mimetype", "watchedepisodes", "disc" ]
     }
   },
   "List.Item.File": {

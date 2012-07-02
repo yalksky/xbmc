@@ -183,7 +183,7 @@ bool CScraper::SetPathSettings(CONTENT_TYPE content, const CStdString& xml)
   if (xml.IsEmpty())
     return true;
 
-  TiXmlDocument doc;
+  CXBMCTinyXML doc;
   doc.Parse(xml.c_str());
   m_userSettingsLoaded = SettingsFromXML(doc);
 
@@ -196,7 +196,7 @@ CStdString CScraper::GetPathSettings()
     return "";
 
   stringstream stream;
-  TiXmlDocument doc;
+  CXBMCTinyXML doc;
   SettingsToXML(doc);
   if (doc.RootElement())
     stream << *doc.RootElement();
@@ -255,7 +255,7 @@ vector<CStdString> CScraper::Run(const CStdString& function,
   if (!XMLUtils::HasUTF8Declaration(strXML))
     g_charsetConverter.unknownToUTF8(strXML);
 
-  TiXmlDocument doc;
+  CXBMCTinyXML doc;
   doc.Parse(strXML.c_str(),0,TIXML_ENCODING_UTF8);
   if (!doc.RootElement())
   {
@@ -285,6 +285,12 @@ vector<CStdString> CScraper::Run(const CStdString& function,
       }
       else
         scrURL2.ParseElement(xchain);
+      // Fix for empty chains. $$1 would still contain the
+      // previous value as there is no child of the xml node. 
+      // since $$1 will always either contain the data from an 
+      // url or the parameters to a chain, we can safely clear it here
+      // to fix this issue
+      m_parser.m_param[0].clear();
       vector<CStdString> result2 = RunNoThrow(szFunction,scrURL2,http,&extras);
       result.insert(result.end(),result2.begin(),result2.end());
     }
@@ -365,7 +371,7 @@ bool CScraper::Load()
 
       if (CAddonMgr::Get().GetAddon((*itr).first, dep))
       {
-        TiXmlDocument doc;
+        CXBMCTinyXML doc;
         if (dep->Type() == ADDON_SCRAPER_LIBRARY && doc.LoadFile(dep->LibPath()))
           m_parser.AddDocument(&doc);
       }
@@ -424,7 +430,7 @@ CScraperUrl CScraper::NfoUrl(const CStdString &sNfoContent)
   // or <url>...</url> or <url>...</url><id>...</id> on success
   for (unsigned int i=0; i < vcsOut.size(); ++i)
   {
-    TiXmlDocument doc;
+    CXBMCTinyXML doc;
     doc.Parse(vcsOut[i], 0, TIXML_ENCODING_UTF8);
     CheckScraperError(doc.RootElement());
 
@@ -518,7 +524,7 @@ std::vector<CScraperUrl> CScraper::FindMovie(XFILE::CCurlFile &fcurl, const CStd
   bool fResults(false);
   for (CStdStringArray::const_iterator i = vcsOut.begin(); i != vcsOut.end(); ++i)
   {
-    TiXmlDocument doc;
+    CXBMCTinyXML doc;
     doc.Parse(*i, 0, TIXML_ENCODING_UTF8);
     if (!doc.RootElement())
     {
@@ -641,7 +647,7 @@ std::vector<CMusicAlbumInfo> CScraper::FindAlbum(CCurlFile &fcurl, const CStdStr
   // parse the returned XML into a vector of album objects
   for (CStdStringArray::const_iterator i = vcsOut.begin(); i != vcsOut.end(); ++i)
   {
-    TiXmlDocument doc;
+    CXBMCTinyXML doc;
     doc.Parse(*i, 0, TIXML_ENCODING_UTF8);
     TiXmlHandle xhDoc(&doc);
 
@@ -730,7 +736,7 @@ std::vector<CMusicArtistInfo> CScraper::FindArtist(CCurlFile &fcurl,
   // parse the returned XML into a vector of artist objects
   for (CStdStringArray::const_iterator i = vcsOut.begin(); i != vcsOut.end(); ++i)
   {
-    TiXmlDocument doc;
+    CXBMCTinyXML doc;
     doc.Parse(*i, 0, TIXML_ENCODING_UTF8);
     if (!doc.RootElement())
     {
@@ -758,7 +764,8 @@ std::vector<CMusicArtistInfo> CScraper::FindArtist(CCurlFile &fcurl,
         CMusicArtistInfo ari(pxnTitle->FirstChild()->Value(), scurlArtist);
         CStdString genre;
         XMLUtils::GetString(pxeArtist, "genre", genre);
-        ari.GetArtist().genre = StringUtils::Split(genre, g_advancedSettings.m_musicItemSeparator);
+        if (!genre.empty())
+          ari.GetArtist().genre = StringUtils::Split(genre, g_advancedSettings.m_musicItemSeparator);
         XMLUtils::GetString(pxeArtist, "year", ari.GetArtist().strBorn);
 
         vcari.push_back(ari);
@@ -787,7 +794,7 @@ EPISODELIST CScraper::GetEpisodeList(XFILE::CCurlFile &fcurl, const CScraperUrl 
   // parse the XML response
   for (CStdStringArray::const_iterator i = vcsOut.begin(); i != vcsOut.end(); ++i)
   {
-    TiXmlDocument doc;
+    CXBMCTinyXML doc;
     doc.Parse(*i);
     if (!doc.RootElement())
     {
@@ -868,7 +875,7 @@ bool CScraper::GetVideoDetails(XFILE::CCurlFile &fcurl, const CScraperUrl &scurl
   bool fRet(false);
   for (CStdStringArray::const_iterator i = vcsOut.begin(); i != vcsOut.end(); ++i)
   {
-    TiXmlDocument doc;
+    CXBMCTinyXML doc;
     doc.Parse(*i, 0, TIXML_ENCODING_UTF8);
     if (!doc.RootElement())
     {
@@ -903,7 +910,7 @@ bool CScraper::GetAlbumDetails(CCurlFile &fcurl, const CScraperUrl &scurl, CAlbu
   bool fRet(false);
   for (CStdStringArray::const_iterator i = vcsOut.begin(); i != vcsOut.end(); ++i)
   {
-    TiXmlDocument doc;
+    CXBMCTinyXML doc;
     doc.Parse(*i, 0, TIXML_ENCODING_UTF8);
     if (!doc.RootElement())
     {
@@ -939,7 +946,7 @@ bool CScraper::GetArtistDetails(CCurlFile &fcurl, const CScraperUrl &scurl,
   bool fRet(false);
   for (vector<CStdString>::const_iterator i = vcsOut.begin(); i != vcsOut.end(); ++i)
   {
-    TiXmlDocument doc;
+    CXBMCTinyXML doc;
     doc.Parse(*i, 0, TIXML_ENCODING_UTF8);
     if (!doc.RootElement())
     {

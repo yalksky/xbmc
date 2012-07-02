@@ -28,6 +28,7 @@
 #include "guilib/GUIListItem.h"
 #include "utils/Archive.h"
 #include "utils/ISerializable.h"
+#include "utils/ISortable.h"
 #include "XBDateTime.h"
 #include "SortFileItem.h"
 #include "utils/LabelFormatter.h"
@@ -61,7 +62,7 @@ class CMediaSource;
   \sa CFileItemList
   */
 class CFileItem :
-  public CGUIListItem, public IArchivable, public ISerializable
+  public CGUIListItem, public IArchivable, public ISerializable, public ISortable
 {
 public:
   CFileItem(void);
@@ -86,6 +87,7 @@ public:
   const CFileItem& operator=(const CFileItem& item);
   virtual void Archive(CArchive& ar);
   virtual void Serialize(CVariant& value);
+  virtual void ToSortable(SortItem &sortable);
   virtual bool IsFileItem() const { return true; };
 
   bool Exists(bool bUseCache = true) const;
@@ -158,9 +160,9 @@ public:
   int GetVideoContentType() const; /* return VIDEODB_CONTENT_TYPE, but don't want to include videodb in this header */
   bool IsLabelPreformated() const { return m_bLabelPreformated; }
   void SetLabelPreformated(bool bYesNo) { m_bLabelPreformated=bYesNo; }
-  bool SortsOnTop() const { return m_specialSort == SORT_ON_TOP; }
-  bool SortsOnBottom() const { return m_specialSort == SORT_ON_BOTTOM; }
-  void SetSpecialSort(SPECIAL_SORT sort) { m_specialSort = sort; }
+  bool SortsOnTop() const { return m_specialSort == SortSpecialOnTop; }
+  bool SortsOnBottom() const { return m_specialSort == SortSpecialOnBottom; }
+  void SetSpecialSort(SortSpecial sort) { m_specialSort = sort; }
 
   inline bool HasMusicInfoTag() const
   {
@@ -199,11 +201,7 @@ public:
   CPictureInfoTag* GetPictureInfoTag();
 
   // Gets the cached thumb filename (no existence checks)
-  CStdString GetCachedVideoThumb() const;
-  CStdString GetCachedEpisodeThumb() const;
   CStdString GetCachedArtistThumb() const;
-  CStdString GetCachedSeasonThumb() const;
-  CStdString GetCachedActorThumb() const;
   /*!
    \brief Get the cached fanart path for this item if it exists
    \return path to the cached fanart for this item, or empty if none exists
@@ -212,8 +210,6 @@ public:
   CStdString GetCachedFanart() const;
   static CStdString GetCachedThumb(const CStdString &path, const CStdString& strPath2, bool split=false);
 
-  // Sets the video thumb (cached first, else caches user thumb)
-  void SetVideoThumb();
   /*!
    \brief Cache a copy of the local fanart for this item if we don't already have an image cached
    \return true if we already have cached fanart or if the caching was successful, false if no image is cached.
@@ -228,10 +224,8 @@ public:
   CStdString GetLocalFanart() const;
 
   // Sets the cached thumb for the item if it exists
-  void SetCachedVideoThumb();
   void SetCachedArtistThumb();
   void SetCachedMusicThumb();
-  void SetCachedSeasonThumb();
 
   // Gets the .tbn file associated with this item
   CStdString GetTBNFile() const;
@@ -258,7 +252,6 @@ public:
   CStdString GetUserMusicThumb(bool alwaysCheckRemote = false) const;
 
   // Caches the user thumb and assigns it to the item
-  void SetUserVideoThumb();
   void SetUserMusicThumb(bool alwaysCheckRemote = false);
 
   /*! \brief Get the path where we expect local metadata to reside.
@@ -326,7 +319,7 @@ public:
 private:
   CStdString m_strPath;            ///< complete path to item
 
-  SPECIAL_SORT m_specialSort;
+  SortSpecial m_specialSort;
   bool m_bIsParentFolder;
   bool m_bCanQueue;
   bool m_bLabelPreformated;
@@ -410,7 +403,7 @@ public:
   void Assign(const CFileItemList& itemlist, bool append = false);
   bool Copy  (const CFileItemList& item);
   void Reserve(int iCount);
-  void Sort(SORT_METHOD sortMethod, SORT_ORDER sortOrder);
+  void Sort(SORT_METHOD sortMethod, SortOrder sortOrder);
   void Randomize();
   void SetMusicThumbs();
   void FillInDefaultIcons();
@@ -431,7 +424,7 @@ public:
    */
   void Stack(bool stackFiles = true);
 
-  SORT_ORDER GetSortOrder() const { return m_sortOrder; }
+  SortOrder GetSortOrder() const { return m_sortOrder; }
   SORT_METHOD GetSortMethod() const { return m_sortMethod; }
   /*! \brief load a CFileItemList out of the cache
 
@@ -471,7 +464,6 @@ public:
   void RemoveDiscCache(int windowID = 0) const;
   bool AlwaysCache() const;
 
-  void SetCachedVideoThumbs();
   void SetCachedMusicThumbs();
 
   void Swap(unsigned int item1, unsigned int item2);
@@ -502,7 +494,7 @@ public:
 private:
   void Sort(FILEITEMLISTCOMPARISONFUNC func);
   void FillSortFields(FILEITEMFILLFUNC func);
-  CStdString GetDisCFileCache(int windowID) const;
+  CStdString GetDiscFileCache(int windowID) const;
 
   /*!
    \brief stack files in a CFileItemList
@@ -520,7 +512,7 @@ private:
   MAPFILEITEMS m_map;
   bool m_fastLookup;
   SORT_METHOD m_sortMethod;
-  SORT_ORDER m_sortOrder;
+  SortOrder m_sortOrder;
   bool m_sortIgnoreFolders;
   CACHE_TYPE m_cacheToDisc;
   bool m_replaceListing;

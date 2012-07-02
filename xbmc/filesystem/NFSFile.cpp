@@ -65,6 +65,7 @@ CNfsConnection::CNfsConnection()
 , m_writeChunkSize(0)
 , m_OpenConnections(0)
 , m_IdleTimeout(0)
+, m_lastAccessedTime(0)
 , m_pLibNfs(new DllLibNfs())
 {
 }
@@ -199,6 +200,7 @@ int CNfsConnection::getContextForExport(const CStdString &exportname)
       ret = CONTEXT_CACHED;
       CLog::Log(LOGDEBUG,"NFS: Using cached context.");
     }
+    m_lastAccessedTime = XbmcThreads::SystemClockMillis(); //refresh last access time of m_pNfsContext
   }
   return ret;
 }
@@ -261,7 +263,9 @@ bool CNfsConnection::Connect(const CURL& url, CStdString &relativePath)
   resolveHost(url);
   ret = splitUrlIntoExportAndPath(url, exportPath, relativePath);
   
-  if(ret && (!exportPath.Equals(m_exportPath,true) || !url.GetHostName().Equals(m_hostName,false)) )
+  if( (ret && (!exportPath.Equals(m_exportPath,true)  || 
+      !url.GetHostName().Equals(m_hostName,false)))    ||
+      (XbmcThreads::SystemClockMillis() - m_lastAccessedTime) > CONTEXT_TIMEOUT )
   {
     int contextRet = getContextForExport(url.GetHostName() + exportPath);
     
@@ -371,7 +375,7 @@ void CNfsConnection::resetKeepAlive(struct nfsfh  *_pFileHandle)
 //we were before
 void CNfsConnection::keepAlive(struct nfsfh  *_pFileHandle)
 {
-  off64_t offset = 0;
+  uint64_t offset = 0;
   char buffer[32];
   CLog::Log(LOGNOTICE, "NFS: sending keep alive after %i s.",KEEP_ALIVE_TIMEOUT/2);
   CSingleLock lock(*this);
@@ -457,7 +461,7 @@ CNFSFile::~CNFSFile()
 int64_t CNFSFile::GetPosition()
 {
   int ret = 0;
-  off64_t offset = 0;
+  uint64_t offset = 0;
   CSingleLock lock(gNfsConnection);
   
   if (gNfsConnection.GetNfsContext() == NULL || m_pFileHandle == NULL) return 0;
@@ -583,7 +587,7 @@ unsigned int CNFSFile::Read(void *lpBuf, int64_t uiBufSize)
   
   if (m_pFileHandle == NULL || m_pNfsContext == NULL ) return 0;
 
-  numberOfBytesRead = gNfsConnection.GetImpl()->nfs_read(m_pNfsContext, m_pFileHandle, (size_t)uiBufSize, (char *)lpBuf);  
+  numberOfBytesRead = gNfsConnection.GetImpl()->nfs_read(m_pNfsContext, m_pFileHandle, uiBufSize, (char *)lpBuf);  
 
   lock.Leave();//no need to keep the connection lock after that
   
@@ -601,7 +605,7 @@ unsigned int CNFSFile::Read(void *lpBuf, int64_t uiBufSize)
 int64_t CNFSFile::Seek(int64_t iFilePosition, int iWhence)
 {
   int ret = 0;
-  off64_t offset = 0;
+  uint64_t offset = 0;
 
   CSingleLock lock(gNfsConnection);  
   if (m_pFileHandle == NULL || m_pNfsContext == NULL) return -1;
@@ -663,7 +667,7 @@ int CNFSFile::Write(const void* lpBuf, int64_t uiBufSize)
     //write chunk
     writtenBytes = gNfsConnection.GetImpl()->nfs_write(m_pNfsContext,
                                   m_pFileHandle, 
-                                  (size_t)chunkSize, 
+                                  chunkSize, 
                                   (char *)lpBuf + numberOfBytesWritten);
     //decrease left bytes
     leftBytes-= writtenBytes;

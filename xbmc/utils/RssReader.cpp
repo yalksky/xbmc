@@ -27,7 +27,7 @@
 #include "URL.h"
 #include "filesystem/File.h"
 #include "filesystem/CurlFile.h"
-#ifdef __APPLE__
+#if defined(TARGET_DARWIN)
 #include "CocoaInterface.h"
 #endif
 #include "settings/Settings.h"
@@ -44,7 +44,7 @@ using namespace XFILE;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CRssReader::CRssReader() : CThread()
+CRssReader::CRssReader() : CThread("CRssReader")
 {
   m_pObserver = NULL;
   m_spacesBetweenFeeds = 0;

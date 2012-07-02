@@ -32,8 +32,14 @@
 #include "FileItem.h"
 #include "utils/StringUtils.h"
 #include "utils/log.h"
-#include "tinyXML/tinyxml.h"
+#include "utils/XBMCTinyXML.h"
 #include "XBIRRemote.h"
+
+#if defined(TARGET_WINDOWS)
+#include "input/windows/WINJoystick.h"
+#elif defined(HAS_SDL_JOYSTICK) || defined(HAS_EVENT_SERVER)
+#include "SDLJoystick.h"
+#endif
 
 using namespace std;
 using namespace XFILE;
@@ -438,7 +444,7 @@ bool CButtonTranslator::Load(bool AlwaysLoad)
       CFileItemList files;
       XFILE::CDirectory::GetDirectory(DIRS_TO_CHECK[dirIndex], files, ".xml");
       // Sort the list for filesystem based priorities, e.g. 01-keymap.xml, 02-keymap-overrides.xml
-      files.Sort(SORT_METHOD_FILE, SORT_ORDER_ASC);
+      files.Sort(SORT_METHOD_FILE, SortOrderAscending);
       for(int fileIndex = 0; fileIndex<files.Size(); ++fileIndex)
       {
         if (!files[fileIndex]->m_bIsFolder)
@@ -457,7 +463,7 @@ bool CButtonTranslator::Load(bool AlwaysLoad)
           CFileItemList files;
           XFILE::CDirectory::GetDirectory(devicedir, files, ".xml");
           // Sort the list for filesystem based priorities, e.g. 01-keymap.xml, 02-keymap-overrides.xml
-          files.Sort(SORT_METHOD_FILE, SORT_ORDER_ASC);
+          files.Sort(SORT_METHOD_FILE, SortOrderAscending);
           for(int fileIndex = 0; fileIndex<files.Size(); ++fileIndex)
           {
             if (!files[fileIndex]->m_bIsFolder)
@@ -506,7 +512,7 @@ bool CButtonTranslator::Load(bool AlwaysLoad)
 
 bool CButtonTranslator::LoadKeymap(const CStdString &keymapPath)
 {
-  TiXmlDocument xmlDoc;
+  CXBMCTinyXML xmlDoc;
 
   CLog::Log(LOGINFO, "Loading %s", keymapPath.c_str());
   if (!xmlDoc.LoadFile(keymapPath))
@@ -525,7 +531,7 @@ bool CButtonTranslator::LoadKeymap(const CStdString &keymapPath)
   TiXmlNode* pWindow = pRoot->FirstChild();
   while (pWindow)
   {
-    if (pWindow->Type() == TiXmlNode::ELEMENT)
+    if (pWindow->Type() == TiXmlNode::TINYXML_ELEMENT)
     {
       int windowID = WINDOW_INVALID;
       const char *szWindow = pWindow->Value();
@@ -553,7 +559,7 @@ bool CButtonTranslator::LoadLircMap(const CStdString &lircmapPath)
 #define REMOTEMAPTAG "irssmap"
 #endif
   // load our xml file, and fill up our mapping tables
-  TiXmlDocument xmlDoc;
+  CXBMCTinyXML xmlDoc;
 
   // Load the config file
   CLog::Log(LOGINFO, "Loading %s", lircmapPath.c_str());
@@ -575,7 +581,7 @@ bool CButtonTranslator::LoadLircMap(const CStdString &lircmapPath)
   TiXmlNode* pRemote = pRoot->FirstChild();
   while (pRemote)
   {
-    if (pRemote->Type() == TiXmlNode::ELEMENT)
+    if (pRemote->Type() == TiXmlNode::TINYXML_ELEMENT)
     {
       const char *szRemote = pRemote->Value();
       if (szRemote)

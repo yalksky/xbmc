@@ -32,8 +32,6 @@
 #include "PasswordManager.h"
 #include "utils/RegExp.h"
 #include "GUIPassword.h"
-#include "guilib/GUIAudioManager.h"
-#include "guilib/AudioContext.h"
 #include "GUIInfoManager.h"
 #include "filesystem/MultiPathDirectory.h"
 #include "filesystem/SpecialProtocol.h"
@@ -93,10 +91,9 @@ void CSettings::Initialize()
   m_bStartVideoWindowed = false;
   m_bAddonAutoUpdate = true;
   m_bAddonNotifications = true;
+  m_bAddonForeignFilter = false;
 
-  m_nVolumeLevel = 0;
-  m_dynamicRangeCompressionLevel = 0;
-  m_iPreMuteVolumeLevel = 0;
+  m_fVolumeLevel = 1.0f;
   m_bMute = false;
   m_fZoomAmount = 1.0f;
   m_fPixelRatio = 1.0f;
@@ -109,7 +106,7 @@ void CSettings::Initialize()
   // internal music extensions
   m_musicExtensions += "|.sidstream|.oggstream|.nsfstream|.asapstream|.cdda";
 
-  #ifdef __APPLE__
+  #if defined(TARGET_DARWIN)
     CStdString logDir = getenv("HOME");
     logDir += "/Library/Logs/";
     m_logFolder = logDir;
@@ -461,8 +458,8 @@ void CSettings::GetViewState(const TiXmlElement *pRootElement, const CStdString 
   viewState.m_sortMethod = (SORT_METHOD)sortMethod;
 
   int sortOrder;
-  GetInteger(pNode, "sortorder", sortOrder, SORT_ORDER_ASC, SORT_ORDER_NONE, SORT_ORDER_DESC);
-  viewState.m_sortOrder = (SORT_ORDER)sortOrder;
+  GetInteger(pNode, "sortorder", sortOrder, SortOrderAscending, SortOrderNone, SortOrderDescending);
+  viewState.m_sortOrder = (SortOrder)sortOrder;
 }
 
 void CSettings::SetViewState(TiXmlNode *pRootNode, const CStdString &strTagName, const CViewState &viewState) const
@@ -578,7 +575,7 @@ bool CSettings::SaveCalibration(TiXmlNode* pRootNode) const
 bool CSettings::LoadSettings(const CStdString& strSettingsFile)
 {
   // load the xml file
-  TiXmlDocument xmlDoc;
+  CXBMCTinyXML xmlDoc;
 
   if (!xmlDoc.LoadFile(strSettingsFile))
   {
@@ -667,6 +664,7 @@ bool CSettings::LoadSettings(const CStdString& strSettingsFile)
     GetInteger(pElement, "httpapibroadcastport", m_HttpApiBroadcastPort, 8278, 1, 65535);
     XMLUtils::GetBoolean(pElement, "addonautoupdate", m_bAddonAutoUpdate);
     XMLUtils::GetBoolean(pElement, "addonnotifications", m_bAddonNotifications);
+    XMLUtils::GetBoolean(pElement, "addonforeignfilter", m_bAddonForeignFilter);
   }
 
   pElement = pRootElement->FirstChildElement("defaultvideosettings");
@@ -724,9 +722,7 @@ bool CSettings::LoadSettings(const CStdString& strSettingsFile)
   if (pElement)
   {
     XMLUtils::GetBoolean(pElement, "mute", m_bMute);
-    GetInteger(pElement, "volumelevel", m_nVolumeLevel, VOLUME_MAXIMUM, VOLUME_MINIMUM, VOLUME_MAXIMUM);
-    GetInteger(pElement, "premutevolumelevel", m_iPreMuteVolumeLevel, 0, 0, 100);
-    GetInteger(pElement, "dynamicrangecompression", m_dynamicRangeCompressionLevel, VOLUME_DRC_MINIMUM, VOLUME_DRC_MINIMUM, VOLUME_DRC_MAXIMUM);
+    GetFloat(pElement, "fvolumelevel", m_fVolumeLevel, VOLUME_MAXIMUM, VOLUME_MINIMUM, VOLUME_MAXIMUM);
   }
 
   LoadCalibration(pRootElement, strSettingsFile);
@@ -773,7 +769,7 @@ bool CSettings::LoadPlayerCoreFactorySettings(const CStdString& fileStr, bool cl
     return false;
   }
 
-  TiXmlDocument playerCoreFactoryXML;
+  CXBMCTinyXML playerCoreFactoryXML;
   if (!playerCoreFactoryXML.LoadFile(fileStr))
   {
     CLog::Log(LOGERROR, "Error loading %s, Line %d (%s)", fileStr.c_str(), playerCoreFactoryXML.ErrorRow(), playerCoreFactoryXML.ErrorDesc());
@@ -785,7 +781,7 @@ bool CSettings::LoadPlayerCoreFactorySettings(const CStdString& fileStr, bool cl
 
 bool CSettings::SaveSettings(const CStdString& strSettingsFile, CGUISettings *localSettings /* = NULL */) const
 {
-  TiXmlDocument xmlDoc;
+  CXBMCTinyXML xmlDoc;
   TiXmlElement xmlRootElement("settings");
   TiXmlNode *pRoot = xmlDoc.InsertEndChild(xmlRootElement);
   if (!pRoot) return false;
@@ -870,6 +866,7 @@ bool CSettings::SaveSettings(const CStdString& strSettingsFile, CGUISettings *lo
   XMLUtils::SetInt(pNode, "httpapibroadcastlevel", m_HttpApiBroadcastLevel);
   XMLUtils::SetBoolean(pNode, "addonautoupdate", m_bAddonAutoUpdate);
   XMLUtils::SetBoolean(pNode, "addonnotifications", m_bAddonNotifications);
+  XMLUtils::SetBoolean(pNode, "addonforeignfilter", m_bAddonForeignFilter);
 
   // default video settings
   TiXmlElement videoSettingsNode("defaultvideosettings");
@@ -902,9 +899,7 @@ bool CSettings::SaveSettings(const CStdString& strSettingsFile, CGUISettings *lo
   pNode = pRoot->InsertEndChild(volumeNode);
   if (!pNode) return false;
   XMLUtils::SetBoolean(pNode, "mute", m_bMute);
-  XMLUtils::SetInt(pNode, "volumelevel", m_nVolumeLevel);
-  XMLUtils::SetInt(pNode, "premutevolumelevel", m_iPreMuteVolumeLevel);
-  XMLUtils::SetInt(pNode, "dynamicrangecompression", m_dynamicRangeCompressionLevel);
+  XMLUtils::SetFloat(pNode, "fvolumelevel", m_fVolumeLevel);
 
   SaveCalibration(pRoot);
 
@@ -946,11 +941,8 @@ bool CSettings::LoadProfile(unsigned int index)
     CLog::Log(LOGINFO, "load language info file:%s", strLangInfoPath.c_str());
     g_langInfo.Load(strLangInfoPath);
 
-    CStdString strLanguagePath;
-    strLanguagePath.Format("special://xbmc/language/%s/strings.xml", strLanguage.c_str());
-
     CButtonTranslator::GetInstance().Load(true);
-    g_localizeStrings.Load(strLanguagePath);
+    g_localizeStrings.Load("special://xbmc/language/", strLanguage);
 
     g_Mouse.SetEnabled(g_guiSettings.GetBool("input.enablemouse"));
 
@@ -962,7 +954,7 @@ bool CSettings::LoadProfile(unsigned int index)
 
     if (m_currentProfile != 0)
     {
-      TiXmlDocument doc;
+      CXBMCTinyXML doc;
       if (doc.LoadFile(URIUtils::AddFileToFolder(GetUserDataFolder(),"guisettings.xml")))
         g_guiSettings.LoadMasterLock(doc.RootElement());
     }
@@ -1037,7 +1029,7 @@ void CSettings::LoadProfiles(const CStdString& profilesFile)
   // clear out our profiles
   m_vecProfiles.clear();
 
-  TiXmlDocument profilesDoc;
+  CXBMCTinyXML profilesDoc;
   if (CFile::Exists(profilesFile))
   {
     if (profilesDoc.LoadFile(profilesFile))
@@ -1089,7 +1081,7 @@ void CSettings::LoadProfiles(const CStdString& profilesFile)
 
 bool CSettings::SaveProfiles(const CStdString& profilesFile) const
 {
-  TiXmlDocument xmlDoc;
+  CXBMCTinyXML xmlDoc;
   TiXmlElement xmlRootElement("profiles");
   TiXmlNode *pRoot = xmlDoc.InsertEndChild(xmlRootElement);
   if (!pRoot) return false;
@@ -1105,7 +1097,7 @@ bool CSettings::SaveProfiles(const CStdString& profilesFile) const
 
 bool CSettings::LoadUPnPXml(const CStdString& strSettingsFile)
 {
-  TiXmlDocument UPnPDoc;
+  CXBMCTinyXML UPnPDoc;
 
   if (!CFile::Exists(strSettingsFile))
   { // set defaults, or assume no rss feeds??
@@ -1141,7 +1133,7 @@ bool CSettings::LoadUPnPXml(const CStdString& strSettingsFile)
 
 bool CSettings::SaveUPnPXml(const CStdString& strSettingsFile) const
 {
-  TiXmlDocument xmlDoc;
+  CXBMCTinyXML xmlDoc;
   TiXmlElement xmlRootElement("upnpserver");
   TiXmlNode *pRoot = xmlDoc.InsertEndChild(xmlRootElement);
   if (!pRoot) return false;
@@ -1281,7 +1273,7 @@ bool CSettings::AddShare(const CStdString &type, const CMediaSource &share)
 bool CSettings::SaveSources()
 {
   // TODO: Should we be specifying utf8 here??
-  TiXmlDocument doc;
+  CXBMCTinyXML doc;
   TiXmlElement xmlRootElement("sources");
   TiXmlNode *pRoot = doc.InsertEndChild(xmlRootElement);
   if (!pRoot) return false;
@@ -1343,7 +1335,7 @@ void CSettings::LoadSources()
   CLog::Log(LOGNOTICE, "Loading media sources from %s", strSourcesFile.c_str());
 
   // load xml file
-  TiXmlDocument xmlDoc;
+  CXBMCTinyXML xmlDoc;
   TiXmlElement *pRootElement = NULL;
   if (xmlDoc.LoadFile(strSourcesFile))
   {
@@ -1770,7 +1762,7 @@ void CSettings::LoadRSSFeeds()
 {
   CStdString rssXML;
   rssXML = GetUserDataItem("RssFeeds.xml");
-  TiXmlDocument rssDoc;
+  CXBMCTinyXML rssDoc;
   if (!CFile::Exists(rssXML))
   { // set defaults, or assume no rss feeds??
     return;

@@ -30,7 +30,7 @@
 #include "WIN32Util.h"
 #include "utils/CharsetConverter.h"
 #endif
-#if defined (_LINUX) && !defined(__APPLE__)
+#if defined (_LINUX) && !defined(TARGET_DARWIN) && !defined(__FreeBSD__)
 #include <linux/limits.h>
 #include <sys/types.h>
 #include <sys/ioctl.h>
@@ -38,10 +38,10 @@
 #include <fcntl.h>
 #include <linux/cdrom.h>
 #endif
-#ifdef __APPLE__
+#if defined(TARGET_DARWIN)
 #include <sys/param.h>
 #include <mach-o/dyld.h>
-#if !defined(__arm__)
+#if defined(TARGET_DARWIN_OSX)
 #include <IOKit/IOKitLib.h>
 #include <IOKit/IOBSD.h>
 #include <IOKit/storage/IOCDTypes.h>
@@ -53,6 +53,9 @@
 #include <IOKit/storage/IODVDMediaBSDClient.h>
 #include <IOKit/storage/IOStorageDeviceCharacteristics.h>
 #endif
+#endif
+#ifdef __FreeBSD__
+#include <sys/syslimits.h>
 #endif
 #include "cdioSupport.h"
 #include "filesystem/iso9660.h"
@@ -93,8 +96,10 @@ HRESULT CIoSupport::EjectTray( const bool bEject, const char cDriveLetter )
 HRESULT CIoSupport::CloseTray()
 {
 #ifdef HAS_DVD_DRIVE
-#ifdef __APPLE__
+#if defined(TARGET_DARWIN)
   // FIXME...
+#elif defined(__FreeBSD__)
+  // NYI
 #elif defined(_LINUX)
   char* dvdDevice = CLibcdio::GetInstance()->GetDeviceFileName();
   if (strlen(dvdDevice) != 0)
@@ -175,7 +180,7 @@ INT CIoSupport::ReadSector(HANDLE hDevice, DWORD dwSector, LPSTR lpczBuffer)
   DWORD dwRead;
   DWORD dwSectorSize = 2048;
 
-#if defined(__APPLE__) && defined(HAS_DVD_DRIVE)
+#if defined(TARGET_DARWIN) && defined(HAS_DVD_DRIVE)
   dk_cd_read_t cd_read;
   memset( &cd_read, 0, sizeof(cd_read) );
 
@@ -247,7 +252,7 @@ INT CIoSupport::ReadSector(HANDLE hDevice, DWORD dwSector, LPSTR lpczBuffer)
 INT CIoSupport::ReadSectorMode2(HANDLE hDevice, DWORD dwSector, LPSTR lpczBuffer)
 {
 #ifdef HAS_DVD_DRIVE
-#ifdef __APPLE__
+#if defined(TARGET_DARWIN)
   dk_cd_read_t cd_read;
 
   memset( &cd_read, 0, sizeof(cd_read) );
@@ -264,6 +269,8 @@ INT CIoSupport::ReadSectorMode2(HANDLE hDevice, DWORD dwSector, LPSTR lpczBuffer
     return -1;
   }
   return MODE2_DATA_SIZE;
+#elif defined(__FreeBSD__)
+  // NYI
 #elif defined(_LINUX)
   if (hDevice->m_bCDROM)
   {
@@ -354,7 +361,7 @@ VOID CIoSupport::GetXbePath(char* szDest)
   CStdString strPath;
   g_charsetConverter.wToUTF8(strPathW,strPath);
   strncpy(szDest,strPath.c_str(),strPath.length()+1);
-#elif __APPLE__
+#elif defined(TARGET_DARWIN)
   int      result = -1;
   char     given_path[2*MAXPATHLEN];
   uint32_t path_size = 2*MAXPATHLEN;

@@ -5,9 +5,12 @@ CXXFLAGS+=-DHAVE_MMX
 SRCS=	DVDAudioCodecFFmpeg.cpp \
 	DVDAudioCodecLibMad.cpp \
 	DVDAudioCodecLPcm.cpp \
-        DVDAudioCodecPassthroughFFmpeg.cpp \
-	DVDAudioCodecPcm.cpp \
-	Encoders/DVDAudioEncoderFFmpeg.cpp
+	DVDAudioCodecPassthrough.cpp \
+	DVDAudioCodecPcm.cpp
+
+ifeq ($(findstring osx,@ARCH@),osx)
+SRCS += DVDAudioCodecPassthroughFFmpeg.cpp
+endif
 
 LIB=Audio.a
 

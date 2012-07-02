@@ -40,7 +40,7 @@
 #include "Autorun.h"
 #include "GUIUserMessages.h"
 #include "settings/Settings.h"
-#include "tinyXML/tinyxml.h"
+#include "utils/XBMCTinyXML.h"
 #include "threads/SingleLock.h"
 #include "utils/log.h"
 #include "dialogs/GUIDialogKaiToast.h"
@@ -54,7 +54,7 @@
 #include "filesystem/Directory.h"
 #include "utils/Crc32.h"
 
-#ifdef __APPLE__
+#if defined(TARGET_DARWIN)
 #include "osx/DarwinStorageProvider.h"
 #elif defined(_LINUX)
 #include "linux/LinuxStorageProvider.h"
@@ -87,7 +87,7 @@ void CMediaManager::Initialize()
 {
   if (!m_platformStorage)
   {
-    #ifdef __APPLE__
+    #if defined(TARGET_DARWIN)
       m_platformStorage = new CDarwinStorageProvider();
     #elif defined(_LINUX)
       m_platformStorage = new CLinuxStorageProvider();
@@ -107,7 +107,7 @@ bool CMediaManager::LoadSources()
   m_locations.clear();
 
   // load xml file...
-  TiXmlDocument xmlDoc;
+  CXBMCTinyXML xmlDoc;
   if ( !xmlDoc.LoadFile( MEDIA_SOURCES_XML ) )
     return false;
 
@@ -140,7 +140,7 @@ bool CMediaManager::LoadSources()
 
 bool CMediaManager::SaveSources()
 {
-  TiXmlDocument xmlDoc;
+  CXBMCTinyXML xmlDoc;
   TiXmlElement xmlRootElement("mediasources");
   TiXmlNode *pRoot = xmlDoc.InsertEndChild(xmlRootElement);
   if (!pRoot) return false;
@@ -541,7 +541,7 @@ bool CMediaManager::HashDVD(const CStdString& dvdpath, uint32_t& crc)
   Crc32 crc32;
   bool dataRead = false;
 
-  vecItemsTS.Sort(SORT_METHOD_FILE, SORT_ORDER_ASC);
+  vecItemsTS.Sort(SORT_METHOD_FILE, SortOrderAscending);
   for (int i = 0; i < vecItemsTS.Size(); i++)
   {
     CFileItemPtr videoTSItem = vecItemsTS[i];

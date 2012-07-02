@@ -80,6 +80,7 @@ class CAdvancedSettings
     static CAdvancedSettings* getInstance();
 
     void Initialize();
+    bool Initialized() { return m_initialized; };
     void AddSettingsFile(const CStdString &filename);
     bool Load();
     void Clear();
@@ -94,6 +95,13 @@ class CAdvancedSettings
     CStdString m_audioDefaultPlayer;
     float m_audioPlayCountMinimumPercent;
     bool m_dvdplayerIgnoreDTSinWAV;
+    int m_audioResample;
+    bool m_allowTranscode44100;
+    bool m_audioForceDirectSound;
+    bool m_audioAudiophile;
+    bool m_allChannelStereo;
+    int m_audioSinkBufferDurationMsec;
+    CStdString m_audioTranscodeTo;
     float m_limiterHold;
     float m_limiterRelease;
 
@@ -122,7 +130,6 @@ class CAdvancedSettings
     int m_musicPercentSeekBackward;
     int m_musicPercentSeekForwardBig;
     int m_musicPercentSeekBackwardBig;
-    int m_musicResample;
     int m_videoBlackBarColour;
     int m_videoIgnoreSecondsAtStart;
     float m_videoIgnorePercentAtEnd;
@@ -232,8 +239,10 @@ class CAdvancedSettings
     bool m_bVideoLibraryCleanOnUpdate;
     bool m_bVideoLibraryExportAutoThumbs;
     bool m_bVideoLibraryImportWatchedState;
+    bool m_bVideoLibraryImportResumePoint;
 
     bool m_bVideoScannerIgnoreErrors;
+    int m_iVideoLibraryDateAdded;
 
     std::vector<CStdString> m_vecTokens; // cleaning strings tied to language
     //TuxBox
@@ -319,6 +328,7 @@ class CAdvancedSettings
     void ParseSettingsFile(const CStdString &file);
 
     float GetDisplayLatency(float refreshrate);
+    bool m_initialized;
 };
 
 XBMC_GLOBAL(CAdvancedSettings,g_advancedSettings);

@@ -44,9 +44,6 @@ const CGFloat timeFadeSecs                = 2.0;
 
 static CEvent screenChangeEvent;
 
-@interface IOSScreenManager ()
-IOSExternalTouchController *_externalTouchController;
-@end
 @implementation IOSScreenManager
 @synthesize _screenIdx;
 @synthesize _externalScreen;
@@ -196,7 +193,11 @@ IOSExternalTouchController *_externalTouchController;
 #ifdef TARGET_DARWIN_IOS_ATV2
   //because bounds returns f00bar on atv2 - we return the preferred resolution (which mostly is the
   //right resolution
+#if __IPHONE_OS_VERSION_MIN_REQUIRED > __IPHONE_4_2
   res.size = screen.preferredMode.size;
+#else
+  res.size = [BRWindow interfaceFrame].size;
+#endif
 #else
   //main screen is in portrait mode (physically) so exchange height and width
   if(screen == [UIScreen mainScreen])

@@ -34,19 +34,24 @@
 #include "utils/StringUtils.h"
 #include "utils/SystemInfo.h"
 #include "utils/log.h"
-#include "tinyXML/tinyxml.h"
+#include "utils/XBMCTinyXML.h"
 #include "windowing/WindowingFactory.h"
 #include "powermanagement/PowerManager.h"
 #include "cores/dvdplayer/DVDCodecs/Video/CrystalHD.h"
-#include "utils/PCMRemap.h"
+#include "cores/AudioEngine/AEFactory.h"
+#include "cores/AudioEngine/AEAudioFormat.h"
 #include "guilib/GUIFont.h" // for FONT_STYLE_* definitions
+#if defined(TARGET_DARWIN_OSX)
+  #include "cores/AudioEngine/Engines/CoreAudio/CoreAudioHardware.h"
+#endif
 #include "guilib/GUIFontManager.h"
 #include "utils/Weather.h"
 #include "LangInfo.h"
 #include "utils/XMLUtils.h"
-#if defined(__APPLE__)
+#if defined(TARGET_DARWIN)
   #include "osx/DarwinUtils.h"
 #endif
+#include "Util.h"
 
 using namespace std;
 using namespace ADDON;
@@ -288,9 +293,10 @@ void CGUISettings::Initialize()
   gain.insert(make_pair(640,REPLAY_GAIN_ALBUM));
 
   AddInt(mp, "musicplayer.replaygaintype", 638, REPLAY_GAIN_ALBUM, gain, SPIN_CONTROL_TEXT);
-  AddInt(NULL, "musicplayer.replaygainpreamp", 641, 89, 77, 1, 101, SPIN_CONTROL_INT_PLUS, MASK_DB);
-  AddInt(NULL, "musicplayer.replaygainnogainpreamp", 642, 89, 77, 1, 101, SPIN_CONTROL_INT_PLUS, MASK_DB);
-  AddBool(NULL, "musicplayer.replaygainavoidclipping", 643, false);
+  AddInt(mp, "musicplayer.replaygainpreamp", 641, 89, 77, 1, 101, SPIN_CONTROL_INT_PLUS, MASK_DB);
+  AddInt(mp, "musicplayer.replaygainnogainpreamp", 642, 89, 77, 1, 101, SPIN_CONTROL_INT_PLUS, MASK_DB);
+  AddBool(mp, "musicplayer.replaygainavoidclipping", 643, false);
+  AddSeparator(mp, "musicplayer.sep2");
   AddInt(mp, "musicplayer.crossfade", 13314, 0, 0, 1, 15, SPIN_CONTROL_INT_PLUS, MASK_SECS, TEXT_OFF);
   AddBool(mp, "musicplayer.crossfadealbumtracks", 13400, true);
   AddSeparator(mp, "musicplayer.sep3");
@@ -330,8 +336,12 @@ void CGUISettings::Initialize()
   AddPath(acd,"audiocds.recordingpath",20000,"select writable folder",BUTTON_CONTROL_PATH_INPUT,false,657);
   AddString(acd, "audiocds.trackpathformat", 13307, "%A - %B/[%N. ][%A - ]%T", EDIT_CONTROL_INPUT, false, 16016);
   map<int,int> encoders;
+#ifdef HAVE_LIBMP3LAME
   encoders.insert(make_pair(34000,CDDARIP_ENCODER_LAME));
+#endif
+#ifdef HAVE_LIBVORBISENC
   encoders.insert(make_pair(34001,CDDARIP_ENCODER_VORBIS));
+#endif
   encoders.insert(make_pair(34002,CDDARIP_ENCODER_WAV));
   encoders.insert(make_pair(34005,CDDARIP_ENCODER_FLAC));
   AddInt(acd, "audiocds.encoder", 621, CDDARIP_ENCODER_FLAC, encoders, SPIN_CONTROL_TEXT);
@@ -371,11 +381,11 @@ void CGUISettings::Initialize()
   // this setting would ideally not be saved, as its value is systematically derived from videoscreen.screenmode.
   // contains a DISPLAYMODE
 #if !defined(TARGET_DARWIN_IOS_ATV2)
-  AddInt(vs, "videoscreen.screen", 240, 0, -1, 1, g_Windowing.GetNumScreens(), SPIN_CONTROL_TEXT);
+  AddInt(vs, "videoscreen.screen", 240, 0, -1, 1, 32, SPIN_CONTROL_TEXT);
 #endif
   // this setting would ideally not be saved, as its value is systematically derived from videoscreen.screenmode.
   // contains an index to the g_settings.m_ResInfo array. the only meaningful fields are iScreen, iWidth, iHeight.
-#if defined (__APPLE__)
+#if defined(TARGET_DARWIN)
   #if !defined(TARGET_DARWIN_IOS_ATV2)
     AddInt(vs, "videoscreen.resolution", 131, -1, 0, 1, INT_MAX, SPIN_CONTROL_TEXT);
   #endif
@@ -384,7 +394,7 @@ void CGUISettings::Initialize()
 #endif
   AddString(g_application.IsStandAlone() ? vs : NULL, "videoscreen.screenmode", 243, "DESKTOP", SPIN_CONTROL_TEXT);
 
-#if defined(_WIN32) || defined (__APPLE__)
+#if defined(_WIN32) || defined(TARGET_DARWIN)
   // We prefer a fake fullscreen mode (window covering the screen rather than dedicated fullscreen)
   // as it works nicer with switching to other applications. However on some systems vsync is broken
   // when we do this (eg non-Aero on ATI in particular) and on others (AppleTV) we can't get XBMC to
@@ -399,11 +409,7 @@ void CGUISettings::Initialize()
   showSetting = false;
 #endif
 
-#if defined (__APPLE__)
-  if (g_sysinfo.IsAppleTV())
-  {
-    fakeFullScreen = false;
-  }
+#if defined(TARGET_DARWIN)
   showSetting = false;
 #endif
   AddBool(showSetting ? vs : NULL, "videoscreen.fakefullscreen", 14083, fakeFullScreen);
@@ -416,7 +422,7 @@ void CGUISettings::Initialize()
 #endif
 
   map<int,int> vsync;
-#if defined(_LINUX) && !defined(__APPLE__)
+#if defined(_LINUX) && !defined(TARGET_DARWIN)
   vsync.insert(make_pair(13101,VSYNC_DRIVER));
 #endif
   vsync.insert(make_pair(13106,VSYNC_DISABLED));
@@ -442,42 +448,65 @@ void CGUISettings::Initialize()
   AddInt(ao, "audiooutput.mode", 337, AUDIO_ANALOG, audiomode, SPIN_CONTROL_TEXT);
 
   map<int,int> channelLayout;
-  for(int layout = 0; layout < PCM_MAX_LAYOUT; ++layout)
-    channelLayout.insert(make_pair(34101+layout, layout));
-  AddInt(ao, "audiooutput.channellayout", 34100, PCM_LAYOUT_2_0, channelLayout, SPIN_CONTROL_TEXT);
+  for(int layout = AE_CH_LAYOUT_2_0; layout < AE_CH_LAYOUT_MAX; ++layout)
+    channelLayout.insert(make_pair(34100+layout, layout));
+  AddInt(ao, "audiooutput.channellayout", 34100, AE_CH_LAYOUT_2_0, channelLayout, SPIN_CONTROL_TEXT);
   AddBool(ao, "audiooutput.dontnormalizelevels", 346, true);
+  AddBool(ao, "audiooutput.stereoupmix", 252, false);
 
-  AddBool(ao, "audiooutput.ac3passthrough", 364, true);
-  AddBool(ao, "audiooutput.dtspassthrough", 254, true);
-  AddBool(NULL, "audiooutput.passthroughaac", 299, false);
-  AddBool(NULL, "audiooutput.passthroughmp1", 300, false);
-  AddBool(NULL, "audiooutput.passthroughmp2", 301, false);
-  AddBool(NULL, "audiooutput.passthroughmp3", 302, false);
-
-#ifdef __APPLE__
-  AddString(ao, "audiooutput.audiodevice", 545, "Default", SPIN_CONTROL_TEXT);
-#elif defined(_LINUX)
-  AddSeparator(ao, "audiooutput.sep1");
-  AddString(ao, "audiooutput.audiodevice", 545, "default", SPIN_CONTROL_TEXT);
-  AddString(ao, "audiooutput.customdevice", 1300, "", EDIT_CONTROL_INPUT);
-  AddSeparator(ao, "audiooutput.sep2");
-  AddString(ao, "audiooutput.passthroughdevice", 546, "iec958", SPIN_CONTROL_TEXT);
-  AddString(ao, "audiooutput.custompassthrough", 1301, "", EDIT_CONTROL_INPUT);
-  AddSeparator(ao, "audiooutput.sep3");
-#elif defined(_WIN32)
-  AddString(ao, "audiooutput.audiodevice", 545, "Default", SPIN_CONTROL_TEXT);
+#if defined(TARGET_DARWIN_IOS)
+  CSettingsCategory* aocat = g_sysinfo.IsAppleTV2() ? ao : NULL;
+#else
+  CSettingsCategory* aocat = ao;
 #endif
+
+  AddBool(aocat, "audiooutput.ac3passthrough"   , 364, true);
+  AddBool(aocat, "audiooutput.dtspassthrough"   , 254, true);
+
+
+#if !defined(TARGET_DARWIN)
+  AddBool(aocat, "audiooutput.passthroughaac"   , 299, false);
+#endif
+#if !defined(TARGET_DARWIN_IOS)
+  AddBool(aocat, "audiooutput.multichannellpcm" , 348, true );
+#endif
+#if !defined(TARGET_DARWIN)
+  AddBool(aocat, "audiooutput.truehdpassthrough", 349, true );
+  AddBool(aocat, "audiooutput.dtshdpassthrough" , 347, true );
+#endif
+
+#if defined(TARGET_DARWIN)
+  #if defined(TARGET_DARWIN_IOS)
+    CStdString defaultDeviceName = "Default";
+  #else
+    CStdString defaultDeviceName;
+    CCoreAudioHardware::GetOutputDeviceName(defaultDeviceName);
+  #endif
+  AddString(ao, "audiooutput.audiodevice", 545, defaultDeviceName.c_str(), SPIN_CONTROL_TEXT);
+  AddString(NULL, "audiooutput.passthroughdevice", 546, defaultDeviceName.c_str(), SPIN_CONTROL_TEXT);
+#else
+  AddSeparator(ao, "audiooutput.sep1");
+  AddString   (ao, "audiooutput.audiodevice"      , 545, CStdString(CAEFactory::GetDefaultDevice(false)), SPIN_CONTROL_TEXT);
+  AddString   (ao, "audiooutput.passthroughdevice", 546, CStdString(CAEFactory::GetDefaultDevice(true )), SPIN_CONTROL_TEXT);
+  AddSeparator(ao, "audiooutput.sep2");
+#endif
+
+  map<int,int> guimode;
+  guimode.insert(make_pair(34121, AE_SOUND_IDLE  ));
+  guimode.insert(make_pair(34122, AE_SOUND_ALWAYS));
+  guimode.insert(make_pair(34123, AE_SOUND_OFF   ));
+  AddInt(ao, "audiooutput.guisoundmode", 34120, AE_SOUND_IDLE, guimode, SPIN_CONTROL_TEXT);
 
   CSettingsCategory* in = AddCategory(4, "input", 14094);
   AddString(in, "input.peripherals", 35000, "", BUTTON_CONTROL_STANDARD);
-#if defined(__APPLE__)
+#if defined(TARGET_DARWIN)
   map<int,int> remotemode;
   remotemode.insert(make_pair(13610,APPLE_REMOTE_DISABLED));
   remotemode.insert(make_pair(13611,APPLE_REMOTE_STANDARD));
   remotemode.insert(make_pair(13612,APPLE_REMOTE_UNIVERSAL));
   remotemode.insert(make_pair(13613,APPLE_REMOTE_MULTIREMOTE));
   AddInt(in, "input.appleremotemode", 13600, APPLE_REMOTE_STANDARD, remotemode, SPIN_CONTROL_TEXT);
-#if !defined(__arm__)
+#if defined(TARGET_DARWIN_OSX)
   AddBool(in, "input.appleremotealwayson", 13602, false);
 #else
   AddBool(NULL, "input.appleremotealwayson", 13602, false);
@@ -495,7 +524,7 @@ void CGUISettings::Initialize()
   CSettingsCategory* net = AddCategory(4, "network", 798);
   if (g_application.IsStandAlone())
   {
-#ifndef __APPLE__
+#if !defined(TARGET_DARWIN)
     AddString(NULL, "network.interface",775,"", SPIN_CONTROL_TEXT);
 
     map<int, int> networkAssignments;
@@ -651,7 +680,7 @@ void CGUISettings::Initialize()
   // FIXME: hide this setting until it is properly respected. In the meanwhile, default to AUTO.
   //AddInt(5, "videoplayer.displayresolution", 169, (int)RES_AUTORES, (int)RES_AUTORES, 1, (int)CUSTOM+MAX_RESOLUTIONS, SPIN_CONTROL_TEXT);
   AddInt(NULL, "videoplayer.displayresolution", 169, (int)RES_AUTORES, (int)RES_AUTORES, 1, (int)RES_AUTORES, SPIN_CONTROL_TEXT);
-#if !(defined(__APPLE__) && defined(__arm__))
+#if !defined(TARGET_DARWIN_IOS)
   AddBool(vp, "videoplayer.adjustrefreshrate", 170, false);
   AddInt(vp, "videoplayer.pauseafterrefreshchange", 13550, 0, 0, 1, MAXREFRESHCHANGEDELAY, SPIN_CONTROL_TEXT);
 #else
@@ -721,7 +750,7 @@ void CGUISettings::Initialize()
   fontStyles.insert(make_pair(738, FONT_STYLE_NORMAL));
   fontStyles.insert(make_pair(739, FONT_STYLE_BOLD));
   fontStyles.insert(make_pair(740, FONT_STYLE_ITALICS));
-  fontStyles.insert(make_pair(741, FONT_STYLE_BOLD_ITALICS));
+  fontStyles.insert(make_pair(741, FONT_STYLE_BOLD | FONT_STYLE_ITALICS));
 
   AddInt(sub, "subtitles.style", 736, FONT_STYLE_BOLD, fontStyles, SPIN_CONTROL_TEXT);
   AddInt(sub, "subtitles.color", 737, SUBTITLE_COLOR_START + 1, SUBTITLE_COLOR_START, 1, SUBTITLE_COLOR_END, SPIN_CONTROL_TEXT);
@@ -761,11 +790,7 @@ void CGUISettings::Initialize()
 #ifdef HAS_WEB_SERVER
   CSettingsCategory* srvWeb = AddCategory(6, "webserver", 33101);
   AddBool(srvWeb,  "services.webserver",        263, false);
-#ifdef _LINUX
-  AddString(srvWeb,"services.webserverport",    730, (geteuid()==0)?"80":"8080", EDIT_CONTROL_NUMBER_INPUT, false, 730);
-#else
-  AddString(srvWeb,"services.webserverport",    730, "80", EDIT_CONTROL_NUMBER_INPUT, false, 730);
-#endif
+  AddString(srvWeb,"services.webserverport",    730, CUtil::CanBindPrivileged()?"80":"8080", EDIT_CONTROL_NUMBER_INPUT, false, 730);
   AddString(srvWeb,"services.webserverusername",1048, "xbmc", EDIT_CONTROL_INPUT);
   AddString(srvWeb,"services.webserverpassword",733, "", EDIT_CONTROL_HIDDEN_INPUT, true, 733);
   AddDefaultAddon(srvWeb, "services.webskin",199, DEFAULT_WEB_INTERFACE, ADDON_WEB_INTERFACE);
@@ -824,7 +849,7 @@ void CGUISettings::Initialize()
   bool use_timezone = false;
   
 #if defined(_LINUX)
-#if defined(__APPLE__)
+#if defined(TARGET_DARWIN)
   if (g_sysinfo.IsAppleTV2() && GetIOSVersion() < 4.3)
 #endif
     use_timezone = true;  
@@ -841,6 +866,9 @@ void CGUISettings::Initialize()
   AddBool(loc, "locale.timeserver", 168, false);
   AddString(loc, "locale.timeserveraddress", 731, "pool.ntp.org", EDIT_CONTROL_INPUT);
 #endif
+  AddSeparator(loc, "locale.sep3");
+  AddString(loc, "locale.audiolanguage", 285, "original", SPIN_CONTROL_TEXT);
+  AddString(loc, "locale.subtitlelanguage", 286, "original", SPIN_CONTROL_TEXT);
 
   CSettingsCategory* fl = AddCategory(7, "filelists", 14081);
   AddBool(fl, "filelists.showparentdiritems", 13306, true);
@@ -1213,12 +1241,8 @@ void CGUISettings::LoadXML(TiXmlElement *pRootElement, bool hideSettings /* = fa
   CLog::Log(LOGINFO, "AC3 pass through is %s", GetBool("audiooutput.ac3passthrough") ? "enabled" : "disabled");
   CLog::Log(LOGINFO, "DTS pass through is %s", GetBool("audiooutput.dtspassthrough") ? "enabled" : "disabled");
   CLog::Log(LOGINFO, "AAC pass through is %s", GetBool("audiooutput.passthroughaac") ? "enabled" : "disabled");
-  CLog::Log(LOGINFO, "MP1 pass through is %s", GetBool("audiooutput.passthroughmp1") ? "enabled" : "disabled");
-  CLog::Log(LOGINFO, "MP2 pass through is %s", GetBool("audiooutput.passthroughmp2") ? "enabled" : "disabled");
-  CLog::Log(LOGINFO, "MP3 pass through is %s", GetBool("audiooutput.passthroughmp3") ? "enabled" : "disabled");
 
-  g_guiSettings.m_LookAndFeelResolution = GetResolution();
-#ifdef __APPLE__
+#if defined(TARGET_DARWIN)
   // trap any previous vsync by driver setting, does not exist on OSX
   if (GetInt("videoscreen.vsync") == VSYNC_DRIVER)
   {
@@ -1227,12 +1251,6 @@ void CGUISettings::LoadXML(TiXmlElement *pRootElement, bool hideSettings /* = fa
 #endif
  // DXMERGE: This might have been useful?
  // g_videoConfig.SetVSyncMode((VSYNC)GetInt("videoscreen.vsync"));
-  CLog::Log(LOGNOTICE, "Checking resolution %i", g_guiSettings.m_LookAndFeelResolution);
-  if (!g_graphicsContext.IsValidResolution(g_guiSettings.m_LookAndFeelResolution))
-  {
-    CLog::Log(LOGNOTICE, "Setting safe mode %i", RES_DESKTOP);
-    SetResolution(RES_DESKTOP);
-  }
 
   // Move replaygain settings into our struct
   m_replayGain.iPreAmp = GetInt("musicplayer.replaygainpreamp");
@@ -1243,7 +1261,7 @@ void CGUISettings::LoadXML(TiXmlElement *pRootElement, bool hideSettings /* = fa
   bool use_timezone = false;
   
 #if defined(_LINUX)
-#if defined(__APPLE__) 
+#if defined(TARGET_DARWIN) 
   if (g_sysinfo.IsAppleTV2() && GetIOSVersion() < 4.3)
 #endif
     use_timezone = true;
@@ -1259,6 +1277,18 @@ void CGUISettings::LoadXML(TiXmlElement *pRootElement, bool hideSettings /* = fa
     g_timezone.SetTimezone(timezone);	
   }
 #endif
+
+  CStdString streamLanguage = GetString("locale.audiolanguage");
+  if (!streamLanguage.Equals("original") && !streamLanguage.Equals("default"))
+    g_langInfo.SetAudioLanguage(streamLanguage);
+  else
+    g_langInfo.SetAudioLanguage("");
+
+  streamLanguage = GetString("locale.subtitlelanguage");
+  if (!streamLanguage.Equals("original") && !streamLanguage.Equals("default"))
+    g_langInfo.SetSubtitleLanguage(streamLanguage);
+  else
+    g_langInfo.SetSubtitleLanguage("");
 }
 
 void CGUISettings::LoadFromXML(TiXmlElement *pRootElement, mapIter &it, bool advanced /* = false */)
@@ -1421,9 +1451,7 @@ bool CGUISettings::SetLanguage(const CStdString &strLanguage)
 
     g_charsetConverter.reset();
 
-    CStdString strLanguagePath;
-    strLanguagePath.Format("special://xbmc/language/%s/strings.xml", strNewLanguage.c_str());
-    if (!g_localizeStrings.Load(strLanguagePath))
+    if (!g_localizeStrings.Load("special://xbmc/language/", strNewLanguage))
       return false;
 
     // also tell our weather and skin to reload as these are localized

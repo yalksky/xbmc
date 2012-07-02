@@ -103,7 +103,7 @@ void URIUtils::RemoveExtension(CStdString& strFileName)
     strFileMask = g_settings.m_pictureExtensions;
     strFileMask += "|" + g_settings.m_musicExtensions;
     strFileMask += "|" + g_settings.m_videoExtensions;
-#if defined(__APPLE__)
+#if defined(TARGET_DARWIN)
     strFileMask += "|.py|.xml|.milk|.xpr|.xbt|.cdg|.app|.applescript|.workflow";
 #else
     strFileMask += "|.py|.xml|.milk|.xpr|.xbt|.cdg";
@@ -231,7 +231,8 @@ void URIUtils::GetCommonPath(CStdString& strParent, const CStdString& strPath)
 bool URIUtils::ProtocolHasParentInHostname(const CStdString& prot)
 {
   return prot.Equals("zip")
-      || prot.Equals("rar");
+      || prot.Equals("rar")
+      || prot.Equals("bluray");
 }
 
 bool URIUtils::ProtocolHasEncodedHostname(const CStdString& prot)
@@ -775,6 +776,11 @@ bool URIUtils::IsVideoDb(const CStdString& strFile)
 bool URIUtils::IsLastFM(const CStdString& strFile)
 {
   return strFile.Left(7).Equals("lastfm:");
+}
+
+bool URIUtils::IsBluray(const CStdString& strFile)
+{
+  return strFile.Left(7).Equals("bluray:");
 }
 
 bool URIUtils::IsDOSPath(const CStdString &path)

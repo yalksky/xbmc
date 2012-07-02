@@ -27,9 +27,6 @@
 #include "utils/URIUtils.h"
 #include "utils/XMLUtils.h"
 #include "utils/Variant.h"
-#ifndef _LINUX
-#include "cores/dllloader/exports/emu_msvcrt.h"
-#endif
 
 using namespace PLAYLIST;
 using namespace XFILE;
@@ -85,7 +82,7 @@ static inline CStdString GetString( const TiXmlElement* pRootElement, const char
 
 bool CPlayListXML::Load( const CStdString& strFileName )
 {
-  TiXmlDocument xmlDoc;
+  CXBMCTinyXML xmlDoc;
 
   m_strPlayListName = URIUtils::GetFileName(strFileName);
   URIUtils::GetParentPath(strFileName, m_strBasePath);

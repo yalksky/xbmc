@@ -86,7 +86,7 @@ void CTCPServer::StopServer(bool bWait)
   }
 }
 
-CTCPServer::CTCPServer(int port, bool nonlocal)
+CTCPServer::CTCPServer(int port, bool nonlocal) : CThread("CTCPServer")
 {
   m_port = port;
   m_nonlocal = nonlocal;
@@ -659,11 +659,11 @@ void CTCPServer::CWebSocketClient::PushBuffer(CTCPServer *host, const char *buff
         CTCPClient::PushBuffer(host, frames.at(index)->GetApplicationData(), (int)frames.at(index)->GetLength());
     }
 
-    if (m_websocket->GetState() == WebSocketStateClosed)
-      Disconnect();
-
     delete msg;
   }
+
+  if (m_websocket->GetState() == WebSocketStateClosed)
+    Disconnect();
 }
 
 void CTCPServer::CWebSocketClient::Disconnect()
