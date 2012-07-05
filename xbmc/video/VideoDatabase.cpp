@@ -50,7 +50,6 @@
 #include "addons/AddonInstaller.h"
 #include "interfaces/AnnouncementManager.h"
 #include "dbwrappers/dataset.h"
-#include "ThumbnailCache.h"
 #include "utils/LabelFormatter.h"
 #include "XBDateTime.h"
 
@@ -3837,6 +3836,9 @@ bool CVideoDatabase::UpdateOldVersion(int iVersion)
       m_pDS->exec("CREATE TRIGGER delete_season AFTER DELETE ON seasons FOR EACH ROW BEGIN DELETE FROM art WHERE media_id=old.idSeason AND media_type='season'; END");
       m_pDS->exec("CREATE TRIGGER delete_set AFTER DELETE ON sets FOR EACH ROW BEGIN DELETE FROM art WHERE media_id=old.idSet AND media_type='set'; END");
       m_pDS->exec("CREATE TRIGGER delete_person AFTER DELETE ON actors FOR EACH ROW BEGIN DELETE FROM art WHERE media_id=old.idActor AND media_type IN ('actor','artist','writer','director'); END");
+
+      g_settings.m_videoNeedsUpdate = 63;
+      g_settings.Save();
     }
     if (iVersion < 64)
     { // add idShow to episode table
@@ -3961,7 +3963,15 @@ bool CVideoDatabase::GetPlayCounts(const CStdString &strPath, CFileItemList &ite
     if (NULL == m_pDS.get()) return false;
 
     // TODO: also test a single query for the above and below
-    CStdString sql = PrepareSQL("select strFilename,playCount from files where idPath=%i", pathID);
+    CStdString sql = PrepareSQL(
+      "SELECT"
+      "  files.strFilename, files.playCount,"
+      "  bookmark.timeInSeconds, bookmark.totalTimeInSeconds "
+      "FROM files"
+      "  LEFT JOIN bookmark ON"
+      "    files.idFile = bookmark.idFile AND bookmark.type = %i"
+      "  WHERE files.idPath=%i", (int)CBookmark::RESUME, pathID);
+
     if (RunQuery(sql) <= 0)
       return false;
 
@@ -3972,7 +3982,12 @@ bool CVideoDatabase::GetPlayCounts(const CStdString &strPath, CFileItemList &ite
       ConstructPath(path, strPath, m_pDS->fv(0).get_asString());
       CFileItemPtr item = items.Get(path);
       if (item)
+      {
         item->GetVideoInfoTag()->m_playCount = m_pDS->fv(1).get_asInt();
+        item->GetVideoInfoTag()->m_resumePoint.timeInSeconds = m_pDS->fv(2).get_asInt();
+        item->GetVideoInfoTag()->m_resumePoint.totalTimeInSeconds = m_pDS->fv(3).get_asInt();
+        item->GetVideoInfoTag()->m_resumePoint.type = CBookmark::RESUME;
+      }
       m_pDS->next();
     }
     return true;
@@ -4486,9 +4501,6 @@ bool CVideoDatabase::GetMusicVideoAlbumsNav(const CStdString& strBaseDir, CFileI
           if (!items.Contains(pItem->GetPath()))
           {
             pItem->GetVideoInfoTag()->m_artist.push_back(it->second.second);
-            CStdString strThumb = CThumbnailCache::GetAlbumThumb(*pItem);
-            if (CFile::Exists(strThumb))
-              pItem->SetThumbnailImage(strThumb);
             items.Add(pItem);
           }
         }
@@ -4509,9 +4521,6 @@ bool CVideoDatabase::GetMusicVideoAlbumsNav(const CStdString& strBaseDir, CFileI
           if (!items.Contains(pItem->GetPath()))
           {
             pItem->GetVideoInfoTag()->m_artist.push_back(m_pDS->fv(2).get_asString());
-            CStdString strThumb = CThumbnailCache::GetAlbumThumb(pItem->GetLabel(), m_pDS->fv(2).get_asString());
-            if (CFile::Exists(strThumb))
-              pItem->SetThumbnailImage(strThumb);
             items.Add(pItem);
           }
         }
@@ -4548,11 +4557,7 @@ bool CVideoDatabase::GetActorsNav(const CStdString& strBaseDir, CFileItemList& i
     {
       CFileItemPtr pItem = items[i];
       if (idContent == VIDEODB_CONTENT_MUSICVIDEOS)
-      {
-        if (CFile::Exists(pItem->GetCachedArtistThumb()))
-          pItem->SetThumbnailImage(pItem->GetCachedArtistThumb());
         pItem->SetIconImage("DefaultArtist.png");
-      }
       else
         pItem->SetIconImage("DefaultActor.png");
     }

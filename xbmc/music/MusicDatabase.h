@@ -113,7 +113,6 @@ class CMusicDatabase : public CDatabase
   {
   public:
     int idAlbum;
-    int idArtist;
   };
 
 public:
@@ -128,7 +127,14 @@ public:
   void DeleteAlbumInfo();
   bool LookupCDDBInfo(bool bRequery=false);
   void DeleteCDDBInfo();
-  void AddSong(CSong& song, bool bCheck = true);
+
+  /*! \brief Add an album and all its songs to the database
+   \param album the album to add
+   \param songIDs [out] the ids of the added songs
+   \return the id of the album
+   */
+  int AddAlbum(const CAlbum &album, std::vector<int> &songIDs);
+
   int UpdateSong(const CSong& song, int idSong = -1);
   int SetAlbumInfo(int idAlbum, const CAlbum& album, const VECSONGS& songs, bool bTransaction=true);
   bool DeleteAlbumInfo(int idArtist);
@@ -147,6 +153,11 @@ public:
 
   bool GetAlbumFromSong(int idSong, CAlbum &album);
   bool GetAlbumFromSong(const CSong &song, CAlbum &album);
+  
+  bool GetAlbumsByArtist(int idArtist, bool includeFeatured, std::vector<long>& albums);
+  bool GetArtistsByAlbum(int idAlbum, bool includeFeatured, std::vector<long>& artists);
+  bool GetSongsByArtist(int idArtist, bool includeFeatured, std::vector<long>& songs);
+  bool GetArtistsBySong(int idSong, bool includeFeatured, std::vector<long>& artists);
 
   bool GetArbitraryQuery(const CStdString& strQuery, const CStdString& strOpenRecordSet, const CStdString& strCloseRecordSet,
                          const CStdString& strOpenRecord, const CStdString& strCloseRecord, const CStdString& strOpenField, const CStdString& strCloseField, CStdString& strResult);
@@ -182,7 +193,6 @@ public:
 
   bool GetAlbumPath(int idAlbum, CStdString &path);
   bool SaveAlbumThumb(int idAlbum, const CStdString &thumb);
-  bool GetAlbumThumb(int idAlbum, CStdString &thumb);
   bool GetArtistPath(int idArtist, CStdString &path);
 
   CStdString GetGenreById(int id);
@@ -195,6 +205,9 @@ public:
   int GetGenreByName(const CStdString& strGenre);
   int GetSongByArtistAndAlbumAndTitle(const CStdString& strArtist, const CStdString& strAlbum, const CStdString& strTitle);
 
+  bool GetCompilationAlbums(const CStdString& strBaseDir, CFileItemList& items);
+  bool GetCompilationSongs(const CStdString& strBaseDir, CFileItemList& items);
+  int  GetCompilationAlbumsCount();
   bool GetVariousArtistsAlbums(const CStdString& strBaseDir, CFileItemList& items);
   bool GetVariousArtistsAlbumsSongs(const CStdString& strBaseDir, CFileItemList& items);
   int GetVariousArtistsAlbumsCount();
@@ -218,6 +231,66 @@ public:
   void SetPropertiesForFileItem(CFileItem& item);
   static void SetPropertiesFromArtist(CFileItem& item, const CArtist& artist);
   static void SetPropertiesFromAlbum(CFileItem& item, const CAlbum& album);
+
+  /*! \brief Sets art for a database item.
+   Sets a single piece of art for a database item.
+   \param mediaId the id in the media (song/artist/album) table.
+   \param mediaType the type of media, which corresponds to the table the item resides in (song/artist/album).
+   \param artType the type of art to set, e.g. "thumb", "fanart"
+   \param url the url to the art (this is the original url, not a cached url).
+   \sa GetArtForItem
+   */
+  void SetArtForItem(int mediaId, const std::string &mediaType, const std::string &artType, const std::string &url);
+
+  /*! \brief Sets art for a database item.
+   Sets multiple pieces of art for a database item.
+   \param mediaId the id in the media (song/artist/album) table.
+   \param mediaType the type of media, which corresponds to the table the item resides in (song/artist/album).
+   \param art a map of <type, url> where type is "thumb", "fanart", etc. and url is the original url of the art.
+   \sa GetArtForItem
+   */
+  void SetArtForItem(int mediaId, const std::string &mediaType, const std::map<std::string, std::string> &art);
+
+  /*! \brief Fetch art for a database item.
+   Fetches multiple pieces of art for a database item.
+   \param mediaId the id in the media (song/artist/album) table.
+   \param mediaType the type of media, which corresponds to the table the item resides in (song/artist/album).
+   \param art [out] a map of <type, url> where type is "thumb", "fanart", etc. and url is the original url of the art.
+   \return true if art is retrieved, false if no art is found.
+   \sa SetArtForItem
+   */
+  bool GetArtForItem(int mediaId, const std::string &mediaType, std::map<std::string, std::string> &art);
+
+  /*! \brief Fetch art for a database item.
+   Fetches a single piece of art for a database item.
+   \param mediaId the id in the media (song/artist/album) table.
+   \param mediaType the type of media, which corresponds to the table the item resides in (song/artist/album).
+   \param artType the type of art to retrieve, eg "thumb", "fanart".
+   \return the original URL to the piece of art, if available.
+   \sa SetArtForItem
+   */
+  std::string GetArtForItem(int mediaId, const std::string &mediaType, const std::string &artType);
+
+  /*! \brief Fetch artist art for a song or album item.
+   Fetches the art associated with the primary artist for the song or album.
+   \param mediaId the id in the media (song/album) table.
+   \param mediaType the type of media, which corresponds to the table the item resides in (song/album).
+   \param art [out] the art map <type, url> of artist art.
+   \return true if artist art is found, false otherwise.
+   \sa GetArtForItem
+   */
+  bool GetArtistArtForItem(int mediaId, const std::string &mediaType, std::map<std::string, std::string> &art);
+
+  /*! \brief Fetch artist art for a song or album item.
+   Fetches a single piece of art associated with the primary artist for the song or album.
+   \param mediaId the id in the media (song/album) table.
+   \param mediaType the type of media, which corresponds to the table the item resides in (song/album).
+   \param artType the type of art to retrieve, eg "thumb", "fanart".
+   \return the original URL to the piece of art, if available.
+   \sa GetArtForItem
+   */
+  std::string GetArtistArtForItem(int mediaId, const std::string &mediaType, const std::string &artType);
+
 protected:
   std::map<CStdString, int /*CArtistCache*/> m_artistCache;
   std::map<CStdString, int /*CGenreCache*/> m_genreCache;
@@ -226,18 +299,21 @@ protected:
   std::map<CStdString, CAlbumCache> m_albumCache;
 
   virtual bool CreateTables();
-  virtual int GetMinVersion() const { return 20; };
+  virtual int GetMinVersion() const { return 27; };
   const char *GetBaseDBName() const { return "MyMusic"; };
 
-  int AddAlbum(const CStdString& strAlbum1, int idArtist, const CStdString &extraArtists, const CStdString &strArtist1, int idThumb, int idGenre, const CStdString &extraGenres, int year);
+  int AddSong(const CSong& song, bool bCheck = true, int idAlbum = -1);
+  int AddAlbum(const CStdString& strAlbum1, const CStdString &strArtist1, const CStdString& strGenre, int year, bool bCompilation);
   int AddGenre(const CStdString& strGenre);
   int AddArtist(const CStdString& strArtist);
   int AddPath(const CStdString& strPath);
-  int AddThumb(const CStdString& strThumb1);
-  void AddExtraAlbumArtists(const std::vector<std::string>& vecArtists, int idAlbum);
-  void AddExtraSongArtists(const std::vector<std::string>& vecArtists, int idSong, bool bCheck = true);
-  void AddKaraokeData(const CSong& song);
-  void AddExtraGenres(const std::vector<std::string>& vecGenres, int idSong, int idAlbum, bool bCheck = true);
+
+  bool AddAlbumArtist(int idArtist, int idAlbum, bool featured, int iOrder);
+  bool AddSongArtist(int idArtist, int idSong, bool featured, int iOrder);
+  bool AddSongGenre(int idGenre, int idSong, int iOrder);
+  bool AddAlbumGenre(int idGenre, int idAlbum, int iOrder);
+
+  void AddKaraokeData(int idSong, const CSong& song);
   bool SetAlbumInfoSongs(int idAlbumInfo, const VECSONGS& songs);
   bool GetAlbumInfoSongs(int idAlbumInfo, VECSONGS& songs);
 private:
@@ -255,7 +331,6 @@ private:
   bool CleanupSongs();
   bool CleanupSongsByIds(const CStdString &strSongIds);
   bool CleanupPaths();
-  bool CleanupThumbs();
   bool CleanupAlbums();
   bool CleanupArtists();
   bool CleanupGenres();
@@ -270,8 +345,8 @@ private:
   enum _SongFields
   {
     song_idSong=0,
-    song_strExtraArtists,
-    song_strExtraGenres,
+    song_strArtists,
+    song_strGenres,
     song_strTitle,
     song_iTrack,
     song_iDuration,
@@ -292,14 +367,10 @@ private:
     song_idAlbum,
     song_strAlbum,
     song_strPath,
-    song_idArtist,
-    song_strArtist,
-    song_idGenre,
-    song_strGenre,
-    song_strThumb,
     song_iKarNumber,
     song_iKarDelay,
-    song_strKarEncoding
+    song_strKarEncoding,
+    song_bCompilation
   } SongFields;
 
   // Fields should be ordered as they
@@ -308,14 +379,9 @@ private:
   {
     album_idAlbum=0,
     album_strAlbum,
-    album_strExtraArtists,
-    album_idArtist,
-    album_strExtraGenres,
-    album_idGenre,
-    album_strArtist,
-    album_strGenre,
+    album_strArtists,
+    album_strGenres,
     album_iYear,
-    album_strThumb,
     album_idAlbumInfo,
     album_strMoods,
     album_strStyles,
@@ -324,12 +390,14 @@ private:
     album_strLabel,
     album_strType,
     album_strThumbURL,
-    album_iRating
+    album_iRating,
+    album_bCompilation
   } AlbumFields;
 
   enum _ArtistFields
   {
-    artist_idArtist=1, // not a typo - we have the primary key @ 0
+    artist_idArtist=0,
+    artist_strArtist,
     artist_strBorn,
     artist_strFormed,
     artist_strGenres,
