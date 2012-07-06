@@ -79,7 +79,7 @@
 ;--------------------------------
 ;Languages
 
-  !insertmacro MUI_LANGUAGE "English"
+  !insertmacro MUI_LANGUAGE "Korean"
 
 ;--------------------------------
 ;Installer Sections
@@ -149,6 +149,7 @@ Section "XBMC" SecXBMC
     "" "Uninstall XBMC."
   
   WriteINIStr "$SMPROGRAMS\$StartMenuFolder\Visit XBMC Online.url" "InternetShortcut" "URL" "http://xbmc.org"
+  WriteINIStr "$SMPROGRAMS\$StartMenuFolder\Visit XBMC-Korea.url" "InternetShortcut" "URL" "http://xbmc-korea.com"
   !insertmacro MUI_STARTMENU_WRITE_END  
   
   ;add entry to add/remove programs
