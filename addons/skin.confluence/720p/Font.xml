@@ -83,7 +83,7 @@
 	 	<font>
 			<name>font_MainMenu</name>
 			<filename>NanumGothicBold.ttf</filename>
-			<style>uppercase</style>
+			<style>bold</style>
 			<size>40</size>
 		</font>
 	 	<font>
