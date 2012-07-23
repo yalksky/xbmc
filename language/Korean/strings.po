@@ -1,13 +1,15 @@
 # XBMC Media Center language file
 # Translators:
+#   <airplanez@gmail.com>, 2012.
+#   <neurostar@gmail.com>, 2012.
 #   <piodio@gmail.com>, 2012.
 msgid ""
 msgstr ""
 "Project-Id-Version: XBMC Main Translation Project (Frodo)\n"
 "Report-Msgid-Bugs-To: http://trac.xbmc.org/\n"
 "POT-Creation-Date: 2012-05-04 12:46+0000\n"
-"PO-Revision-Date: 2012-07-01 17:39+0000\n"
-"Last-Translator: piodio <piodio@gmail.com>\n"
+"PO-Revision-Date: 2012-07-21 18:09+0000\n"
+"Last-Translator: neurostar <neurostar@gmail.com>\n"
 "Language-Team: Korean (http://www.transifex.com/projects/p/XBMC-Main-Frodo/language/ko/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -1091,7 +1093,7 @@ msgstr "정상적으로 데이터베이스 정리됨"
 
 msgctxt "#318"
 msgid "Cleaning songs..."
-msgstr "노래 정리중..."
+msgstr "노래 정리 중..."
 
 msgctxt "#319"
 msgid "Error cleaning songs"
@@ -1099,7 +1101,7 @@ msgstr "노래 정리 오류"
 
 msgctxt "#320"
 msgid "Cleaning artists..."
-msgstr "아티스트 정리중..."
+msgstr "아티스트 정리 중..."
 
 msgctxt "#321"
 msgid "Error cleaning artists"
@@ -1107,7 +1109,7 @@ msgstr "아티스트 정리 오류"
 
 msgctxt "#322"
 msgid "Cleaning genres..."
-msgstr "장르 정리중..."
+msgstr "장르 정리 중..."
 
 msgctxt "#323"
 msgid "Error cleaning genres"
@@ -1115,7 +1117,7 @@ msgstr "장르 정리 오류"
 
 msgctxt "#324"
 msgid "Cleaning paths..."
-msgstr "경로 정리중..."
+msgstr "경로 정리 중..."
 
 msgctxt "#325"
 msgid "Error cleaning paths"
@@ -1123,7 +1125,7 @@ msgstr "경로 정리 오류"
 
 msgctxt "#326"
 msgid "Cleaning albums..."
-msgstr "앨범 정리중..."
+msgstr "앨범 정리 중..."
 
 msgctxt "#327"
 msgid "Error cleaning albums"
@@ -1258,7 +1260,7 @@ msgstr "모든 앨범"
 
 msgctxt "#359"
 msgid "Recently added albums"
-msgstr "최근 추가된 앨범"
+msgstr "최근 추가한 앨범"
 
 msgctxt "#360"
 msgid "Screensaver"
@@ -1294,7 +1296,7 @@ msgstr "정렬기준: 평점"
 
 msgctxt "#368"
 msgid "IMDb"
-msgstr "평점"
+msgstr "IMDb"
 
 msgctxt "#369"
 msgid "Title"
@@ -1430,7 +1432,7 @@ msgstr "온도"
 
 msgctxt "#402"
 msgid "Feels like"
-msgstr "체감"
+msgstr "체감 온도"
 
 msgctxt "#403"
 msgid "UV index"
@@ -1478,7 +1480,7 @@ msgstr "미리보기 다운로드중..."
 
 msgctxt "#416"
 msgid "Not available"
-msgstr "사용할수 없음"
+msgstr "사용할 수 없음"
 
 msgctxt "#417"
 msgid "View: Big icons"
@@ -1775,7 +1777,7 @@ msgstr "정렬기준: 형식"
 
 msgctxt "#499"
 msgid "Unable to connect to online lookup service"
-msgstr "온라인 검색 서비스에 연결할수 없음"
+msgstr "온라인 검색 서비스에 연결할 수 없음"
 
 msgctxt "#500"
 msgid "Downloading album information failed"
@@ -2163,7 +2165,7 @@ msgstr "대상:"
 
 msgctxt "#608"
 msgid "Could not rip CD or track"
-msgstr "CD나 트랙을 추출 할수 없음"
+msgstr "CD나 트랙을 추출할 수 없음"
 
 msgctxt "#609"
 msgid "CDDARipPath is not set."
@@ -2343,7 +2345,7 @@ msgstr "내보내기 폴더 선택"
 
 msgctxt "#662"
 msgid "This file is no longer available."
-msgstr "이 파일은 더 이상 사용할수 없습니다."
+msgstr "이 파일은 더 이상 사용할 수 없습니다."
 
 msgctxt "#663"
 msgid "Would you like to remove it from the library?"
@@ -2583,7 +2585,7 @@ msgstr "회색"
 
 msgctxt "#770"
 msgid "Error %i: share not available"
-msgstr "오류 %i: 공유를 사용할수 없음"
+msgstr "오류 %i: 공유를 사용할 수 없음"
 
 msgctxt "#772"
 msgid "Audio output"
@@ -2675,7 +2677,7 @@ msgstr "포트 범위"
 
 msgctxt "#794"
 msgid "Allow programs on other systems to control XBMC"
-msgstr "XBMC를 제어 하기 위해 다른 시스템의 프로그램 허용"
+msgstr "XBMC를 제어하기 위해 다른 시스템의 프로그램 허용"
 
 msgctxt "#795"
 msgid "Initial repeat delay (ms)"
@@ -2719,11 +2721,11 @@ msgstr "- 미리보기"
 
 msgctxt "#1001"
 msgid "Unable to connect"
-msgstr "연결할수 없음"
+msgstr "연결할 수 없음"
 
 msgctxt "#1002"
 msgid "XBMC was unable to connect to the network location."
-msgstr "XBMC가 네트워크 위치에 연결할수 없습니다."
+msgstr "XBMC가 네트워크 위치에 연결할 수 없습니다."
 
 msgctxt "#1003"
 msgid "This could be due to the network not being connected."
@@ -2811,7 +2813,7 @@ msgstr "탐색"
 
 msgctxt "#1025"
 msgid "Could not retrieve directory information."
-msgstr "디렉터리 정보를 검색할수 없습니다."
+msgstr "디렉터리 정보를 검색할 수 없습니다."
 
 msgctxt "#1026"
 msgid "Add source"
@@ -3075,7 +3077,7 @@ msgstr "Zeroconf를 통해 이 서비스를 다른 시스템에 알림"
 
 msgctxt "#1270"
 msgid "Allow XBMC to receive AirPlay content"
-msgstr "XBMC가 AirPlay 컨텐츠를 수신하도록 허용"
+msgstr "XBMC가 AirPlay 콘텐츠를 수신하도록 허용"
 
 msgctxt "#1271"
 msgid "Device name"
@@ -3755,7 +3757,7 @@ msgstr "- 최소 파일 재생시간:"
 
 msgctxt "#13005"
 msgid "Shutdown"
-msgstr "시스템 종료"
+msgstr "종료"
 
 msgctxt "#13008"
 msgid "Shutdown function"
@@ -3763,7 +3765,7 @@ msgstr "종료 기능"
 
 msgctxt "#13009"
 msgid "Quit"
-msgstr "끝내기"
+msgstr "종료"
 
 msgctxt "#13010"
 msgid "Hibernate"
@@ -3775,7 +3777,7 @@ msgstr "대기"
 
 msgctxt "#13012"
 msgid "Exit"
-msgstr "나가기"
+msgstr "종료"
 
 msgctxt "#13013"
 msgid "Reboot"
@@ -3919,7 +3921,7 @@ msgstr "활성 연결 감지됨!"
 
 msgctxt "#13141"
 msgid "If you proceed, you might not be able to control XBMC"
-msgstr "진행할경우, XBMC 제어를 할수 없음"
+msgstr "진행할 경우, XBMC를 제어할 수 없음"
 
 msgctxt "#13142"
 msgid "any longer. Are you sure you want to stop the Event server?"
@@ -3959,7 +3961,7 @@ msgstr "초기화 실패"
 
 msgctxt "#13170"
 msgid "Never"
-msgstr "안함"
+msgstr "안 함"
 
 msgctxt "#13171"
 msgid "Immediately"
@@ -4057,7 +4059,7 @@ msgstr "CPU 사용량:"
 
 msgctxt "#13274"
 msgid "Connected, but no DNS is available."
-msgstr "연결됨, 그러나 DNS 를 사용할수 없습니다."
+msgstr "연결됨, 그러나 DNS를 사용할 수 없습니다."
 
 msgctxt "#13275"
 msgid "Hard Disk"
@@ -4277,7 +4279,7 @@ msgstr "버튼 제거"
 
 msgctxt "#13340"
 msgid "Leave as is"
-msgstr "변경안함"
+msgstr "변경 안 함"
 
 msgctxt "#13341"
 msgid "Green"
@@ -4693,7 +4695,7 @@ msgstr "애플 리모트 오류"
 
 msgctxt "#13621"
 msgid "Apple Remote support could be enabled."
-msgstr "애플 리모트 지원을 사용할수 있습니다."
+msgstr "애플 리모트 지원을 사용할 수 있습니다."
 
 msgctxt "#14000"
 msgid "Stack"
@@ -4781,7 +4783,7 @@ msgstr "라이브러리"
 
 msgctxt "#14023"
 msgid "No TV"
-msgstr "TV 사용 안함"
+msgstr "TV 사용 안 함"
 
 msgctxt "#14024"
 msgid "Enter the nearest large town"
@@ -4989,7 +4991,7 @@ msgstr "파일 목록"
 
 msgctxt "#14082"
 msgid "Show EXIF picture information"
-msgstr "EXIF 사진 정보 보이기"
+msgstr "EXIF 사진 정보 보기"
 
 msgctxt "#14083"
 msgid "Use a fullscreen window rather than true fullscreen"
@@ -5133,7 +5135,7 @@ msgstr "Last.fm 비밀번호"
 
 msgctxt "#15204"
 msgid "Unable to handshake: sleeping..."
-msgstr "연결할수 없음: 응답없음..."
+msgstr "연결할 수 없음: 응답없음..."
 
 msgctxt "#15205"
 msgid "Please update XBMC"
@@ -5325,7 +5327,7 @@ msgstr "Last.fm 에서 목록을 검색중..."
 
 msgctxt "#15280"
 msgid "Can't retrieve list from Last.fm..."
-msgstr "Last.fm 에서 목록을 검색할수 없음..."
+msgstr "Last.fm 에서 목록을 검색할 수 없음..."
 
 msgctxt "#15281"
 msgid "Enter an artist name to find related ones"
@@ -5361,7 +5363,7 @@ msgstr "선호 트랙에 추가됨: '%s'."
 
 msgctxt "#15290"
 msgid "Could not add '%s' to your loved tracks."
-msgstr "'%s' 를 선호 트랙에 추가할수 없습니다."
+msgstr "'%s' 를 선호 트랙에 추가할 수 없습니다."
 
 msgctxt "#15291"
 msgid "Banned: '%s'."
@@ -5529,7 +5531,7 @@ msgstr "일치하는 노래가 라이브러리에 없습니다."
 
 msgctxt "#16032"
 msgid "Could not initialize database."
-msgstr "데이터베이스를 초기화 할수 없습니다."
+msgstr "데이터베이스를 초기화할 수 없습니다."
 
 msgctxt "#16033"
 msgid "Could not open database."
@@ -5997,19 +5999,19 @@ msgstr "바로가기 버튼 사용"
 
 msgctxt "#20082"
 msgid "Show programs in main menu"
-msgstr "메인메뉴에 프로그램 보이기"
+msgstr "메인메뉴에 프로그램 표시"
 
 msgctxt "#20083"
 msgid "Show music info"
-msgstr "음악 정보 보이기"
+msgstr "음악 정보 보기"
 
 msgctxt "#20084"
 msgid "Show weather info"
-msgstr "날씨 정보 보이기"
+msgstr "날씨 정보 보기"
 
 msgctxt "#20085"
 msgid "Show system info"
-msgstr "시스템 정보 보이기"
+msgstr "시스템 정보 보기"
 
 msgctxt "#20086"
 msgid "Show available disc space C: E: F:"
@@ -6065,7 +6067,7 @@ msgstr "앨범 정보 가져오기"
 
 msgctxt "#20099"
 msgid "Can't rip CD or track while playing from CD"
-msgstr "CD 재생중에는 CD나 트랙을 추출할수 없음"
+msgstr "CD 재생중에는 CD나 트랙을 추출할 수 없음"
 
 msgctxt "#20100"
 msgid "Master lock code and settings"
@@ -6217,7 +6219,7 @@ msgstr "장착된 메모리 유닛"
 
 msgctxt "#20138"
 msgid "Unable to mount memory unit"
-msgstr "메모리 유닛을 장착할수 없음"
+msgstr "메모리 유닛을 장착할 수 없음"
 
 msgctxt "#20139"
 msgid "In port %i, slot %i"
@@ -6245,31 +6247,31 @@ msgstr "시스템 종료 타이머"
 
 msgctxt "#20145"
 msgid "Shutdown interval (in minutes)"
-msgstr "시스템 종료 시간(분)"
+msgstr "종료 시간(분)"
 
 msgctxt "#20146"
 msgid "Started, shutdown in %im"
-msgstr "시작됨, %i분 후 시스템 종료"
+msgstr "시작됨, %i분 후 종료"
 
 msgctxt "#20147"
 msgid "Shutdown in 30 minutes"
-msgstr "30분후 시스템 종료"
+msgstr "30분후 종료"
 
 msgctxt "#20148"
 msgid "Shutdown in 60 minutes"
-msgstr "60분후 시스템 종료"
+msgstr "60분후 종료"
 
 msgctxt "#20149"
 msgid "Shutdown in 120 minutes"
-msgstr "120분후 시스템 종료"
+msgstr "120분후 종료"
 
 msgctxt "#20150"
 msgid "Custom shutdown timer"
-msgstr "사용자 지정 시스템 종료 타이머"
+msgstr "사용자 지정 종료 타이머"
 
 msgctxt "#20151"
 msgid "Cancel shutdown timer"
-msgstr "시스템 종료 타이머 취소"
+msgstr "종료 타이머 취소"
 
 msgctxt "#20152"
 msgid "Lock preferences for %s"
@@ -6369,7 +6371,7 @@ msgstr "UPnP 서버"
 
 msgctxt "#20176"
 msgid "Show video info"
-msgstr "비디오 정보 보이기"
+msgstr "비디오 정보 보기"
 
 msgctxt "#20177"
 msgid "Done"
@@ -6713,7 +6715,7 @@ msgstr "에피소드 상세정보 읽기"
 
 msgctxt "#20362"
 msgid "Remove episode from library"
-msgstr "라이브러리에서 에피소트 제거"
+msgstr "라이브러리에서 에피소드 제거"
 
 msgctxt "#20363"
 msgid "Remove TV show from library"
@@ -6741,7 +6743,7 @@ msgstr "제품 코드"
 
 msgctxt "#20369"
 msgid "Show plot for unwatched items"
-msgstr "미시청 항목의 줄거리 보이기"
+msgstr "미시청 항목의 줄거리 보기"
 
 msgctxt "#20370"
 msgid "* Hidden to prevent spoilers *"
@@ -6777,7 +6779,7 @@ msgstr "TV 쇼 정보 새로고침"
 
 msgctxt "#20378"
 msgid "Refresh info for all episodes?"
-msgstr "모든 에피소트 정보를 새로고치겠습니까?"
+msgstr "모든 에피소드 정보를 새로고치겠습니까?"
 
 msgctxt "#20379"
 msgid "Selected folder contains a single TV show"
@@ -6809,11 +6811,11 @@ msgstr "TV 쇼 연결 제거"
 
 msgctxt "#20386"
 msgid "Recently added movies"
-msgstr "최근 추가된 영화"
+msgstr "최근 추가한 영화"
 
 msgctxt "#20387"
 msgid "Recently added episodes"
-msgstr "최근 추가된 에피소드"
+msgstr "최근 추가한 에피소드"
 
 msgctxt "#20388"
 msgid "Studios"
@@ -6825,7 +6827,7 @@ msgstr "뮤직비디오"
 
 msgctxt "#20390"
 msgid "Recently added music videos"
-msgstr "최근 추가된 뮤직비디오"
+msgstr "최근 추가한 뮤직비디오"
 
 msgctxt "#20391"
 msgid "Music video"
@@ -6933,11 +6935,11 @@ msgstr "각본"
 
 msgctxt "#20419"
 msgid "Replace file names with library titles"
-msgstr "파일명을 라이브러리 제목으로 표시"
+msgstr "파일명 대신 라이브러리 제목 사용"
 
 msgctxt "#20420"
 msgid "Never"
-msgstr "안함"
+msgstr "안 함"
 
 msgctxt "#20421"
 msgid "If only one season"
@@ -6997,7 +6999,7 @@ msgstr "시리즈"
 
 msgctxt "#20435"
 msgid "Set movieset thumb"
-msgstr "시리즈영화 미리보기 설정"
+msgstr "시리즈 영화 미리보기 설정"
 
 msgctxt "#20436"
 msgid "Export actor thumbs?"
@@ -7049,11 +7051,11 @@ msgstr "무시하고 인터넷에서 새로고침 할까요?"
 
 msgctxt "#20448"
 msgid "Could not download information"
-msgstr "정보를 다운로드할수 없음"
+msgstr "정보를 다운로드할 수 없음"
 
 msgctxt "#20449"
 msgid "Unable to connect to remote server"
-msgstr "원격 서버에 연결할수 없음"
+msgstr "원격 서버에 연결할 수 없음"
 
 msgctxt "#20450"
 msgid "Would you like to continue scanning?"
@@ -7257,7 +7259,7 @@ msgstr "최소 대기"
 
 msgctxt "#21395"
 msgid "Unable to cache files bigger than 4GB"
-msgstr "4GB 이상의 파일을 캐시할수 없음"
+msgstr "4GB 이상의 파일을 캐시할 수 없음"
 
 msgctxt "#21396"
 msgid "Chapter"
@@ -7269,7 +7271,7 @@ msgstr "고화질 픽셀 셰이더 V2"
 
 msgctxt "#21398"
 msgid "Enable playlist at startup"
-msgstr "시작시 재생목록 사용"
+msgstr "시작할 때 재생목록 사용"
 
 msgctxt "#21399"
 msgid "Use tween animations"
@@ -7445,7 +7447,7 @@ msgstr "시청 횟수"
 
 msgctxt "#21442"
 msgid "Episode title"
-msgstr "에피소트 제목"
+msgstr "에피소드 제목"
 
 msgctxt "#21443"
 msgid "Video resolution"
@@ -7985,7 +7987,7 @@ msgstr "선택"
 
 msgctxt "#22081"
 msgid "Show Information"
-msgstr "정보 보이기"
+msgstr "정보 보기"
 
 msgctxt "#22082"
 msgid "More..."
@@ -8125,7 +8127,7 @@ msgstr "Weather.com (표준)"
 
 msgctxt "#24030"
 msgid "This Add-on can not be configured"
-msgstr "이 추가기능은 설정할수 없음"
+msgstr "이 추가기능은 설정할 수 없음"
 
 msgctxt "#24031"
 msgid "Error loading settings"
@@ -8277,7 +8279,7 @@ msgstr "설정이 필요함"
 
 msgctxt "#24073"
 msgid "Could not connect"
-msgstr "연결할수 없음"
+msgstr "연결할 수 없음"
 
 msgctxt "#24074"
 msgid "Needs to restart"
@@ -8629,7 +8631,7 @@ msgstr "이 버전의 %s 는 실행하려면"
 
 msgctxt "#33075"
 msgid "XBMC revision of %s or greater to run."
-msgstr "XBMC 리비전 %s 또는 이상이 필요합니다"
+msgstr "실행에 XBMC 리비전 %s 또는 이상이 필요합니다."
 
 msgctxt "#33076"
 msgid "Please update XBMC."
@@ -8760,7 +8762,7 @@ msgstr "GUI 사운드 재생"
 #: xbmc/settings/GUISettings.cpp
 msgctxt "#34121"
 msgid "Only when playback stopped"
-msgstr "재생을 정지했을 때만"
+msgstr "재생을 중지했을 때만"
 
 #. play GUI sounds
 #: xbmc/settings/GUISettings.cpp
@@ -8784,7 +8786,7 @@ msgstr "재생할 이전 항목이 없습니다"
 
 msgctxt "#34300"
 msgid "Failed to start zeroconf"
-msgstr "Zeroconf 시작 실패"
+msgstr "zeroconf 시작 실패"
 
 msgctxt "#34301"
 msgid "Is Apple's Bonjour Service installed? See log for more info."
@@ -8918,7 +8920,7 @@ msgstr "어댑터를 열 수 없습니다"
 
 msgctxt "#36007"
 msgid "Devices to power on when starting XBMC"
-msgstr "XBMC 시작시 TV 켜기"
+msgstr "XBMC를 시작할 때 TV 켜기"
 
 msgctxt "#36008"
 msgid "Devices to power off when stopping XBMC"
