@@ -489,8 +489,8 @@ double CSoftAEStream::GetCacheTime()
     return 0.0;
 
   double time;
-  time  = (double)(m_inputBuffer.Free() / m_format.m_frameSize) / (double)m_format.m_sampleRate;
-  time += (double)(m_waterLevel - m_refillBuffer)               / (double)AE.GetSampleRate();
+  time  = (double)(m_inputBuffer.Used() / m_format.m_frameSize) / (double)m_format.m_sampleRate;
+  time += (double)(m_waterLevel - m_framesBuffered)             / (double)AE.GetSampleRate();
   time += AE.GetCacheTime();
   return time;
 }
@@ -576,6 +576,7 @@ void CSoftAEStream::InternalFlush()
   /* reset our counts */
   m_framesBuffered = 0;
   m_refillBuffer   = m_waterLevel;
+  m_draining       = false;
 }
 
 double CSoftAEStream::GetResampleRatio()

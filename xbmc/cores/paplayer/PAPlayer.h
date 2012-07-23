@@ -29,8 +29,9 @@
 #include "threads/SharedSection.h"
 
 #include "cores/IAudioCallback.h"
-#include "cores/AudioEngine/AEFactory.h"
-#include "cores/AudioEngine/Interfaces/AEStream.h"
+#include "cores/AudioEngine/Utils/AEChannelInfo.h"
+
+class IAEStream;
 
 class CFileItem;
 class PAPlayer : public IPlayer, public CThread
@@ -73,6 +74,20 @@ public:
   virtual bool SkipNext();
 
   static bool HandlesType(const CStdString &type);
+
+  struct
+  {
+    char         m_codec[21];
+    int64_t      m_time;
+    int64_t      m_totalTime;
+    int          m_channelCount;
+    int          m_bitsPerSample;
+    int          m_sampleRate;
+    int          m_audioBitrate;
+    int          m_cacheLevel;
+    bool         m_canSeek;
+  } m_playerGUIData;
+
 protected:
   virtual void OnStartup() {}
   virtual void Process();
@@ -114,7 +129,8 @@ private:
   bool                m_isPlaying;
   bool                m_isPaused;
   bool                m_isFinished;          /* if there are no more songs in the queue */
-  unsigned int        m_crossFadeTime;       /* how long the crossfade is */
+  unsigned int        m_defaultCrossfadeMS;  /* how long the default crossfade is in ms */
+  unsigned int        m_upcomingCrossfadeMS; /* how long the upcoming crossfade is in ms */
   CEvent              m_startEvent;          /* event for playback start */
   StreamInfo*         m_currentStream;       /* the current playing stream */
   IAudioCallback*     m_audioCallback;       /* the viz audio callback */
@@ -133,7 +149,10 @@ private:
   bool PrepareStream(StreamInfo *si);
   bool ProcessStream(StreamInfo *si, double &delay, double &buffer);
   bool QueueData(StreamInfo *si);
-  void UpdateCrossFadingTime(const CFileItem& file);
   int64_t GetTotalTime64();
+  void UpdateCrossfadeTime(const CFileItem& file);
+  void UpdateStreamInfoPlayNextAtFrame(StreamInfo *si, unsigned int crossFadingTime);
+  void UpdateGUIData(StreamInfo *si);
+  int64_t GetTimeInternal();
 };
 

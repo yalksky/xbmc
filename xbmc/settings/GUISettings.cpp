@@ -451,7 +451,7 @@ void CGUISettings::Initialize()
   for(int layout = AE_CH_LAYOUT_2_0; layout < AE_CH_LAYOUT_MAX; ++layout)
     channelLayout.insert(make_pair(34100+layout, layout));
   AddInt(ao, "audiooutput.channellayout", 34100, AE_CH_LAYOUT_2_0, channelLayout, SPIN_CONTROL_TEXT);
-  AddBool(ao, "audiooutput.dontnormalizelevels", 346, true);
+  AddBool(ao, "audiooutput.normalizelevels", 346, false);
   AddBool(ao, "audiooutput.stereoupmix", 252, false);
 
 #if defined(TARGET_DARWIN_IOS)
@@ -519,6 +519,9 @@ void CGUISettings::Initialize()
   AddBool(NULL, "input.enablemouse", 21369, true);
 #else
   AddBool(in, "input.enablemouse", 21369, true);
+#endif
+#if defined(HAS_SDL_JOYSTICK)
+  AddBool(in, "input.enablejoystick", 35100, true);
 #endif
 
   CSettingsCategory* net = AddCategory(4, "network", 798);
@@ -774,8 +777,7 @@ void CGUISettings::Initialize()
 
   AddDefaultAddon(NULL, "scrapers.moviesdefault", 21413, "metadata.movie.daum.net", ADDON_SCRAPER_MOVIES);
   AddDefaultAddon(NULL, "scrapers.tvshowsdefault", 21414, "metadata.tvdb.com", ADDON_SCRAPER_TVSHOWS);
-  AddDefaultAddon(NULL, "scrapers.musicvideosdefault", 21415, "metadata.yahoomusic.com", ADDON_SCRAPER_MUSICVIDEOS);
-  AddBool(NULL, "scrapers.langfallback", 21416, false);
+  AddDefaultAddon(NULL, "scrapers.musicvideosdefault", 21415, "metadata.musicvideos.last.fm", ADDON_SCRAPER_MUSICVIDEOS);
 
   // service settings
   AddGroup(6, 14036);

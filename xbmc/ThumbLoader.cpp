@@ -31,7 +31,6 @@
 #include "guilib/GUIWindowManager.h"
 #include "TextureCache.h"
 #include "utils/log.h"
-#include "programs/Shortcut.h"
 #include "video/VideoInfoTag.h"
 #include "video/VideoDatabase.h"
 #include "cores/dvdplayer/DVDFileInfo.h"
@@ -110,6 +109,7 @@ bool CThumbExtractor::DoWork()
   ||  m_item.IsDVDImage()
   ||  m_item.IsDVDFile(false, true)
   ||  m_item.IsInternetStream()
+  ||  m_item.IsDiscStub()
   ||  m_item.IsPlayList())
     return false;
 
@@ -488,23 +488,7 @@ bool CProgramThumbLoader::FillThumb(CFileItem &item)
 CStdString CProgramThumbLoader::GetLocalThumb(const CFileItem &item)
 {
   // look for the thumb
-  if (item.IsShortCut())
-  {
-    CShortcut shortcut;
-    if ( shortcut.Create( item.GetPath() ) )
-    {
-      // use the shortcut's thumb
-      if (!shortcut.m_strThumb.IsEmpty())
-        return shortcut.m_strThumb;
-      else
-      {
-        CFileItem cut(shortcut.m_strPath,false);
-        if (FillThumb(cut))
-          return cut.GetThumbnailImage();
-      }
-    }
-  }
-  else if (item.m_bIsFolder)
+  if (item.m_bIsFolder)
   {
     CStdString folderThumb = item.GetFolderThumb();
     if (XFILE::CFile::Exists(folderThumb))

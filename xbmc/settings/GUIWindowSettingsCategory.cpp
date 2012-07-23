@@ -23,6 +23,7 @@
 #include "GUIUserMessages.h"
 #include "GUIWindowSettingsCategory.h"
 #include "Application.h"
+#include "ApplicationMessenger.h"
 #include "interfaces/Builtins.h"
 #include "input/KeyboardLayoutConfiguration.h"
 #include "filesystem/Directory.h"
@@ -92,6 +93,11 @@
 #include "Settings.h"
 #include "AdvancedSettings.h"
 #include "input/MouseStat.h"
+#if defined(TARGET_WINDOWS)
+#include "input/windows/WINJoystick.h"
+#elif defined(HAS_SDL_JOYSTICK)
+#include "input/SDLJoystick.h"
+#endif
 #include "guilib/LocalizeStrings.h"
 #include "LangInfo.h"
 #include "utils/StringUtils.h"
@@ -1388,6 +1394,12 @@ void CGUIWindowSettingsCategory::OnSettingChanged(CBaseSettingControl *pSettingC
   {
     g_Mouse.SetEnabled(g_guiSettings.GetBool("input.enablemouse"));
   }
+  else if (strSetting.Equals("input.enablejoystick"))
+  {
+#if defined(HAS_SDL_JOYSTICK)
+    g_Joystick.SetEnabled(g_guiSettings.GetBool("input.enablejoystick"));
+#endif
+  }
   else if (strSetting.Equals("videoscreen.screen"))
   {
     DisplayMode mode = g_guiSettings.GetInt("videoscreen.screen");
@@ -1598,7 +1610,7 @@ void CGUIWindowSettingsCategory::OnSettingChanged(CBaseSettingControl *pSettingC
     if (CGUIDialogYesNo::ShowAndGetInput(14038, 14039, 14040, -1, -1))
     {
       g_settings.Save();
-      g_application.getApplicationMessenger().RestartApp();
+      CApplicationMessenger::Get().RestartApp();
     }
   }
   else if (strSetting.Equals("services.upnpserver"))

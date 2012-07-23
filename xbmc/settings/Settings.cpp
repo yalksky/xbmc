@@ -56,6 +56,7 @@
 #include "input/MouseStat.h"
 #include "filesystem/File.h"
 #include "filesystem/DirectoryCache.h"
+#include "DatabaseManager.h"
 
 using namespace std;
 using namespace XFILE;
@@ -743,7 +744,7 @@ bool CSettings::LoadSettings(const CStdString& strSettingsFile)
 
   // Add the list of disc stub extensions (if any) to the list of video extensions
   if (!m_discStubExtensions.IsEmpty())
- 	g_settings.m_videoExtensions += "|" + m_discStubExtensions;
+    g_settings.m_videoExtensions += "|" + m_discStubExtensions;
 
   // Default players?
   CLog::Log(LOGNOTICE, "Default DVD Player: %s", g_advancedSettings.m_videoDefaultDVDPlayer.c_str());
@@ -949,6 +950,8 @@ bool CSettings::LoadProfile(unsigned int index)
 
     CButtonTranslator::GetInstance().Load(true);
     g_localizeStrings.Load("special://xbmc/language/", strLanguage);
+
+    CDatabaseManager::Get().Initialize();
 
     g_Mouse.SetEnabled(g_guiSettings.GetBool("input.enablemouse"));
 

@@ -22,11 +22,11 @@
 #include "threads/SingleLock.h"
 #include "utils/log.h"
 #include "DVDAudio.h"
-#include "Util.h"
 #include "DVDClock.h"
 #include "DVDCodecs/DVDCodecs.h"
 #include "DVDPlayerAudio.h"
 #include "cores/AudioEngine/AEFactory.h"
+#include "cores/AudioEngine/Interfaces/AEStream.h"
 #include "settings/Settings.h"
 
 using namespace std;

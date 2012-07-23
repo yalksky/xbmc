@@ -20,10 +20,7 @@
  */
 
 #include "system.h"
-#include "dialogs/GUIDialogSeekBar.h"
 #include "windows/GUIMediaWindow.h"
-#include "dialogs/GUIDialogFileBrowser.h"
-#include "settings/GUIDialogContentSettings.h"
 #include "dialogs/GUIDialogProgress.h"
 #include "Application.h"
 #include "Util.h"
@@ -37,7 +34,6 @@
 #ifdef HAS_LCD
 #include "utils/LCD.h"
 #endif
-#include "GUIPassword.h"
 #include "LangInfo.h"
 #include "utils/SystemInfo.h"
 #include "guilib/GUITextBox.h"
@@ -58,11 +54,10 @@
 #include "utils/CPUInfo.h"
 #include "utils/StringUtils.h"
 #include "utils/MathUtils.h"
+#include "utils/SeekHandler.h"
 
 // stuff for current song
-#include "music/tags/MusicInfoTagLoaderFactory.h"
 #include "music/MusicInfoLoader.h"
-#include "utils/LabelFormatter.h"
 
 #include "GUIUserMessages.h"
 #include "video/dialogs/GUIDialogVideoInfo.h"
@@ -74,7 +69,6 @@
 
 #include "addons/AddonManager.h"
 #include "interfaces/info/InfoBool.h"
-#include "TextureCache.h"
 #include "ThumbLoader.h"
 #include "cores/AudioEngine/Utils/AEUtil.h"
 
@@ -1731,11 +1725,8 @@ bool CGUIInfoManager::GetInt(int &value, int info, int contextWindow, const CGUI
             value = (int)(g_application.GetCachePercentage());
             break;
           case PLAYER_SEEKBAR:
-            {
-              CGUIDialogSeekBar *seekBar = (CGUIDialogSeekBar*)g_windowManager.GetWindow(WINDOW_DIALOG_SEEK_BAR);
-              value = seekBar ? (int)seekBar->GetPercentage() : 0;
-              break;
-            }
+            value = (int)g_application.GetSeekHandler()->GetPercent();
+            break;
           case PLAYER_CACHELEVEL:
             value = (int)(g_application.m_pPlayer->GetCacheLevel());
             break;
@@ -2128,7 +2119,7 @@ bool CGUIInfoManager::GetBool(int condition1, int contextWindow, const CGUIListI
     break;
     case PLAYER_SEEKBAR:
       {
-        CGUIDialogSeekBar *seekBar = (CGUIDialogSeekBar*)g_windowManager.GetWindow(WINDOW_DIALOG_SEEK_BAR);
+        CGUIDialog *seekBar = (CGUIDialog*)g_windowManager.GetWindow(WINDOW_DIALOG_SEEK_BAR);
         bReturn = seekBar ? seekBar->IsDialogRunning() : false;
       }
     break;
@@ -2736,12 +2727,7 @@ CStdString CGUIInfoManager::GetMultiInfoLabel(const GUIInfo &info, int contextWi
   }
   else if (info.m_info == PLAYER_SEEKTIME)
   {
-    TIME_FORMAT format = (TIME_FORMAT)info.GetData1();
-    if (format == TIME_FORMAT_GUESS && GetTotalPlayTime() >= 3600)
-      format = TIME_FORMAT_HH_MM_SS;
-    CGUIDialogSeekBar *seekBar = (CGUIDialogSeekBar*)g_windowManager.GetWindow(WINDOW_DIALOG_SEEK_BAR);
-    if (seekBar)
-      return seekBar->GetSeekTimeLabel(format);
+    return GetCurrentSeekTime((TIME_FORMAT)info.GetData1());
   }
   else if (info.m_info == PLAYER_SEEKOFFSET)
   {
@@ -3248,7 +3234,7 @@ CStdString CGUIInfoManager::GetMusicLabel(int item)
       CStdString strSampleRate = "";
       if (g_application.m_pPlayer->GetSampleRate() > 0)
       {
-        strSampleRate.Format("%i",g_application.m_pPlayer->GetSampleRate());
+        strSampleRate.Format("%i",g_application.m_pPlayer->GetSampleRate()/1000);
       }
       return strSampleRate;
     }
@@ -3491,6 +3477,14 @@ CStdString CGUIInfoManager::GetCurrentPlayTime(TIME_FORMAT format) const
   if (g_application.IsPlayingAudio() || g_application.IsPlayingVideo())
     return StringUtils::SecondsToTimeString((int)(GetPlayTime()/1000), format);
   return "";
+}
+
+CStdString CGUIInfoManager::GetCurrentSeekTime(TIME_FORMAT format) const
+{
+  if (format == TIME_FORMAT_GUESS && GetTotalPlayTime() >= 3600)
+    format = TIME_FORMAT_HH_MM_SS;
+  float time = GetTotalPlayTime() * g_application.GetSeekHandler()->GetPercent() * 0.01f;
+  return StringUtils::SecondsToTimeString((int)time, format);
 }
 
 int CGUIInfoManager::GetTotalPlayTime() const

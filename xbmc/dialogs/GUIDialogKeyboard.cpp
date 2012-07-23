@@ -31,9 +31,11 @@
 #include "GUIPassword.h"
 #include "utils/md5.h"
 #include "utils/TimeUtils.h"
-#include "Application.h"
+#include "ApplicationMessenger.h"
 #include "settings/AdvancedSettings.h"
 #include "guilib/LocalizeStrings.h"
+#include "interfaces/AnnouncementManager.h"
+#include "utils/CharsetConverter.h"
 
 // Symbol mapping (based on MS virtual keyboard - may need improving)
 static char symbol_map[37] = ")!@#$%^&*([]{}-_=+;:\'\",.<>/?\\|`~    ";
@@ -98,6 +100,11 @@ void CGUIDialogKeyboard::OnInitWindow()
   {
     SET_CONTROL_HIDDEN(CTL_LABEL_HEADING);
   }
+
+  CVariant data;
+  data["title"] = m_strHeading;
+  data["type"] = "keyboard";
+  ANNOUNCEMENT::CAnnouncementManager::Announce(ANNOUNCEMENT::Input, "xbmc", "OnInputRequested", data);
 }
 
 bool CGUIDialogKeyboard::OnAction(const CAction &action)
@@ -254,6 +261,14 @@ bool CGUIDialogKeyboard::OnMessage(CGUIMessage& message)
         break;
       }
     }
+    break;
+
+  case GUI_MSG_SET_TEXT:
+    SetText(message.GetLabel());
+
+    // close the dialog if requested
+    if (message.GetParam1() > 0)
+      OnOK();
     break;
   }
 
@@ -540,7 +555,7 @@ bool CGUIDialogKeyboard::ShowAndGetInput(CStdString& aTextString, const CVariant
   pKeyboard->SetText(aTextString);
   // do this using a thread message to avoid render() conflicts
   ThreadMessage tMsg = {TMSG_DIALOG_DOMODAL, WINDOW_DIALOG_KEYBOARD, g_windowManager.GetActiveWindow()};
-  g_application.getApplicationMessenger().SendMessage(tMsg, true);
+  CApplicationMessenger::Get().SendMessage(tMsg, true);
   pKeyboard->Close();
 
   // If have text - update this.
@@ -664,6 +679,8 @@ void CGUIDialogKeyboard::OnDeinitWindow(int nextWindowID)
   CGUIDialog::OnDeinitWindow(nextWindowID);
   // reset the heading (we don't always have this)
   m_strHeading = "";
+
+  ANNOUNCEMENT::CAnnouncementManager::Announce(ANNOUNCEMENT::Input, "xbmc", "OnInputFinished");
 }
 
 void CGUIDialogKeyboard::MoveCursor(int iAmount)

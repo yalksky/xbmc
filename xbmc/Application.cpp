@@ -104,6 +104,7 @@
 #include "settings/AdvancedSettings.h"
 #include "guilib/LocalizeStrings.h"
 #include "utils/CPUInfo.h"
+#include "utils/SeekHandler.h"
 
 #include "input/KeyboardStat.h"
 #include "input/XBMC_vkeys.h"
@@ -306,6 +307,7 @@
 #include "utils/SaveFileStateJob.h"
 #include "utils/AlarmClock.h"
 #include "utils/StringUtils.h"
+#include "DatabaseManager.h"
 
 #ifdef _LINUX
 #include "XHandle.h"
@@ -374,6 +376,7 @@ CApplication::CApplication(void)
   , m_progressTrackingItem(new CFileItem)
   , m_videoInfoScanner(new CVideoInfoScanner)
   , m_musicInfoScanner(new CMusicInfoScanner)
+  , m_seekHandler(new CSeekHandler)
 {
   TiXmlBase::SetCondenseWhiteSpace(false);
   m_iPlaySpeed = 1;
@@ -444,6 +447,7 @@ CApplication::~CApplication(void)
 #endif
 
   delete m_dpms;
+  delete m_seekHandler;
   delete m_pInertialScrollingHandler;
 }
 
@@ -453,7 +457,7 @@ bool CApplication::OnEvent(XBMC_Event& newEvent)
   {
     case XBMC_QUIT:
       if (!g_application.m_bStop)
-        g_application.getApplicationMessenger().Quit();
+        CApplicationMessenger::Get().Quit();
       break;
     case XBMC_KEYDOWN:
       g_application.OnKey(g_Keyboard.ProcessKeyDown(newEvent.key.keysym));
@@ -497,7 +501,7 @@ bool CApplication::OnEvent(XBMC_Event& newEvent)
       }
       break;
     case XBMC_USEREVENT:
-      g_application.getApplicationMessenger().UserEvent(newEvent.user.code);
+      CApplicationMessenger::Get().UserEvent(newEvent.user.code);
       break;
     case XBMC_APPCOMMAND:
       return g_application.OnAppCommand(newEvent.appcommand.action);
@@ -708,6 +712,9 @@ bool CApplication::Create()
   SetHardwareVolume(g_settings.m_fVolumeLevel);
   CAEFactory::SetMute     (g_settings.m_bMute);
   CAEFactory::SetSoundMode(g_guiSettings.GetInt("audiooutput.guisoundmode"));
+
+  // initialize the addon database (must be before the addon manager is init'd)
+  CDatabaseManager::Get().Initialize(true);
 
   // start-up Addons Framework
   // currently bails out if either cpluff Dll is unavailable or system dir can not be scanned
@@ -1153,6 +1160,9 @@ bool CApplication::Initialize()
   g_curlInterface.Load();
   g_curlInterface.Unload();
 
+  // initialize (and update as needed) our databases
+  CDatabaseManager::Get().Initialize();
+
 #ifdef HAS_WEB_SERVER
   CWebServer::RegisterRequestHandler(&m_httpImageHandler);
   CWebServer::RegisterRequestHandler(&m_httpVfsHandler);
@@ -1351,7 +1361,7 @@ bool CApplication::Initialize()
   ResetScreenSaver();
 
 #ifdef HAS_SDL_JOYSTICK
-  g_Joystick.Initialize();
+  g_Joystick.SetEnabled(g_guiSettings.GetBool("input.enablejoystick"));
 #endif
 
   return true;
@@ -1390,7 +1400,7 @@ bool CApplication::StartWebServer()
     }
 #ifdef HAS_HTTPAPI
     if (g_settings.m_HttpApiBroadcastLevel >= 1)
-      getApplicationMessenger().HttpApi("broadcastlevel; StartUp;1");
+      CApplicationMessenger::Get().HttpApi("broadcastlevel; StartUp;1");
 #endif
 
     return started;
@@ -2418,7 +2428,7 @@ bool CApplication::OnAction(const CAction &action)
   {
     CStdString tmp;
     tmp.Format("%i",action.GetID());
-    getApplicationMessenger().HttpApi("broadcastlevel; OnAction:"+tmp+";2");
+    CApplicationMessenger::Get().HttpApi("broadcastlevel; OnAction:"+tmp+";2");
   }
 #endif
 
@@ -2564,6 +2574,9 @@ bool CApplication::OnAction(const CAction &action)
   {
     if (IsPlaying() && m_pPlayer->SkipNext())
       return true;
+    
+    if (IsPaused())
+      m_pPlayer->Pause();
 
     g_playlistPlayer.PlayNext();
 
@@ -2705,9 +2718,7 @@ bool CApplication::OnAction(const CAction &action)
   if (IsPlaying() && action.GetAmount() && (action.GetID() == ACTION_ANALOG_SEEK_FORWARD || action.GetID() == ACTION_ANALOG_SEEK_BACK))
   {
     if (!m_pPlayer->CanSeek()) return false;
-    CGUIWindow *seekBar = g_windowManager.GetWindow(WINDOW_DIALOG_SEEK_BAR);
-    if (seekBar)
-      seekBar->OnAction(action);
+    m_seekHandler->Seek(action.GetID() == ACTION_ANALOG_SEEK_FORWARD, action.GetAmount(), action.GetRepeat());
     return true;
   }
   if (action.GetID() == ACTION_GUIPROFILE_BEGIN)
@@ -2800,7 +2811,10 @@ void CApplication::FrameMove(bool processEvents, bool processGUI)
     ProcessEventServer(frameTime);
     ProcessPeripherals(frameTime);
     if (processGUI)
+    {
       m_pInertialScrollingHandler->ProcessInertialScroll(frameTime);
+      m_seekHandler->Process();
+    }
   }
   if (processGUI)
   {
@@ -2815,8 +2829,9 @@ bool CApplication::ProcessGamepad(float frameTime)
 #ifdef HAS_SDL_JOYSTICK
   if (!m_AppFocused)
     return false;
+
   int iWin = GetActiveWindowID();
-  int bid;
+  int bid = 0;
   g_Joystick.Update();
   if (g_Joystick.GetButton(bid))
   {
@@ -2875,7 +2890,7 @@ bool CApplication::ProcessGamepad(float frameTime)
       g_Joystick.ResetAxis(abs(bid));
     }
   }
-  int position;
+  int position = 0;
   if (g_Joystick.GetHat(bid, position))
   {
     // reset Idle Timer
@@ -2894,7 +2909,7 @@ bool CApplication::ProcessGamepad(float frameTime)
 
     bid = position<<16|bid;
 
-    if (CButtonTranslator::GetInstance().TranslateJoystickString(iWin, g_Joystick.GetJoystick().c_str(), bid, JACTIVE_HAT, actionID, actionName, fullrange))
+    if (bid && CButtonTranslator::GetInstance().TranslateJoystickString(iWin, g_Joystick.GetJoystick().c_str(), bid, JACTIVE_HAT, actionID, actionName, fullrange))
     {
       CAction action(actionID, 1.0f, 0.0f, actionName);
       g_audioManager.PlayActionSound(action);
@@ -2996,7 +3011,7 @@ void  CApplication::CheckForTitleChange()
         CStdString msg=m_pXbmcHttp->GetOpenTag()+"MovieTitle:"+tagVal->m_strTitle+m_pXbmcHttp->GetCloseTag();
         if (m_prevMedia!=msg && g_settings.m_HttpApiBroadcastLevel>=1)
         {
-          getApplicationMessenger().HttpApi("broadcastlevel; MediaChanged:"+msg+";1");
+          CApplicationMessenger::Get().HttpApi("broadcastlevel; MediaChanged:"+msg+";1");
           m_prevMedia=msg;
         }
       }
@@ -3013,7 +3028,7 @@ void  CApplication::CheckForTitleChange()
           msg+=m_pXbmcHttp->GetOpenTag()+"AudioArtist:"+StringUtils::Join(tagVal->GetArtist(), g_advancedSettings.m_musicItemSeparator)+m_pXbmcHttp->GetCloseTag();
         if (m_prevMedia!=msg)
         {
-          getApplicationMessenger().HttpApi("broadcastlevel; MediaChanged:"+msg+";1");
+          CApplicationMessenger::Get().HttpApi("broadcastlevel; MediaChanged:"+msg+";1");
           m_prevMedia=msg;
         }
       }
@@ -3060,6 +3075,16 @@ bool CApplication::ProcessJsonRpcButtons()
 {
 #ifdef HAS_JSONRPC
   CKey tempKey(JSONRPC::CInputOperations::GetKey());
+  if (tempKey.GetButtonCode() == KEY_UNICODE && tempKey.GetUnicode() != 0)
+  {
+    XBMC_Event event = { 0 };
+    event.type = XBMC_KEYDOWN;
+    event.key.type = XBMC_KEYDOWN;
+    event.key.keysym.unicode = (uint16_t)tempKey.GetUnicode();
+    event.key.keysym.sym = (XBMCKey)tempKey.GetUnicode();
+
+    return OnEvent(event);
+  }
   if (tempKey.GetButtonCode() != KEY_INVALID)
   {
     tempKey.SetFromService(true);
@@ -3377,7 +3402,7 @@ void CApplication::Stop(int exitCode)
     if (m_pXbmcHttp)
     {
       if (g_settings.m_HttpApiBroadcastLevel >= 1)
-        getApplicationMessenger().HttpApi("broadcastlevel; ShutDown;1");
+        CApplicationMessenger::Get().HttpApi("broadcastlevel; ShutDown;1");
 
       m_pXbmcHttp->shuttingDown = true;
     }
@@ -3411,7 +3436,7 @@ void CApplication::Stop(int exitCode)
     if (m_videoInfoScanner->IsScanning())
       m_videoInfoScanner->Stop();
 
-    m_applicationMessenger.Cleanup();
+    CApplicationMessenger::Get().Cleanup();
 
     StopServices();
     //Sleep(5000);
@@ -4040,7 +4065,7 @@ void CApplication::OnPlayBackEnded()
 #ifdef HAS_HTTPAPI
   // Let's tell the outside world as well
   if (g_settings.m_HttpApiBroadcastLevel>=1)
-    getApplicationMessenger().HttpApi("broadcastlevel; OnPlayBackEnded;1");
+    CApplicationMessenger::Get().HttpApi("broadcastlevel; OnPlayBackEnded;1");
 #endif
 
   CVariant data(CVariant::VariantTypeObject);
@@ -4074,7 +4099,7 @@ void CApplication::OnPlayBackStarted()
 #ifdef HAS_HTTPAPI
   // Let's tell the outside world as well
   if (g_settings.m_HttpApiBroadcastLevel>=1)
-    getApplicationMessenger().HttpApi("broadcastlevel; OnPlayBackStarted;1");
+    CApplicationMessenger::Get().HttpApi("broadcastlevel; OnPlayBackStarted;1");
 #endif
 
   CGUIMessage msg(GUI_MSG_PLAYBACK_STARTED, 0, 0);
@@ -4092,7 +4117,7 @@ void CApplication::OnQueueNextItem()
 #ifdef HAS_HTTPAPI
   // Let's tell the outside world as well
   if (g_settings.m_HttpApiBroadcastLevel>=1)
-    getApplicationMessenger().HttpApi("broadcastlevel; OnQueueNextItem;1");
+    CApplicationMessenger::Get().HttpApi("broadcastlevel; OnQueueNextItem;1");
 #endif
 
   if(IsPlayingAudio())
@@ -4122,7 +4147,7 @@ void CApplication::OnPlayBackStopped()
 #ifdef HAS_HTTPAPI
   // Let's tell the outside world as well
   if (g_settings.m_HttpApiBroadcastLevel>=1)
-    getApplicationMessenger().HttpApi("broadcastlevel; OnPlayBackStopped;1");
+    CApplicationMessenger::Get().HttpApi("broadcastlevel; OnPlayBackStopped;1");
 #endif
 
   CVariant data(CVariant::VariantTypeObject);
@@ -4145,7 +4170,7 @@ void CApplication::OnPlayBackPaused()
 #ifdef HAS_HTTPAPI
   // Let's tell the outside world as well
   if (g_settings.m_HttpApiBroadcastLevel>=1)
-    getApplicationMessenger().HttpApi("broadcastlevel; OnPlayBackPaused;1");
+    CApplicationMessenger::Get().HttpApi("broadcastlevel; OnPlayBackPaused;1");
 #endif
 
   CVariant param;
@@ -4163,7 +4188,7 @@ void CApplication::OnPlayBackResumed()
 #ifdef HAS_HTTPAPI
   // Let's tell the outside world as well
   if (g_settings.m_HttpApiBroadcastLevel>=1)
-    getApplicationMessenger().HttpApi("broadcastlevel; OnPlayBackResumed;1");
+    CApplicationMessenger::Get().HttpApi("broadcastlevel; OnPlayBackResumed;1");
 #endif
 
   CVariant param;
@@ -4184,7 +4209,7 @@ void CApplication::OnPlayBackSpeedChanged(int iSpeed)
   {
     CStdString tmp;
     tmp.Format("broadcastlevel; OnPlayBackSpeedChanged:%i;1",iSpeed);
-    getApplicationMessenger().HttpApi(tmp);
+    CApplicationMessenger::Get().HttpApi(tmp);
   }
 #endif
 
@@ -4206,7 +4231,7 @@ void CApplication::OnPlayBackSeek(int iTime, int seekOffset)
   {
     CStdString tmp;
     tmp.Format("broadcastlevel; OnPlayBackSeek:%i;1",iTime);
-    getApplicationMessenger().HttpApi(tmp);
+    CApplicationMessenger::Get().HttpApi(tmp);
   }
 #endif
 
@@ -4231,7 +4256,7 @@ void CApplication::OnPlayBackSeekChapter(int iChapter)
   {
     CStdString tmp;
     tmp.Format("broadcastlevel; OnPlayBackSkeekChapter:%i;1",iChapter);
-    getApplicationMessenger().HttpApi(tmp);
+    CApplicationMessenger::Get().HttpApi(tmp);
   }
 #endif
 }
@@ -4521,7 +4546,7 @@ bool CApplication::WakeUpScreenSaver(bool bPowerOffKeyPressed /* = false */)
       if (g_windowManager.GetActiveWindow() == WINDOW_SCREENSAVER)
         g_windowManager.PreviousWindow();  // show the previous window
       if (g_windowManager.GetActiveWindow() == WINDOW_SLIDESHOW)
-        g_application.getApplicationMessenger().SendAction(CAction(ACTION_STOP), WINDOW_SLIDESHOW);
+        CApplicationMessenger::Get().SendAction(CAction(ACTION_STOP), WINDOW_SLIDESHOW);
     }
     return true;
   }
@@ -4634,7 +4659,7 @@ void CApplication::ActivateScreenSaver(bool forceType /*= false */)
       path = "special://profile/Thumbnails/Video/Fanart";
     if (type == "1")
       path = "special://profile/Thumbnails/Music/Fanart";
-    m_applicationMessenger.PictureSlideShow(path, true, type != "2");
+    CApplicationMessenger::Get().PictureSlideShow(path, true, type != "2");
   }
   else if (m_screenSaver->ID() == "screensaver.xbmc.builtin.dim")
     return;
@@ -4672,7 +4697,7 @@ void CApplication::CheckShutdown()
     m_shutdownTimer.Stop();
 
     // Sleep the box
-    getApplicationMessenger().Shutdown();
+    CApplicationMessenger::Get().Shutdown();
   }
 }
 
@@ -4703,6 +4728,9 @@ bool CApplication::OnMessage(CGUIMessage& message)
 #ifdef TARGET_DARWIN
       DarwinSetScheduling(message.GetMessage());
 #endif
+      // reset the seek handler
+      m_seekHandler->Reset();
+
       // Update our infoManager with the new details etc.
       if (m_nextPlaylistItem >= 0)
       { // we've started a previously queued item
@@ -4860,7 +4888,8 @@ bool CApplication::OnMessage(CGUIMessage& message)
         g_windowManager.PreviousWindow();
       }
 
-      if (IsEnableTestMode()) g_application.getApplicationMessenger().Quit();
+      if (IsEnableTestMode())
+        CApplicationMessenger::Get().Quit();
       return true;
     }
     break;
@@ -4932,7 +4961,7 @@ void CApplication::Process()
 
   // process messages which have to be send to the gui
   // (this can only be done after g_windowManager.Render())
-  m_applicationMessenger.ProcessWindowMessages();
+  CApplicationMessenger::Get().ProcessWindowMessages();
 
 #ifdef HAS_PYTHON
   // process any Python scripts
@@ -4940,7 +4969,7 @@ void CApplication::Process()
 #endif
 
   // process messages, even if a movie is playing
-  m_applicationMessenger.ProcessMessages();
+  CApplicationMessenger::Get().ProcessMessages();
   if (g_application.m_bStop) return; //we're done, everything has been unloaded
 
   // check how far we are through playing the current item
@@ -5394,7 +5423,7 @@ void CApplication::SeekTime( double dTime )
             item.m_lStartOffset = (long)((dTime - startOfNewFile) * 75.0);
             // don't just call "PlayFile" here, as we are quite likely called from the
             // player thread, so we won't be able to delete ourselves.
-            m_applicationMessenger.PlayFile(item, true);
+            CApplicationMessenger::Get().PlayFile(item, true);
           }
           return;
         }
@@ -5409,6 +5438,13 @@ float CApplication::GetPercentage() const
 {
   if (IsPlaying() && m_pPlayer)
   {
+    if (m_pPlayer->GetTotalTime() == 0 && IsPlayingAudio() && m_itemCurrentFile->HasMusicInfoTag())
+    {
+      const CMusicInfoTag& tag = *m_itemCurrentFile->GetMusicInfoTag();
+      if (tag.GetDuration() > 0)
+        return (float)(GetTime() / tag.GetDuration() * 100);
+    }
+
     if (m_itemCurrentFile->IsStack() && m_currentStack->Size() > 0)
       return (float)(GetTime() / GetTotalTime() * 100);
     else
@@ -5560,12 +5596,20 @@ void CApplication::StartVideoScan(const CStdString &strDirectory, bool scanAll)
   m_videoInfoScanner->Start(strDirectory,scanAll);
 }
 
-void CApplication::StartMusicScan(const CStdString &strDirectory)
+void CApplication::StartMusicScan(const CStdString &strDirectory, int flags)
 {
   if (m_musicInfoScanner->IsScanning())
     return;
 
-  if (!g_guiSettings.GetBool("musiclibrary.backgroundupdate"))
+  if (!flags)
+  { // setup default flags
+    if (g_guiSettings.GetBool("musiclibrary.downloadinfo"))
+      flags |= CMusicInfoScanner::SCAN_ONLINE;
+    if (g_guiSettings.GetBool("musiclibrary.backgroundupdate"))
+      flags |= CMusicInfoScanner::SCAN_BACKGROUND;
+  }
+
+  if (!(flags & CMusicInfoScanner::SCAN_BACKGROUND))
   {
     CGUIDialogMusicScan *musicScan = (CGUIDialogMusicScan *)g_windowManager.GetWindow(WINDOW_DIALOG_MUSIC_SCAN);
     if (musicScan)
@@ -5575,7 +5619,7 @@ void CApplication::StartMusicScan(const CStdString &strDirectory)
     }
   }
   SaveMusicScanSettings();
-  m_musicInfoScanner->Start(strDirectory);
+  m_musicInfoScanner->Start(strDirectory, flags);
 }
 
 void CApplication::StartMusicAlbumScan(const CStdString& strDirectory,
@@ -5716,11 +5760,6 @@ bool CApplication::AlwaysProcess(const CAction& action)
   }
 
   return false;
-}
-
-CApplicationMessenger& CApplication::getApplicationMessenger()
-{
-   return m_applicationMessenger;
 }
 
 bool CApplication::IsCurrentThread() const

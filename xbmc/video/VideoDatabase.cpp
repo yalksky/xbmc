@@ -321,6 +321,16 @@ bool CVideoDatabase::CreateTables()
     m_pDS->exec("CREATE TRIGGER delete_set AFTER DELETE ON sets FOR EACH ROW BEGIN DELETE FROM art WHERE media_id=old.idSet AND media_type='set'; END");
     m_pDS->exec("CREATE TRIGGER delete_person AFTER DELETE ON actors FOR EACH ROW BEGIN DELETE FROM art WHERE media_id=old.idActor AND media_type IN ('actor','artist','writer','director'); END");
 
+    CLog::Log(LOGINFO, "create tag table");
+    m_pDS->exec("CREATE TABLE tag (idTag integer primary key, strTag text)");
+    m_pDS->exec("CREATE UNIQUE INDEX ix_tag_1 ON tag (strTag(255))");
+
+    CLog::Log(LOGINFO, "create taglinks table");
+    m_pDS->exec("CREATE TABLE taglinks (idTag integer, idMedia integer, media_type TEXT)");
+    m_pDS->exec("CREATE UNIQUE INDEX ix_taglinks_1 ON taglinks (idTag, media_type(20), idMedia)");
+    m_pDS->exec("CREATE UNIQUE INDEX ix_taglinks_2 ON taglinks (idMedia, media_type(20), idTag)");
+    m_pDS->exec("CREATE INDEX ix_taglinks_3 ON taglinks (media_type(20))");
+
     // we create views last to ensure all indexes are rolled in
     CreateViews();
   }
@@ -719,14 +729,14 @@ void CVideoDatabase::UpdateFileDateAdded(int idFile, const CStdString& strFileNa
     {
       // Let's try to get the modification datetime
       struct __stat64 buffer;
-      if (CFile::Stat(file, &buffer) == 0)
+      if (CFile::Stat(file, &buffer) == 0 && (buffer.st_mtime != 0 || buffer.st_ctime !=0))
       {
         time_t now = time(NULL);
         time_t addedTime;
         // Prefer the modification time if it's valid
         if (g_advancedSettings.m_iVideoLibraryDateAdded == 1)
         {
-          if ((time_t)buffer.st_mtime <= now)
+          if (buffer.st_mtime != 0 && (time_t)buffer.st_mtime <= now)
             addedTime = (time_t)buffer.st_mtime;
           else
             addedTime = (time_t)buffer.st_ctime;
@@ -1240,7 +1250,7 @@ int CVideoDatabase::AddToTable(const CStdString& table, const CStdString& firstF
     {
       m_pDS->close();
       // doesnt exists, add it
-      strSQL = PrepareSQL("insert into %s (%s, %s) values( NULL, '%s')", table.c_str(), firstField.c_str(), secondField.c_str(), value.c_str());
+      strSQL = PrepareSQL("insert into %s (%s, %s) values(NULL, '%s')", table.c_str(), firstField.c_str(), secondField.c_str(), value.c_str());      
       m_pDS->exec(strSQL.c_str());
       int id = (int)m_pDS->lastinsertid();
       return id;
@@ -1263,6 +1273,14 @@ int CVideoDatabase::AddToTable(const CStdString& table, const CStdString& firstF
 int CVideoDatabase::AddSet(const CStdString& strSet)
 {
   return AddToTable("sets", "idSet", "strSet", strSet);
+}
+
+int CVideoDatabase::AddTag(const std::string& tag)
+{
+  if (tag.empty())
+    return -1;
+
+  return AddToTable("tag", "idTag", "strTag", tag);
 }
 
 int CVideoDatabase::AddGenre(const CStdString& strGenre)
@@ -1346,22 +1364,45 @@ void CVideoDatabase::AddLinkToActor(const char *table, int actorID, const char *
   }
 }
 
-void CVideoDatabase::AddToLinkTable(const char *table, const char *firstField, int firstID, const char *secondField, int secondID)
+void CVideoDatabase::AddToLinkTable(const char *table, const char *firstField, int firstID, const char *secondField, int secondID, const char *typeField /* = NULL */, const char *type /* = NULL */)
 {
   try
   {
     if (NULL == m_pDB.get()) return ;
     if (NULL == m_pDS.get()) return ;
 
-    CStdString strSQL=PrepareSQL("select * from %s where %s=%i and %s=%i", table, firstField, firstID, secondField, secondID);
+    CStdString strSQL = PrepareSQL("select * from %s where %s=%i and %s=%i", table, firstField, firstID, secondField, secondID);
+    if (typeField != NULL && type != NULL)
+      strSQL += PrepareSQL(" and %s='%s'", typeField, type);
     m_pDS->query(strSQL.c_str());
     if (m_pDS->num_rows() == 0)
     {
       // doesnt exists, add it
-      strSQL=PrepareSQL("insert into %s (%s,%s) values(%i,%i)", table, firstField, secondField, firstID, secondID);
+      if (typeField == NULL || type == NULL)
+        strSQL = PrepareSQL("insert into %s (%s,%s) values(%i,%i)", table, firstField, secondField, firstID, secondID);
+      else
+        strSQL = PrepareSQL("insert into %s (%s,%s,%s) values(%i,%i,'%s')", table, firstField, secondField, typeField, firstID, secondID, type);
       m_pDS->exec(strSQL.c_str());
     }
     m_pDS->close();
+  }
+  catch (...)
+  {
+    CLog::Log(LOGERROR, "%s failed", __FUNCTION__);
+  }
+}
+
+void CVideoDatabase::RemoveFromLinkTable(const char *table, const char *firstField, int firstID, const char *secondField, int secondID, const char *typeField /* = NULL */, const char *type /* = NULL */)
+{
+  try
+  {
+    if (NULL == m_pDB.get()) return ;
+    if (NULL == m_pDS.get()) return ;
+
+    CStdString strSQL = PrepareSQL("DELETE FROM %s WHERE %s = %i AND %s = %i", table, firstField, firstID, secondField, secondID);
+    if (typeField != NULL && type != NULL)
+      strSQL += PrepareSQL(" AND %s='%s'", typeField, type);
+    m_pDS->exec(strSQL.c_str());
   }
   catch (...)
   {
@@ -1373,6 +1414,22 @@ void CVideoDatabase::AddToLinkTable(const char *table, const char *firstField, i
 void CVideoDatabase::AddSetToMovie(int idMovie, int idSet)
 {
   AddToLinkTable("setlinkmovie", "idSet", idSet, "idMovie", idMovie);
+}
+//****Tags****
+void CVideoDatabase::AddTagToItem(int idMovie, int idTag, const std::string &type)
+{
+  if (type.empty())
+    return;
+
+  AddToLinkTable("taglinks", "idTag", idTag, "idMedia", idMovie, "media_type", type.c_str());
+}
+
+void CVideoDatabase::RemoveTagFromItem(int idMovie, int idTag, const std::string &type)
+{
+  if (type.empty())
+    return;
+
+  RemoveFromLinkTable("taglinks", "idTag", idTag, "idMedia", idMovie, "media_type", type.c_str());
 }
 
 //****Actors****
@@ -1896,6 +1953,13 @@ int CVideoDatabase::SetDetailsForMovie(const CStdString& strFilenameAndPath, con
       if (!GetArtForItem(idSet, "set", setArt))
         SetArtForItem(idSet, "set", artwork);
       AddSetToMovie(idMovie, idSet);
+    }
+
+    // add tags...
+    for (unsigned int i = 0; i < details.m_tags.size(); i++)
+    {
+      int idTag = AddTag(details.m_tags[i]);
+      AddTagToItem(idMovie, idTag, "movie");
     }
 
     // add countries...
@@ -2838,6 +2902,31 @@ void CVideoDatabase::DeleteSet(int idSet)
   }
 }
 
+void CVideoDatabase::DeleteTag(int idTag, const std::string &mediaType)
+{
+  try
+  {
+    if (m_pDB.get() == NULL || m_pDS.get() == NULL)
+      return;
+
+    CStdString strSQL;
+    strSQL = PrepareSQL("DELETE FROM taglinks WHERE idTag = %i AND media_type = '%s'", idTag, mediaType.c_str());
+    m_pDS->exec(strSQL.c_str());
+
+    // check if the tag is used for another media type as well before deleting it completely
+    strSQL = PrepareSQL("SELECT 1 FROM taglinks WHERE idTag = %i", idTag);
+    if (RunQuery(strSQL) <= 0)
+    {
+      strSQL = PrepareSQL("DELETE FROM tag WHERE idTag = %i", idTag);
+      m_pDS->exec(strSQL.c_str());
+    }
+  }
+  catch (...)
+  {
+    CLog::Log(LOGERROR, "%s (%i) failed", __FUNCTION__, idTag);
+  }
+}
+
 void CVideoDatabase::GetDetailsFromDB(auto_ptr<Dataset> &pDS, int min, int max, const SDbTableOffsets *offsets, CVideoInfoTag &details, int idxOffset)
 {
   GetDetailsFromDB(pDS->get_sql_record(), min, max, offsets, details, idxOffset);
@@ -3055,6 +3144,15 @@ CVideoInfoTag CVideoDatabase::GetDetailsForMovie(const dbiplus::sql_record* cons
       details.m_set.push_back(m_pDS2->fv("sets.strSet").get_asString());
       details.m_setId.push_back(m_pDS2->fv("sets.idSet").get_asInt());
 
+      m_pDS2->next();
+    }
+
+    // get tags
+    strSQL = PrepareSQL("SELECT tag.strTag FROM tag, taglinks WHERE taglinks.idMedia = %i AND taglinks.media_type = 'movie' AND taglinks.idTag = tag.idTag ORDER BY tag.idTag", idMovie);
+    m_pDS2->query(strSQL.c_str());
+    while (!m_pDS2->eof())
+    {
+      details.m_tags.push_back(m_pDS2->fv("tag.strTag").get_asString());
       m_pDS2->next();
     }
 
@@ -3900,6 +3998,16 @@ bool CVideoDatabase::UpdateOldVersion(int iVersion)
     m_pDS->exec("CREATE INDEX ix_episode_show1 on episode(idEpisode,idShow)");
     m_pDS->exec("CREATE INDEX ix_episode_show2 on episode(idShow,idEpisode)");
   }
+  if (iVersion < 67)
+  {
+    m_pDS->exec("CREATE TABLE tag (idTag integer primary key, strTag text)");
+    m_pDS->exec("CREATE UNIQUE INDEX ix_tag_1 ON tag (strTag(255))");
+
+    m_pDS->exec("CREATE TABLE taglinks (idTag integer, idMedia integer, media_type TEXT)");
+    m_pDS->exec("CREATE UNIQUE INDEX ix_taglinks_1 ON taglinks (idTag, media_type(20), idMedia)");
+    m_pDS->exec("CREATE UNIQUE INDEX ix_taglinks_2 ON taglinks (idMedia, media_type(20), idTag)");
+    m_pDS->exec("CREATE INDEX ix_taglinks_3 ON taglinks (media_type(20))");
+  }
   // always recreate the view after any table change
   CreateViews();
   return true;
@@ -4342,6 +4450,54 @@ bool CVideoDatabase::GetNavCommon(const CStdString& strBaseDir, CFileItemList& i
       }
       m_pDS->close();
     }
+    return true;
+  }
+  catch (...)
+  {
+    CLog::Log(LOGERROR, "%s failed", __FUNCTION__);
+  }
+  return false;
+}
+
+bool CVideoDatabase::GetTagsNav(const CStdString& strBaseDir, CFileItemList& items, int idContent)
+{
+  CStdString mediaType;
+  if (idContent == VIDEODB_CONTENT_MOVIES)
+    mediaType = "movie";
+  else
+    return false;
+
+  try
+  {
+    if (NULL == m_pDB.get()) return false;
+    if (NULL == m_pDS.get()) return false;
+
+    int iRowsFound = RunQuery(PrepareSQL("SELECT tag.idTag, tag.strTag FROM taglinks JOIN tag ON tag.idTag = taglinks.idTag WHERE taglinks.media_type = '%s' GROUP BY taglinks.idTag", mediaType.c_str()));
+    if (iRowsFound <= 0)
+      return iRowsFound == 0;
+
+    while (!m_pDS->eof())
+    {
+      int idTag = m_pDS->fv(0).get_asInt();
+
+      CFileItemPtr pItem(new CFileItem(m_pDS->fv(1).get_asString()));
+      pItem->m_bIsFolder = true;
+      pItem->GetVideoInfoTag()->m_iDbId = idTag;
+      pItem->GetVideoInfoTag()->m_type = "tag";
+
+      CStdString strDir; strDir.Format("%ld/", idTag);
+      pItem->SetPath(strBaseDir + strDir);
+
+      if (!items.Contains(pItem->GetPath()))
+      {
+        pItem->SetLabelPreformated(true);
+        items.Add(pItem);
+      }
+
+      m_pDS->next();
+    }
+    m_pDS->close();
+
     return true;
   }
   catch (...)
@@ -5149,7 +5305,9 @@ bool CVideoDatabase::GetSortedVideos(MediaType mediaType, const CStdString& strB
   return success;
 }
 
-bool CVideoDatabase::GetMoviesNav(const CStdString& strBaseDir, CFileItemList& items, int idGenre, int idYear, int idActor, int idDirector, int idStudio, int idCountry, int idSet)
+bool CVideoDatabase::GetMoviesNav(const CStdString& strBaseDir, CFileItemList& items,
+                                  int idGenre /* = -1 */, int idYear /* = -1 */, int idActor /* = -1 */, int idDirector /* = -1 */,
+                                  int idStudio /* = -1 */, int idCountry /* = -1 */, int idSet /* = -1 */, int idTag /* = -1 */)
 {
   Filter filter;
   if (idGenre != -1)
@@ -5184,6 +5342,11 @@ bool CVideoDatabase::GetMoviesNav(const CStdString& strBaseDir, CFileItemList& i
     filter.join  = PrepareSQL("join setlinkmovie on setlinkmovie.idMovie=movieview.idMovie");
     filter.where = PrepareSQL("setlinkmovie.idSet=%u",idSet);
   }
+  else if (idTag != -1)
+  {
+    filter.join  = PrepareSQL("join taglinks on taglinks.idMedia = movieview.idMovie AND taglinks.media_type = 'movie'");
+    filter.where = PrepareSQL("taglinks.idTag = %u", idTag);
+  }
 
   return GetMoviesByWhere(strBaseDir, filter, items, idSet == -1);
 }
@@ -5200,7 +5363,8 @@ bool CVideoDatabase::GetMoviesByWhere(const CStdString& strBaseDir, const Filter
 
     int total = -1;
 
-    CStdString strSQL;
+    CStdString strSQL = "select %s from movieview ";
+    CStdString strSQLExtra;
     CFileItemList setItems;
     if (fetchSets && g_guiSettings.GetBool("videolibrary.groupmoviesets"))
     {
@@ -5225,38 +5389,38 @@ bool CVideoDatabase::GetMoviesByWhere(const CStdString& strBaseDir, const Filter
         movieSetsWhere += "))";
       }
       if (!filter.join.empty())
-        strSQL += filter.join;
+        strSQLExtra += filter.join;
       if (!filter.where.empty())
       {
-        strSQL += " WHERE (" + filter.where + ")";
+        strSQLExtra += " WHERE (" + filter.where + ")";
         if (!movieSetsWhere.empty())
-          strSQL += " AND " + movieSetsWhere;
+          strSQLExtra += " AND " + movieSetsWhere;
       }
       else if (!movieSetsWhere.empty())
-        strSQL += " WHERE " + movieSetsWhere;
+        strSQLExtra += " WHERE " + movieSetsWhere;
     }
     else
     {
       if (!filter.join.empty())
-        strSQL += filter.join;
+        strSQLExtra += filter.join;
       if (!filter.where.empty())
-        strSQL += " WHERE " + filter.where;
+        strSQLExtra += " WHERE " + filter.where;
     }
 
     if (!filter.group.empty())
-      strSQL += " GROUP BY " + filter.group;
+      strSQLExtra += " GROUP BY " + filter.group;
     if (filter.order.size())
-      strSQL += " ORDER BY " + filter.order;
+      strSQLExtra += " ORDER BY " + filter.order;
     if (!filter.limit.empty())
-      strSQL += " LIMIT " + filter.limit;
+      strSQLExtra += " LIMIT " + filter.limit;
     else if (sortDescription.sortBy == SortByNone &&
             (sortDescription.limitStart > 0 || sortDescription.limitEnd > 0))
     {
-      total = (int)strtol(GetSingleValue(PrepareSQL(strSQL.c_str(), "COUNT(1)"), m_pDS).c_str(), NULL, 10);
-      strSQL += DatabaseUtils::BuildLimitClause(sortDescription.limitEnd, sortDescription.limitStart);
+      total = (int)strtol(GetSingleValue(PrepareSQL(strSQL, "COUNT(1)") + strSQLExtra, m_pDS).c_str(), NULL, 10);
+      strSQLExtra += DatabaseUtils::BuildLimitClause(sortDescription.limitEnd, sortDescription.limitStart);
     }
 
-    strSQL = PrepareSQL("select %s from movieview ", !filter.fields.empty() ? filter.fields.c_str() : "*") + strSQL;
+    strSQL = PrepareSQL(strSQL, !filter.fields.empty() ? filter.fields.c_str() : "*") + strSQLExtra;
 
     int iRowsFound = RunQuery(strSQL);
     if (iRowsFound <= 0 && setItems.Size() == 0)
@@ -5362,26 +5526,27 @@ bool CVideoDatabase::GetTvShowsByWhere(const CStdString& strBaseDir, const Filte
 
     int total = -1;
 
-    CStdString strSQL;
+    CStdString strSQL = "SELECT %s FROM tvshowview ";
+    CStdString strSQLExtra;
     if (!filter.join.empty())
-      strSQL += filter.join;
+      strSQLExtra += filter.join;
     if (!filter.where.empty())
-      strSQL += " WHERE " + filter.where;
+      strSQLExtra += " WHERE " + filter.where;
     if (!filter.group.empty())
-      strSQL += " GROUP BY " + filter.group;
+      strSQLExtra += " GROUP BY " + filter.group;
     if (!filter.order.empty())
-      strSQL += " ORDER BY " + filter.order;
+      strSQLExtra += " ORDER BY " + filter.order;
     if (!filter.limit.empty())
-      strSQL += " LIMIT " + filter.limit;
+      strSQLExtra += " LIMIT " + filter.limit;
     // Apply the limiting directly here if there's no special sorting but limiting
     else if (sortDescription.sortBy == SortByNone &&
             (sortDescription.limitStart > 0 || sortDescription.limitEnd > 0))
     {
-      total = (int)strtol(GetSingleValue(PrepareSQL(strSQL.c_str(), "COUNT(1)"), m_pDS).c_str(), NULL, 10);
-      strSQL += DatabaseUtils::BuildLimitClause(sortDescription.limitEnd, sortDescription.limitStart);
+      total = (int)strtol(GetSingleValue(PrepareSQL(strSQL, "COUNT(1)") + strSQLExtra, m_pDS).c_str(), NULL, 10);
+      strSQLExtra += DatabaseUtils::BuildLimitClause(sortDescription.limitEnd, sortDescription.limitStart);
     }
 
-    strSQL = PrepareSQL("SELECT %s FROM tvshowview ", !filter.fields.empty() ? filter.fields.c_str() : "*") + strSQL;
+    strSQL = PrepareSQL(strSQL, !filter.fields.empty() ? filter.fields.c_str() : "*") + strSQLExtra;
 
     int iRowsFound = RunQuery(strSQL);
     if (iRowsFound <= 0)
@@ -5687,26 +5852,27 @@ bool CVideoDatabase::GetEpisodesByWhere(const CStdString& strBaseDir, const Filt
 
     int total = -1;
 
-    CStdString strSQL;
+    CStdString strSQL = "select %s from episodeview ";
+    CStdString strSQLExtra;
     if (!filter.join.empty())
-      strSQL += filter.join;
+      strSQLExtra += filter.join;
     if (!filter.where.empty())
-      strSQL += " WHERE " + filter.where;
+      strSQLExtra += " WHERE " + filter.where;
     if (!filter.group.empty())
-      strSQL += " GROUP BY " + filter.group;
+      strSQLExtra += " GROUP BY " + filter.group;
     if (!filter.order.empty())
-      strSQL += " ORDER BY " + filter.order;
+      strSQLExtra += " ORDER BY " + filter.order;
     if (!filter.limit.empty())
-      strSQL += " LIMIT " + filter.limit;
+      strSQLExtra += " LIMIT " + filter.limit;
     // Apply the limiting directly here if there's no special sorting but limiting
     else if (sortDescription.sortBy == SortByNone &&
             (sortDescription.limitStart > 0 || sortDescription.limitEnd > 0))
     {
-      total = (int)strtol(GetSingleValue(PrepareSQL(strSQL.c_str(), "COUNT(1)"), m_pDS).c_str(), NULL, 10);
-      strSQL += DatabaseUtils::BuildLimitClause(sortDescription.limitEnd, sortDescription.limitStart);
+      total = (int)strtol(GetSingleValue(PrepareSQL(strSQL, "COUNT(1)") + strSQLExtra, m_pDS).c_str(), NULL, 10);
+      strSQLExtra += DatabaseUtils::BuildLimitClause(sortDescription.limitEnd, sortDescription.limitStart);
     }
 
-    strSQL = PrepareSQL("select %s from episodeview ", !filter.fields.empty() ? filter.fields.c_str() : "*") + strSQL;
+    strSQL = PrepareSQL(strSQL, !filter.fields.empty() ? filter.fields.c_str() : "*") + strSQLExtra;
 
     int iRowsFound = RunQuery(strSQL);
     if (iRowsFound <= 0)
@@ -5840,6 +6006,11 @@ CStdString CVideoDatabase::GetCountryById(int id)
 CStdString CVideoDatabase::GetSetById(int id)
 {
   return GetSingleValue("sets", "strSet", PrepareSQL("idSet=%i", id));
+}
+
+CStdString CVideoDatabase::GetTagById(int id)
+{
+  return GetSingleValue("tag", "strTag", PrepareSQL("idTag = %i", id));
 }
 
 CStdString CVideoDatabase::GetPersonById(int id)
@@ -6546,26 +6717,27 @@ bool CVideoDatabase::GetMusicVideosByWhere(const CStdString &baseDir, const Filt
 
     int total = -1;
 
-    CStdString strSQL;
+    CStdString strSQL = "select %s from musicvideoview ";
+    CStdString strSQLExtra;
     if (!filter.join.empty())
-      strSQL += filter.join;
+      strSQLExtra += filter.join;
     if (!filter.where.empty())
-      strSQL += " WHERE " + filter.where;
+      strSQLExtra += " WHERE " + filter.where;
     if (!filter.group.empty())
-      strSQL += PrepareSQL(" GROUP BY " + filter.group);
+      strSQLExtra += PrepareSQL(" GROUP BY " + filter.group);
     if (!filter.order.empty())
-      strSQL += " ORDER BY " + filter.order;
+      strSQLExtra += " ORDER BY " + filter.order;
     if (!filter.limit.empty())
-      strSQL += PrepareSQL(" LIMIT " + filter.limit);
+      strSQLExtra += PrepareSQL(" LIMIT " + filter.limit);
     // Apply the limiting directly here if there's no special sorting but limiting
     else if (sortDescription.sortBy == SortByNone &&
             (sortDescription.limitStart > 0 || sortDescription.limitEnd > 0))
     {
-      total = (int)strtol(GetSingleValue(PrepareSQL(strSQL.c_str(), "COUNT(1)"), m_pDS).c_str(), NULL, 10);
-      strSQL += DatabaseUtils::BuildLimitClause(sortDescription.limitEnd, sortDescription.limitStart);
+      total = (int)strtol(GetSingleValue(PrepareSQL(strSQL, "COUNT(1)") + strSQLExtra, m_pDS).c_str(), NULL, 10);
+      strSQLExtra += DatabaseUtils::BuildLimitClause(sortDescription.limitEnd, sortDescription.limitStart);
     }
 
-    strSQL = PrepareSQL("select %s from musicvideoview ", !filter.fields.empty() ? filter.fields.c_str() : "*") + strSQL;
+    strSQL = PrepareSQL(strSQL, !filter.fields.empty() ? filter.fields.c_str() : "*") + strSQLExtra;
 
     int iRowsFound = RunQuery(strSQL);
     if (iRowsFound <= 0)
