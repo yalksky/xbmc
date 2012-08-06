@@ -233,7 +233,7 @@
 #include "settings/GUIDialogContentSettings.h"
 #include "video/dialogs/GUIDialogVideoScan.h"
 #include "dialogs/GUIDialogBusy.h"
-#include "dialogs/GUIDialogKeyboard.h"
+#include "dialogs/GUIDialogKeyboardGeneric.h"
 #include "dialogs/GUIDialogYesNo.h"
 #include "dialogs/GUIDialogOK.h"
 #include "dialogs/GUIDialogProgress.h"
@@ -1209,7 +1209,7 @@ bool CApplication::Initialize()
     g_windowManager.Add(new CGUIWindowPointer);            // window id = 99
     g_windowManager.Add(new CGUIDialogYesNo);              // window id = 100
     g_windowManager.Add(new CGUIDialogProgress);           // window id = 101
-    g_windowManager.Add(new CGUIDialogKeyboard);           // window id = 103
+    g_windowManager.Add(new CGUIDialogKeyboardGeneric);    // window id = 103
     g_windowManager.Add(new CGUIDialogVolumeBar);          // window id = 104
     g_windowManager.Add(new CGUIDialogSeekBar);            // window id = 115
     g_windowManager.Add(new CGUIDialogSubMenu);            // window id = 105
@@ -1365,6 +1365,100 @@ bool CApplication::Initialize()
   return true;
 }
 
+bool CApplication::StartServer(enum ESERVERS eServer, bool bStart, bool bWait/* = false*/)
+{
+  bool ret = true;
+  bool oldSetting = false;
+
+  switch(eServer)
+  {
+    case ES_WEBSERVER:
+      oldSetting = g_guiSettings.GetBool("services.webserver");
+      g_guiSettings.SetBool("services.webserver", bStart);
+
+      if (bStart)
+        ret = StartWebServer();
+      else
+        StopWebServer();
+
+      if (!ret)
+      {
+        g_guiSettings.SetBool("services.webserver", oldSetting);
+      }
+      break;
+    case ES_AIRPLAYSERVER:
+      oldSetting = g_guiSettings.GetBool("services.esenabled");
+      g_guiSettings.SetBool("services.airplay", bStart);
+
+      if (bStart)
+        ret = StartAirplayServer();
+      else
+        StopAirplayServer(bWait);
+
+      if (!ret)
+      {
+        g_guiSettings.SetBool("services.esenabled", oldSetting);
+      }
+      break;
+    case ES_JSONRPCSERVER:
+      oldSetting = g_guiSettings.GetBool("services.esenabled");
+      g_guiSettings.SetBool("services.esenabled", bStart);
+
+      if (bStart)
+        ret = StartJSONRPCServer();
+      else
+        StopJSONRPCServer(bWait);
+
+      if (!ret)
+      {
+        g_guiSettings.SetBool("services.esenabled", oldSetting);
+      }
+      break;
+    case ES_UPNPSERVER:
+      g_guiSettings.SetBool("services.upnpserver", bStart);
+      if (bStart)
+        StartUPnPServer();
+      else
+        StopUPnPServer();
+      break;
+    case ES_UPNPRENDERER:
+      g_guiSettings.SetBool("services.upnprenderer", bStart);
+      if (bStart)
+        StartUPnPRenderer();
+      else
+        StopUPnPRenderer();
+      break;
+    case ES_EVENTSERVER:
+      oldSetting = g_guiSettings.GetBool("services.esenabled");
+      g_guiSettings.SetBool("services.esenabled", bStart);
+
+      if (bStart)
+        ret = StartEventServer();
+      else
+        StopEventServer(bWait, false);
+
+      if (!ret)
+      {
+        g_guiSettings.SetBool("services.esenabled", oldSetting);
+      }
+
+      break;
+    case ES_ZEROCONF:
+      g_guiSettings.SetBool("services.zeroconf", bStart);
+      if (bStart)
+        StartZeroconf();
+      else
+        StopZeroconf();
+      break;
+    default:
+      ret = false;
+      break;
+  }
+  g_settings.Save();
+
+  return ret;
+}
+
 bool CApplication::StartWebServer()
 {
 #ifdef HAS_WEB_SERVER
@@ -1427,8 +1521,9 @@ void CApplication::StopWebServer()
 #endif
 }
 
-void CApplication::StartAirplayServer()
+bool CApplication::StartAirplayServer()
 {
+  bool ret = false;
 #ifdef HAS_AIRPLAY
   if (g_guiSettings.GetBool("services.airplay") && m_network.IsAvailable())
   {
@@ -1453,22 +1548,28 @@ void CApplication::StartAirplayServer()
       txt["model"] = "AppleTV2,1";
       txt["srcvers"] = AIRPLAY_SERVER_VERSION_STR;
       CZeroconf::GetInstance()->PublishService("servers.airplay", "_airplay._tcp", g_infoManager.GetLabel(SYSTEM_FRIENDLY_NAME), listenPort, txt);
+      ret = true;
     }
   }
+  if (ret)
 #endif
-#ifdef HAS_AIRTUNES
-  if (g_guiSettings.GetBool("services.airplay") && m_network.IsAvailable())
   {
-    int listenPort = g_advancedSettings.m_airTunesPort;
-    CStdString password = g_guiSettings.GetString("services.airplaypassword");
-    bool usePassword = g_guiSettings.GetBool("services.useairplaypassword");
-
-    if (!CAirTunesServer::StartServer(listenPort, true, usePassword, password))
+#ifdef HAS_AIRTUNES
+    if (g_guiSettings.GetBool("services.airplay") && m_network.IsAvailable())
     {
-      CLog::Log(LOGERROR, "Failed to start AirTunes Server");
+      int listenPort = g_advancedSettings.m_airTunesPort;
+      CStdString password = g_guiSettings.GetString("services.airplaypassword");
+      bool usePassword = g_guiSettings.GetBool("services.useairplaypassword");
+
+      if (!CAirTunesServer::StartServer(listenPort, true, usePassword, password))
+      {
+        CLog::Log(LOGERROR, "Failed to start AirTunes Server");
+      }
+      ret = true;
     }
-  }
 #endif
+  }
+  return ret;
 }
 
 void CApplication::StopAirplayServer(bool bWait)
@@ -2116,7 +2217,7 @@ void CApplication::Render()
 
   {
     // Less fps in DPMS
-    bool lowfps = m_dpmsIsActive;
+    bool lowfps = m_dpmsIsActive || g_Windowing.EnableFrameLimiter();
     // Whether externalplayer is playing and we're unfocused
     bool extPlayerActive = m_eCurrentPlayer >= EPC_EXTPLAYER && IsPlaying() && !m_AppFocused;
 
@@ -2377,10 +2478,23 @@ bool CApplication::OnKey(const CKey& key)
   if (!key.IsAnalogButton())
     CLog::Log(LOGDEBUG, "%s: %s pressed, action is %s", __FUNCTION__, g_Keyboard.GetKeyName((int) key.GetButtonCode()).c_str(), action.GetName().c_str());
 
-  //  Play a sound based on the action
-  g_audioManager.PlayActionSound(action);
+  bool bResult = false;
 
-  return OnAction(action);
+  // play sound before the action unless the button is held, 
+  // where we execute after the action as held actions aren't fired every time.
+  if(action.GetHoldTime())
+  {
+    bResult = OnAction(action);
+    if(bResult)
+      g_audioManager.PlayActionSound(action);
+  }
+  else
+  {
+    g_audioManager.PlayActionSound(action);
+    bResult = OnAction(action);
+  }
+
+  return bResult;
 }
 
 // OnAppCommand is called in response to a XBMC_APPCOMMAND event.
@@ -3207,8 +3321,23 @@ bool CApplication::ProcessJoystickEvent(const std::string& joystickName, int wKe
    if (CButtonTranslator::GetInstance().TranslateJoystickString(iWin, joystickName.c_str(), wKeyID, isAxis ? JACTIVE_AXIS : JACTIVE_BUTTON, actionID, actionName, fullRange))
    {
      CAction action(actionID, fAmount, 0.0f, actionName, holdTime);
-     g_audioManager.PlayActionSound(action);
-     return OnAction(action);
+     bool bResult = false;
+
+     // play sound before the action unless the button is held, 
+     // where we execute after the action as held actions aren't fired every time.
+     if(action.GetHoldTime())
+     {
+       bResult = OnAction(action);
+       if(bResult)
+         g_audioManager.PlayActionSound(action);
+     }
+     else
+     {
+       g_audioManager.PlayActionSound(action);
+       bResult = OnAction(action);
+     }
+
+     return bResult;
    }
    else
    {
@@ -3883,6 +4012,14 @@ bool CApplication::PlayFile(const CFileItem& item, bool bRestart)
           options.starttime = bookmark.timeInSeconds;
           options.state = bookmark.playerState;
         }
+        /*
+         override with information from the actual item if available.  We do this as the VFS (eg plugins)
+         may set the resume point to override whatever XBMC has stored, yet we ignore it until now so that,
+         should the playerState be required, it is fetched from the database.
+         See the note in CGUIWindowVideoBase::ShowResumeMenu.
+         */
+        if (item.HasVideoInfoTag() && item.GetVideoInfoTag()->m_resumePoint.IsSet())
+          options.starttime = item.GetVideoInfoTag()->m_resumePoint.timeInSeconds;
       }
       else if (item.HasVideoInfoTag())
       {

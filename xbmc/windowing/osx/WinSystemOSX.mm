@@ -482,6 +482,9 @@ static void DisplayReconfigured(CGDirectDisplayID display,
   {
     // pre/post-reconfiguration changes
     RESOLUTION res = g_graphicsContext.GetVideoResolution();
+    if (res == RES_INVALID)
+      return;
+    
     NSScreen* pScreen = nil;
     unsigned int screenIdx = g_settings.m_ResInfo[res].iScreen;
     
@@ -511,6 +514,8 @@ CWinSystemOSX::CWinSystemOSX() : CWinSystemBase()
   m_glContext = 0;
   m_SDLSurface = NULL;
   m_osx_events = NULL;
+  m_obscured   = false;
+  m_obscured_timecheck = XbmcThreads::SystemClockMillis() + 1000;
   m_use_system_screensaver = true;
   // check runtime, we only allow this on 10.5+
   m_can_display_switch = (floor(NSAppKitVersionNumber) >= 949);
@@ -1222,6 +1227,104 @@ bool CWinSystemOSX::FlushBuffer(void)
   return true;
 }
 
+bool CWinSystemOSX::IsObscured(void)
+{
+  // check once a second if we are obscured.
+  unsigned int now_time = XbmcThreads::SystemClockMillis();
+  if (m_obscured_timecheck > now_time)
+    return m_obscured;
+  else
+    m_obscured_timecheck = now_time + 1000;
+
+  NSOpenGLContext* cur_context = [NSOpenGLContext currentContext];
+  NSView* view = [cur_context view];
+  if (!view)
+  {
+    // sanity check, we should always have a view
+    m_obscured = true;
+    return m_obscured;
+  }
+
+  NSWindow *window = [view window];
+  if (!window)
+  {
+    // sanity check, we should always have a window
+    m_obscured = true;
+    return m_obscured;
+  }
+
+  if ([window isVisible] == NO)
+  {
+    // not visable means the window is not showing.
+    // this should never really happen as we are always visable
+    // even when minimized in dock.
+    m_obscured = true;
+    return m_obscured;
+  }
+
+  // check if we are showing on the active workspace.
+  if ([window isOnActiveSpace] == NO)
+  {
+    m_obscured = true;
+    return m_obscured;
+  }
+
+  // default to false before we start parsing though the windows.
+  // if we are are obscured by any windows, then set true.
+  m_obscured = false;
+
+  CGWindowListOption opts;
+  opts = kCGWindowListOptionOnScreenAboveWindow | kCGWindowListExcludeDesktopElements;
+  CFArrayRef windowIDs =CGWindowListCreate(opts, (CGWindowID)[window windowNumber]);  if (!windowIDs)
+    return m_obscured;
+
+  CFArrayRef windowDescs = CGWindowListCreateDescriptionFromArray(windowIDs);
+  if (!windowDescs)
+  {
+    CFRelease(windowIDs);
+    return m_obscured;
+  }
+
+  CGRect bounds = NSRectToCGRect([window frame]);
+  // kCGWindowBounds measures the origin as the top-left corner of the rectangle
+  //  relative to the top-left corner of the screen.
+  // NSWindow’s frame property measures the origin as the bottom-left corner
+  //  of the rectangle relative to the bottom-left corner of the screen.
+  // convert bounds from NSWindow to CGWindowBounds here.
+  bounds.origin.y = [[window screen] frame].size.height - bounds.origin.y - bounds.size.height;
+
+  for (CFIndex idx=0; idx < CFArrayGetCount(windowDescs); idx++)
+  {
+    // walk the window list of windows that are above us and are not desktop elements
+    CFDictionaryRef windowDictionary = (CFDictionaryRef)CFArrayGetValueAtIndex(windowDescs, idx);
+
+    // skip the Dock window, it actually covers the entire screen.
+    CFStringRef ownerName = (CFStringRef)CFDictionaryGetValue(windowDictionary, kCGWindowOwnerName);
+    if (CFStringCompare(ownerName, CFSTR("Dock"), 0) == kCFCompareEqualTo)
+      continue;
+
+    CFDictionaryRef rectDictionary = (CFDictionaryRef)CFDictionaryGetValue(windowDictionary, kCGWindowBounds);
+    if (!rectDictionary)
+      continue;
+
+    CGRect windowBounds;
+    if (CGRectMakeWithDictionaryRepresentation(rectDictionary, &windowBounds))
+    {
+      if (CGRectContainsRect(windowBounds, bounds))
+      {   
+        // if the windowBounds completely encloses our bounds, we are obscured.
+        m_obscured = true;
+        break;
+      }
+      // TODO: handle overlaping windows above us that combine to obscure.
+    }
+  }
+  CFRelease(windowDescs);
+  CFRelease(windowIDs);
+
+  return m_obscured;
+}
+
 void CWinSystemOSX::NotifyAppFocusChange(bool bGaining)
 {
   NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
@@ -1324,6 +1427,11 @@ void CWinSystemOSX::ResetOSScreensaver()
 {
   // allow os screensaver only if we are fullscreen
   EnableSystemScreenSaver(!m_bFullScreen);
+}
+
+bool CWinSystemOSX::EnableFrameLimiter()
+{
+  return IsObscured();
 }
 
 void CWinSystemOSX::Register(IDispResource *resource)
