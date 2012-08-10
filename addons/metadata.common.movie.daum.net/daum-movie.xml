@@ -64,7 +64,7 @@
 	<GetDaumTrailer dest="4">
 		<RegExp input="$$5" output="&lt;details&gt;\1&lt;/details&gt;" dest="4">
 			<RegExp input="$$1" output="\1" dest="6">
-				<expression noclean="1">&lt;h5&gt;예고편&lt;/h5&gt;(.*)&lt;/dl&gt;</expression>
+				<expression noclean="1">&lt;/h5&gt;(.*)&lt;/dl&gt;</expression>
 			</RegExp>
 			<RegExp input="$$6" output="&lt;url function=&quot;GetDaumTrailer2&quot;&gt;\1&lt;/url&gt;" dest="5">
 				<expression>&lt;a href="(.*?)"&gt;</expression>
@@ -74,7 +74,7 @@
 	</GetDaumTrailer>
 	<GetDaumTrailer2 dest="4">
 		<RegExp input="$$5" output="&lt;details&gt;\1&lt;/details&gt;" dest="4">
-			<RegExp input="$$1" output="&lt;url function=&quot;GetDaumTrailer3&quot;&gt;http://stream.tvpot.daum.net/fms/pos_query2.php?protocol=http&amp;out_type=xml&amp;s_idx=\1&lt;/url&gt;" dest="5">
+			<RegExp input="$$1" output="&lt;url function=&quot;GetDaumTrailer3&quot; post=&quot;true&quot;&gt;http://videofarm.daum.net/controller/api/open/v1_2/MovieLocation.apixml?preset=main&amp;playLoc=daum_movie&amp;vid=\1&lt;/url&gt;" dest="5">
 				<expression>vid=(.*?)&amp;</expression>
 			</RegExp>
 			<expression noclean="1"/>
@@ -83,7 +83,7 @@
 	<GetDaumTrailer3 dest="4">
 		<RegExp input="$$5" output="&lt;details&gt;\1&lt;/details&gt;" dest="4">
 			<RegExp input="$$1" output="&lt;trailer urlencoded=&quot;yes&quot;&gt;\1&lt;/trailer&gt;" dest="5">
-				<expression>movieURL="(.*?)"</expression>
+				<expression>(http.*?flv)</expression>
 			</RegExp>
 			<expression noclean="1"/>
 		</RegExp>

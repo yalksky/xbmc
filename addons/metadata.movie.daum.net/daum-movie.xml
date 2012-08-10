@@ -1,4 +1,5 @@
-﻿<?xml version="1.0" encoding="utf-8"?><scraper framework="1.1" date="2012-03-23">
+﻿<?xml version="1.0" encoding="utf-8"?>
+<scraper framework="1.1" date="2012-03-23">
 	<NfoUrl dest="3">
 		<RegExp input="$$1" output="&lt;url&gt;http://movie.daum.net/moviedetail/moviedetailMain.do?movieId=\1&lt;/url&gt;" dest="3">
 			<expression>movie\.daum\.net[^\?]*\?movieId=(\d*)</expression>
@@ -118,7 +119,7 @@
 			<RegExp conditional="EnableFanart" input="$$1" output="&lt;url cache=&quot;daum-photo-$$2.htm&quot; function=&quot;GetDaumFanart&quot;&gt;\1&amp;order=recommend&lt;/url&gt;" dest="8+">
 				<expression>&lt;a class="tab4" href="([^"]*)"</expression>
 			</RegExp>
-			<RegExp input="$$1" output="&lt;url cache=&quot;daum-video-$$2.htm&quot; function=&quot;GetDaumTrailer&quot;&gt;\1&lt;/url&gt;" dest="8+">
+			<RegExp conditional="EnableTrailer" input="$$1" output="&lt;url cache=&quot;daum-video-$$2.htm&quot; function=&quot;GetDaumTrailer&quot;&gt;\1&lt;/url&gt;" dest="8+">
 				<expression>&lt;a class="tab5" href="([^"]*)"</expression>
 			</RegExp>
 			<expression noclean="1" />
