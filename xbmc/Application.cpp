@@ -1910,7 +1910,7 @@ void CApplication::LoadSkin(const SkinPtr& skin)
 
   UnloadSkin();
 
-  CLog::Log(LOGINFO, "  load skin from: %s", skin->Path().c_str());
+  CLog::Log(LOGINFO, "  load skin from: %s (version: %s)", skin->Path().c_str(), skin->Version().c_str());
   g_SkinInfo = skin;
   g_SkinInfo->Start();
 
@@ -2492,7 +2492,7 @@ bool CApplication::OnKey(const CKey& key)
 
   bool bResult = false;
 
-  // play sound before the action unless the button is held, 
+  // play sound before the action unless the button is held,
   // where we execute after the action as held actions aren't fired every time.
   if(action.GetHoldTime())
   {
@@ -3335,7 +3335,7 @@ bool CApplication::ProcessJoystickEvent(const std::string& joystickName, int wKe
      CAction action(actionID, fAmount, 0.0f, actionName, holdTime);
      bool bResult = false;
 
-     // play sound before the action unless the button is held, 
+     // play sound before the action unless the button is held,
      // where we execute after the action as held actions aren't fired every time.
      if(action.GetHoldTime())
      {
@@ -4522,7 +4522,7 @@ void CApplication::UpdateFileState()
 
       if (m_progressTrackingItem->IsVideo())
       {
-        if ((m_progressTrackingItem->IsDVDImage() || m_progressTrackingItem->IsDVDFile()) && m_pPlayer->GetTotalTime() > 15*60)
+        if ((m_progressTrackingItem->IsDVDImage() || m_progressTrackingItem->IsDVDFile()) && m_pPlayer->GetTotalTime() > 15*60*1000)
         {
           m_progressTrackingItem->GetVideoInfoTag()->m_streamDetails.Reset();
           m_pPlayer->GetStreamDetails(m_progressTrackingItem->GetVideoInfoTag()->m_streamDetails);
@@ -5017,9 +5017,18 @@ bool CApplication::OnMessage(CGUIMessage& message)
         DimLCDOnPlayback(false);
       }
 
-      if (!IsPlayingVideo() && g_windowManager.GetActiveWindow() == WINDOW_FULLSCREEN_VIDEO)
+      if (!IsPlayingVideo())
       {
-        g_windowManager.PreviousWindow();
+        if(g_windowManager.GetActiveWindow() == WINDOW_FULLSCREEN_VIDEO)
+        {
+          g_windowManager.PreviousWindow();
+        }
+        else
+        {
+          CSingleLock lock(g_graphicsContext);
+          //  resets to res_desktop or look&feel resolution (including refreshrate)
+          g_graphicsContext.SetFullScreenVideo(false);
+        }
       }
 
       if (!IsPlayingAudio() && g_playlistPlayer.GetCurrentPlaylist() == PLAYLIST_NONE && g_windowManager.GetActiveWindow() == WINDOW_VISUALISATION)
@@ -5500,7 +5509,7 @@ double CApplication::GetTotalTime() const
     if (m_itemCurrentFile->IsStack() && m_currentStack->Size() > 0)
       rc = (*m_currentStack)[m_currentStack->Size() - 1]->m_lEndOffset;
     else
-      rc = m_pPlayer->GetTotalTime();
+      rc = static_cast<double>(m_pPlayer->GetTotalTime() * 0.001f);
   }
 
   return rc;
@@ -5617,7 +5626,7 @@ float CApplication::GetCachePercentage() const
       float stackedTotalTime = (float) GetTotalTime();
       // We need to take into account the stack's total time vs. currently playing file's total time
       if (stackedTotalTime > 0.0f)
-        return min( 100.0f, GetPercentage() + (m_pPlayer->GetCachePercentage() * m_pPlayer->GetTotalTime() / stackedTotalTime ) );
+        return min( 100.0f, GetPercentage() + (m_pPlayer->GetCachePercentage() * m_pPlayer->GetTotalTime() * 0.001f / stackedTotalTime ) );
     }
     else
       return min( 100.0f, m_pPlayer->GetPercentage() + m_pPlayer->GetCachePercentage() );

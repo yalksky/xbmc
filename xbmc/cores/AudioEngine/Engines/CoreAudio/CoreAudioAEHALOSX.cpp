@@ -92,7 +92,12 @@ bool CCoreAudioAEHALOSX::InitializePCM(ICoreAudioSource *pSource, AEAudioFormat 
   if (!m_audioGraph)
     return false;
 
-  if (!m_audioGraph->Open(pSource, format, outputDevice, allowMixing, g_LayoutMap[ g_guiSettings.GetInt("audiooutput.channellayout") ] ))
+  AudioChannelLayoutTag layout = g_LayoutMap[ g_guiSettings.GetInt("audiooutput.channellayout") ];
+  // force optical/coax to 2.0 output channels
+  if (!m_Passthrough && g_guiSettings.GetInt("audiooutput.mode") == AUDIO_IEC958)
+    layout = g_LayoutMap[1];
+
+  if (!m_audioGraph->Open(pSource, format, outputDevice, allowMixing, layout ))
   {
     CLog::Log(LOGDEBUG, "CCoreAudioAEHALOSX::Initialize: "
       "Unable to initialize audio due a missconfiguration. Try 2.0 speaker configuration.");
@@ -159,7 +164,7 @@ bool CCoreAudioAEHALOSX::InitializeEncoded(AudioDeviceID outputDevice, AEAudioFo
       {
         // check pcm output formats
         unsigned int bps = CAEUtil::DataFormatToBits(AE_FMT_S16NE);
-        if (desc.mFormat.mChannelsPerFrame == m_initformat.m_channelLayout.Count() && 
+        if (desc.mFormat.mChannelsPerFrame == m_initformat.m_channelLayout.Count() &&
             desc.mFormat.mBitsPerChannel == bps &&
             desc.mFormat.mSampleRate == m_initformat.m_sampleRate )
         {
@@ -174,7 +179,7 @@ bool CCoreAudioAEHALOSX::InitializeEncoded(AudioDeviceID outputDevice, AEAudioFo
         // check encoded formats
         if (desc.mFormat.mFormatID == kAudioFormat60958AC3 || desc.mFormat.mFormatID == 'IAC3')
         {
-          if (desc.mFormat.mChannelsPerFrame == m_initformat.m_channelLayout.Count() && 
+          if (desc.mFormat.mChannelsPerFrame == m_initformat.m_channelLayout.Count() &&
               desc.mFormat.mSampleRate == m_initformat.m_sampleRate )
           {
             outputFormat = desc.mFormat; // Select this format
@@ -201,7 +206,7 @@ bool CCoreAudioAEHALOSX::InitializeEncoded(AudioDeviceID outputDevice, AEAudioFo
   }
 
   CLog::Log(LOGDEBUG, "CCoreAudioAEHALOSX::InitializeEncoded: "
-    "Selected stream[%u] - id: 0x%04X, Physical Format: %s", 
+    "Selected stream[%u] - id: 0x%04X, Physical Format: %s",
     m_OutputBufferIndex, (uint)outputStream, StreamDescriptionToString(outputFormat, formatString));
 
   // TODO: Auto hogging sets this for us. Figure out how/when to turn it off or use it
@@ -298,6 +303,8 @@ bool CCoreAudioAEHALOSX::Initialize(ICoreAudioSource *ae, bool passThrough, AEAu
 
   // Attach our output object to the device
   m_AudioDevice->Open(outputDevice);
+  m_AudioDevice->SetHogStatus(false);
+  m_AudioDevice->SetMixingSupport(true);
 
   // If this is a passthrough (AC3/DTS) stream, attempt to handle it natively
   if (m_Passthrough)
