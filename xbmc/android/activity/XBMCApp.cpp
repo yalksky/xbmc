@@ -713,6 +713,86 @@ bool CXBMCApp::HasLaunchIntent(const string &package)
   env->DeleteLocalRef(oPackageIntent);
   return true;
 }
+bool CXBMCApp::StartActivityWithExtra(const string &package,const string &path)
+{
+  if (!m_activity || !package.size())
+    return false;
+
+  jthrowable exc;
+  JNIEnv *env = NULL;
+  AttachCurrentThread(&env);
+  jobject oActivity = m_activity->clazz;
+  jclass cActivity = env->GetObjectClass(oActivity);
+
+
+  // oPackageManager = new PackageManager();
+  jmethodID mgetPackageManager = env->GetMethodID(cActivity, "getPackageManager", "()Landroid/content/pm/PackageManager;");
+  jobject oPackageManager = (jobject)env->CallObjectMethod(oActivity, mgetPackageManager);
+
+  CLog::Log(LOGERROR, "CXBMCApp::StartActivity exec %s", package.c_str());
+
+  // oPackageIntent = oPackageManager.getLaunchIntentForPackage(package);
+  jclass cPackageManager = env->GetObjectClass(oPackageManager);
+  jmethodID mgetLaunchIntentForPackage = env->GetMethodID(cPackageManager, "getLaunchIntentForPackage", "(Ljava/lang/String;)Landroid/content/Intent;");
+
+  jstring sPackageName = env->NewStringUTF(package.c_str());
+
+  jobject oPackageIntent = env->CallObjectMethod(oPackageManager, mgetLaunchIntentForPackage, sPackageName);
+  env->DeleteLocalRef(cPackageManager);
+  env->DeleteLocalRef(sPackageName);
+  env->DeleteLocalRef(oPackageManager);
+
+  jstring sUri = env->NewStringUTF(path.c_str());
+
+  jclass cUri = env->FindClass("android/net/Uri");
+  jmethodID mParse = env->GetStaticMethodID(cUri,"parse","(Ljava/lang/String;)Landroid/net/Uri;");
+  jobject oUri = env->CallStaticObjectMethod(cUri,mParse,sUri);
+
+  jclass cIntent = env->GetObjectClass(oPackageIntent);
+  jmethodID msetData= env->GetMethodID(cIntent , "setData","(Landroid/net/Uri;)Landroid/content/Intent;");
+  env->CallObjectMethod(oPackageIntent , msetData , oUri );
+
+  env->DeleteLocalRef(cIntent);
+  env->DeleteLocalRef(oUri);
+  env->DeleteLocalRef(cUri);
+  env->DeleteLocalRef(sUri);
+
+  exc = env->ExceptionOccurred();
+  if (exc)
+  {
+    CLog::Log(LOGERROR, "CXBMCApp::StartActivity Failed to load %s. Exception follows:", package.c_str());
+    env->ExceptionDescribe();
+    env->ExceptionClear();
+    env->DeleteLocalRef(cActivity);
+    DetachCurrentThread();
+    return false;
+  }
+  if (!oPackageIntent)
+  {
+    CLog::Log(LOGERROR, "CXBMCApp::StartActivity %s has no Launch Intent", package.c_str());
+    env->DeleteLocalRef(cActivity);
+    DetachCurrentThread();
+    return false;
+  }
+  // startActivity(oIntent);
+  jmethodID mStartActivity = env->GetMethodID(cActivity, "startActivity", "(Landroid/content/Intent;)V");
+  env->CallVoidMethod(oActivity, mStartActivity, oPackageIntent);
+  env->DeleteLocalRef(cActivity);
+  env->DeleteLocalRef(oPackageIntent);
+
+  exc = env->ExceptionOccurred();
+  if (exc)
+  {
+    CLog::Log(LOGERROR, "CXBMCApp::StartActivity Failed to load %s. Exception follows:", package.c_str());
+    env->ExceptionDescribe();
+    env->ExceptionClear();
+    DetachCurrentThread();
+    return false;
+  }
+
+  DetachCurrentThread();
+  return true;
+}
 
 bool CXBMCApp::StartActivity(const string &package)
 {
@@ -725,9 +805,12 @@ bool CXBMCApp::StartActivity(const string &package)
   jobject oActivity = m_activity->clazz;
   jclass cActivity = env->GetObjectClass(oActivity);
 
+
   // oPackageManager = new PackageManager();
   jmethodID mgetPackageManager = env->GetMethodID(cActivity, "getPackageManager", "()Landroid/content/pm/PackageManager;");
   jobject oPackageManager = (jobject)env->CallObjectMethod(oActivity, mgetPackageManager);
+
+  CLog::Log(LOGERROR, "CXBMCApp::StartActivity exec %s", package.c_str());
 
   // oPackageIntent = oPackageManager.getLaunchIntentForPackage(package);
   jclass cPackageManager = env->GetObjectClass(oPackageManager);
