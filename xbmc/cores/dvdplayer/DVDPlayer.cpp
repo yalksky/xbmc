@@ -1107,6 +1107,9 @@ void CDVDPlayer::Process()
       if(next == CDVDInputStream::NEXTSTREAM_OPEN)
       {
         SAFE_DELETE(m_pDemuxer);
+        m_CurrentAudio.stream = NULL;
+        m_CurrentVideo.stream = NULL;
+        m_CurrentSubtitle.stream = NULL;
         continue;
       }
 
@@ -3129,11 +3132,13 @@ int CDVDPlayer::OnDVDNavResult(void* pData, int iMessage)
 
         //Force an aspect ratio that is set in the dvdheaders if available
         m_CurrentVideo.hint.aspect = pStream->GetVideoAspectRatio();
-        if( m_dvdPlayerAudio.IsInited() )
+        if( m_dvdPlayerVideo.IsInited() )
           m_dvdPlayerVideo.SendMessage(new CDVDMsgDouble(CDVDMsg::VIDEO_SET_ASPECT, m_CurrentVideo.hint.aspect));
 
         m_SelectionStreams.Clear(STREAM_NONE, STREAM_SOURCE_NAV);
         m_SelectionStreams.Update(m_pInputStream, m_pDemuxer);
+
+        return NAVRESULT_HOLD;
       }
       break;
     case DVDNAV_CELL_CHANGE:
