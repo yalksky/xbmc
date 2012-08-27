@@ -154,7 +154,7 @@ void CExternalPlayer::Process()
       mainFile = CMusicDatabaseFile::TranslateUrl(url);
   }
 
-  if (m_filenameReplacers.size() > 0) 
+  if (m_filenameReplacers.size() > 0)
   {
     for (unsigned int i = 0; i < m_filenameReplacers.size(); i++)
     {
@@ -176,7 +176,7 @@ void CExternalPlayer::Process()
         continue;
       }
 
-      if (regExp.RegFind(mainFile) > -1) 
+      if (regExp.RegFind(mainFile) > -1)
       {
         CStdString strPat = vecSplit[1];
         strPat.Replace(",,",",");
@@ -293,7 +293,7 @@ void CExternalPlayer::Process()
   BOOL ret = TRUE;
 #if defined(_WIN32)
   ret = ExecuteAppW32(strFName.c_str(),strFArgs.c_str());
-#elif defined(_LINUX)
+#elif defined(_LINUX) || defined(TARGET_DARWIN_OSX)
 
 #if defined(TARGET_ANDROID)
 	ret = ExecuteAppAndroid(m_filename.c_str(),mainFile.c_str());
@@ -385,12 +385,12 @@ BOOL CExternalPlayer::ExecuteAppW32(const char* strPath, const char* strSwitches
   if (m_bAbortRequest) return false;
 
   BOOL ret = CreateProcessW(WstrPath.IsEmpty() ? NULL : WstrPath.c_str(),
-                            (LPWSTR) WstrSwitches.c_str(), NULL, NULL, FALSE, NULL, 
+                            (LPWSTR) WstrSwitches.c_str(), NULL, NULL, FALSE, NULL,
                             NULL, NULL, &si, &m_processInfo);
 
   if (ret == FALSE)
   {
-    DWORD lastError = GetLastError(); 
+    DWORD lastError = GetLastError();
     CLog::Log(LOGNOTICE, "%s - Failure: %d", __FUNCTION__, lastError);
   }
   else
@@ -424,7 +424,7 @@ BOOL CExternalPlayer::ExecuteAppW32(const char* strPath, const char* strSwitches
 }
 #endif
 
-#if defined(_LINUX)
+#if defined(_LINUX) || defined(TARGET_DARWIN_OSX)
 BOOL CExternalPlayer::ExecuteAppLinux(const char* strSwitches)
 {
   CLog::Log(LOGNOTICE, "%s: %s", __FUNCTION__, strSwitches);
@@ -597,7 +597,7 @@ bool CExternalPlayer::SetPlayerState(CStdString state)
 
 bool CExternalPlayer::Initialize(TiXmlElement* pConfig)
 {
-  XMLUtils::GetString(pConfig, "filename", m_filename); 
+  XMLUtils::GetString(pConfig, "filename", m_filename);
   if (m_filename.length() > 0)
   {
     CLog::Log(LOGNOTICE, "ExternalPlayer Filename: %s", m_filename.c_str());
@@ -643,7 +643,7 @@ bool CExternalPlayer::Initialize(TiXmlElement* pConfig)
 
   XMLUtils::GetInt(pConfig, "playcountminimumtime", m_playCountMinTime, 1, INT_MAX);
 
-  CLog::Log(LOGNOTICE, "ExternalPlayer Tweaks: hideconsole (%s), hidexbmc (%s), islauncher (%s), warpcursor (%s)", 
+  CLog::Log(LOGNOTICE, "ExternalPlayer Tweaks: hideconsole (%s), hidexbmc (%s), islauncher (%s), warpcursor (%s)",
           m_hideconsole ? "true" : "false",
           m_hidexbmc ? "true" : "false",
           m_islauncher ? "true" : "false",
