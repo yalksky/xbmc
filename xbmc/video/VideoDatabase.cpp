@@ -52,6 +52,8 @@
 #include "dbwrappers/dataset.h"
 #include "utils/LabelFormatter.h"
 #include "XBDateTime.h"
+#include "pvr/PVRManager.h"
+#include "pvr/recordings/PVRRecordings.h"
 #include "URL.h"
 #include "video/VideoDbUrl.h"
 #include "playlists/SmartPlayList.h"
@@ -61,6 +63,7 @@ using namespace dbiplus;
 using namespace XFILE;
 using namespace VIDEO;
 using namespace ADDON;
+using namespace PVR;
 
 //********************************************************************************************************************************
 CVideoDatabase::CVideoDatabase(void)
@@ -1539,6 +1542,8 @@ bool CVideoDatabase::LoadVideoInfo(const CStdString& strFilenameAndPath, CVideoI
     CLog::Log(LOGDEBUG,"%s, got music video info!", __FUNCTION__);
     CLog::Log(LOGDEBUG,"  Title = %s", details.m_strTitle.c_str());
   }
+  else if (GetFileInfo(strFilenameAndPath, details))
+    CLog::Log(LOGDEBUG,"%s, got file info!", __FUNCTION__);
 
   return !details.IsEmpty();
 }
@@ -1831,6 +1836,42 @@ bool CVideoDatabase::GetSetInfo(int idSet, CVideoInfoTag& details)
   catch (...)
   {
     CLog::Log(LOGERROR, "%s (%d) failed", __FUNCTION__, idSet);
+  }
+  return false;
+}
+
+bool CVideoDatabase::GetFileInfo(const CStdString& strFilenameAndPath, CVideoInfoTag& details, int idFile /* = -1 */)
+{
+  try
+  {
+    if (idFile < 0)
+      idFile = GetFileId(strFilenameAndPath);
+    if (idFile < 0)
+      return false;
+
+    CStdString sql = PrepareSQL("SELECT * FROM files "
+                                "JOIN path ON path.idPath = files.idPath "
+                                "JOIN bookmark ON bookmark.idFile = files.idFile AND bookmark.type = %i "
+                                "WHERE files.idFile = %i", CBookmark::RESUME, idFile);
+    if (!m_pDS->query(sql.c_str()))
+      return false;
+
+    details.m_iFileId = m_pDS->fv("files.idFile").get_asInt();
+    details.m_strPath = m_pDS->fv("path.strPath").get_asString();
+    CStdString strFileName = m_pDS->fv("files.strFilename").get_asString();
+    ConstructPath(details.m_strFileNameAndPath, details.m_strPath, strFileName);
+    details.m_playCount = m_pDS->fv("files.playCount").get_asInt();
+    details.m_lastPlayed.SetFromDBDateTime(m_pDS->fv("files.lastPlayed").get_asString());
+    details.m_dateAdded.SetFromDBDateTime(m_pDS->fv("files.dateAdded").get_asString());
+    details.m_resumePoint.timeInSeconds = m_pDS->fv("bookmark.timeInSeconds").get_asInt();
+    details.m_resumePoint.totalTimeInSeconds = m_pDS->fv("bookmark.totalTimeInSeconds").get_asInt();
+    details.m_resumePoint.type = CBookmark::RESUME;
+
+    return !details.IsEmpty();
+  }
+  catch (...)
+  {
+    CLog::Log(LOGERROR, "%s (%s) failed", __FUNCTION__, strFilenameAndPath.c_str());
   }
   return false;
 }
@@ -4246,6 +4287,10 @@ void CVideoDatabase::SetPlayCount(const CFileItem &item, int count, const CDateT
 
     m_pDS->exec(strSQL.c_str());
 
+    // PVR: Set recording's play count on the backend (if supported)
+    if (item.HasPVRRecordingInfoTag() && g_PVRManager.IsStarted())
+      g_PVRRecordings->SetPlayCount(item, count);
+
     // We only need to announce changes to video items in the library
     if (item.HasVideoInfoTag() && item.GetVideoInfoTag()->m_iDbId > 0)
     {
@@ -5511,7 +5556,9 @@ bool CVideoDatabase::GetMoviesByWhere(const CStdString& strBaseDir, const Filter
       }
 
       CVideoDbUrl setUrl;
-      setUrl.FromString("videodb://1/7/");
+      if (!setUrl.FromString("videodb://1/7/"))
+        return false;
+ 
       setUrl.AddOptions(videoUrl.GetOptionsString());
       GetSetsByWhere(setUrl.ToString(), setsFilter, setItems);
 
@@ -8496,9 +8543,9 @@ void CVideoDatabase::ImportFromXML(const CStdString &path)
               int seasonNum = -1;
               season->Attribute("num", &seasonNum);
               map<string, string> artwork;
-              ImportArtFromXML(season, artwork);
+              
               int seasonID = AddSeason(showID, seasonNum);
-              if (seasonID > -1)
+              if (ImportArtFromXML(season, artwork) &&  seasonID > -1)
                 SetArtForItem(seasonID, "season", artwork);
             }
             season = season->NextSiblingElement("season");

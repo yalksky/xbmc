@@ -40,6 +40,7 @@ CDVDMessageQueue::CDVDMessageQueue(const string &owner) : m_hEvent(true)
   m_TimeBack      = DVD_NOPTS_VALUE;
   m_TimeFront     = DVD_NOPTS_VALUE;
   m_TimeSize      = 1.0 / 4.0; /* 4 seconds */
+  m_iMaxDataSize  = 0;
 }
 
 CDVDMessageQueue::~CDVDMessageQueue()
@@ -163,7 +164,9 @@ MsgQueueReturnCode CDVDMessageQueue::Get(CDVDMsg** pMsg, unsigned int iTimeoutIn
 
   if(m_list.empty() && m_bEmptied == false && priority == 0 && m_owner != "teletext")
   {
+#if !defined(TARGET_RASPBERRY_PI)
     CLog::Log(LOGWARNING, "CDVDMessageQueue(%s)::Get - asked for new data packet, with nothing available", m_owner.c_str());
+#endif
     m_bEmptied = true;
   }
 

@@ -41,7 +41,7 @@ class CProtocolFinder {
 public:
     CProtocolFinder(const char* protocol) : m_Protocol(protocol) {}
     bool operator()(const PLT_MediaItemResource& resource) const {
-        return (resource.m_ProtocolInfo.ToString().Compare(m_Protocol, true) == 0);
+        return (resource.m_ProtocolInfo.GetProtocol().Compare(m_Protocol, true) == 0);
     }
 private:
     NPT_String m_Protocol;
@@ -106,7 +106,7 @@ static bool FindDeviceWait(CUPnP* upnp, const char* uuid, PLT_DeviceDataReferenc
             return false;
 
         // sleep a bit and try again
-        NPT_System::Sleep(NPT_TimeInterval(1, 0));
+        NPT_System::Sleep(NPT_TimeInterval((double)1));
     }
 
     return !device.IsNull();
@@ -456,8 +456,9 @@ CUPnPDirectory::GetDirectory(const CStdString& strPath, CFileItemList &items)
             }
 
             // if there is a thumbnail available set it here
-            if((*entry)->m_ExtraInfo.album_art_uri.GetLength())
-                pItem->SetThumbnailImage((const char*) (*entry)->m_ExtraInfo.album_art_uri);
+            if((*entry)->m_ExtraInfo.album_arts.GetItem(0))
+                // only considers first album art
+                pItem->SetThumbnailImage((const char*) (*entry)->m_ExtraInfo.album_arts.GetItem(0)->uri);
             else if((*entry)->m_Description.icon_uri.GetLength())
                 pItem->SetThumbnailImage((const char*) (*entry)->m_Description.icon_uri);
 

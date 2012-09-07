@@ -31,6 +31,7 @@
 #include "utils/log.h"
 #include "utils/TimeUtils.h"
 #include "utils/MathUtils.h"
+#include "cores/AudioEngine/AEFactory.h"
 #include "cores/AudioEngine/Utils/AEUtil.h"
 
 #include <sstream>
@@ -166,9 +167,22 @@ CDVDPlayerAudio::CDVDPlayerAudio(CDVDClock* pClock, CDVDMessageQueue& parent)
   m_speed = DVD_PLAYSPEED_NORMAL;
   m_stalled = true;
   m_started = false;
+  m_silence = false;
   m_duration = 0.0;
   m_resampleratio = 1.0;
+  m_synctype = SYNC_DISCON;
+  m_setsynctype = SYNC_DISCON;
+  m_prevsynctype = -1;
+  m_error = 0;
+  m_errorbuff = 0;
+  m_errorcount = 0;
+  m_syncclock = true;
+  m_integral = 0;
+  m_skipdupcount = 0;
+  m_prevskipped = false;
+  m_maxspeedadjust = 0.0;
 
+  m_errortime = 0;
   m_freq = CurrentHostFrequency();
 
   m_messageQueue.SetMaxDataSize(6 * 1024 * 1024);
@@ -252,8 +266,10 @@ void CDVDPlayerAudio::OpenStream( CDVDStreamInfo &hints, CDVDAudioCodec* codec )
 
 void CDVDPlayerAudio::CloseStream(bool bWaitForBuffers)
 {
+  bool bWait = bWaitForBuffers && m_speed > 0 && !CAEFactory::IsSuspended();
+
   // wait until buffers are empty
-  if (bWaitForBuffers && m_speed > 0) m_messageQueue.WaitUntilEmpty();
+  if (bWait) m_messageQueue.WaitUntilEmpty();
 
   // send abort message to the audio queue
   m_messageQueue.Abort();
@@ -265,7 +281,7 @@ void CDVDPlayerAudio::CloseStream(bool bWaitForBuffers)
 
   // destroy audio device
   CLog::Log(LOGNOTICE, "Closing audio device");
-  if (bWaitForBuffers && m_speed > 0)
+  if (bWait)
   {
     m_bStop = false;
     m_dvdAudio.Drain();
@@ -529,7 +545,6 @@ int CDVDPlayerAudio::DecodeFrame(DVDAudioFrame &audioframe, bool bDropPacket)
 
 void CDVDPlayerAudio::OnStartup()
 {
-  m_decode.msg = NULL;
   m_decode.Release();
 
   g_dvdPerformanceCounter.EnableAudioDecodePerformance(this);
@@ -552,7 +567,8 @@ void CDVDPlayerAudio::Process()
   while (!m_bStop)
   {
     //Don't let anybody mess with our global variables
-    result = DecodeFrame(audioframe, m_speed > DVD_PLAYSPEED_NORMAL || m_speed < 0); // blocks if no audio is available, but leaves critical section before doing so
+    result = DecodeFrame(audioframe, m_speed > DVD_PLAYSPEED_NORMAL || m_speed < 0 ||
+                         CAEFactory::IsSuspended()); // blocks if no audio is available, but leaves critical section before doing so
 
     if( result & DECODE_FLAG_ERROR )
     {

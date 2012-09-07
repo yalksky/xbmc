@@ -39,6 +39,7 @@
 #define HAS_UPNP
 #define HAS_VIDEO_PLAYBACK
 #define HAS_VISUALISATION
+#define HAS_PVRCLIENTS
 
 #ifdef HAVE_LIBMICROHTTPD
 #define HAS_WEB_SERVER
@@ -165,6 +166,8 @@
 #define HAS_SDL_OPENGL
 #endif
 #define HAS_SDL_WIN_EVENTS
+#else
+#define HAS_LINUX_EVENTS
 #endif
 #define HAS_LINUX_NETWORK
 #define HAS_LIRC
@@ -229,6 +232,7 @@
 #endif
 
 #if defined(TARGET_ANDROID)
+#undef HAS_LINUX_EVENTS
 #undef HAS_LIRC
 #undef HAS_LCD
 #endif

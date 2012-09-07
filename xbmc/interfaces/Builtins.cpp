@@ -114,11 +114,14 @@ const BUILT_IN commands[] = {
   { "Quit",                       false,  "Quit XBMC" },
   { "Hibernate",                  false,  "Hibernates the system" },
   { "Suspend",                    false,  "Suspends the system" },
+  { "InhibitIdleShutdown",        false,  "Inhibit idle shutdown" },
+  { "AllowIdleShutdown",          false,  "Allow idle shutdown" },
   { "RestartApp",                 false,  "Restart XBMC" },
   { "Minimize",                   false,  "Minimize XBMC" },
   { "Reset",                      false,  "Reset the system (same as reboot)" },
   { "Mastermode",                 false,  "Control master mode" },
   { "ActivateWindow",             true,   "Activate the specified window" },
+  { "ActivateWindowAndFocus",     true,   "Activate the specified window and sets focus to the specified id" },
   { "ReplaceWindow",              true,   "Replaces the current window with the new one" },
   { "TakeScreenshot",             false,  "Takes a Screenshot" },
   { "RunScript",                  true,   "Run the specified script" },
@@ -210,7 +213,7 @@ const BUILT_IN commands[] = {
   { "LCD.Resume",                 false,  "Resumes LCDproc" },
 #endif
   { "VideoLibrary.Search",        false,  "Brings up a search dialog which will search the library" },
-  { "toggledebug",                false,  "Enables/disables debug mode" },
+  { "ToggleDebug",                false,  "Enables/disables debug mode" },
 };
 
 bool CBuiltins::HasCommand(const CStdString& execString)
@@ -275,6 +278,11 @@ int CBuiltins::Execute(const CStdString& execString)
   else if (execute.Equals("quit"))
   {
     CApplicationMessenger::Get().Quit();
+  }
+  else if (execute.Equals("inhibitidleshutdown"))
+  {
+    bool inhibit = (params.size() == 1 && params[0].Equals("true"));
+    CApplicationMessenger::Get().InhibitIdleShutdown(inhibit);
   }
   else if (execute.Equals("minimize"))
   {
@@ -351,6 +359,39 @@ int CBuiltins::Execute(const CStdString& execString)
     CGUIMessage msg(GUI_MSG_SETFOCUS, g_windowManager.GetFocusedWindow(), controlID, subItem);
     g_windowManager.SendMessage(msg);
   }
+  else if ((execute.Equals("activatewindowandfocus")) && params.size())
+  {
+    CStdString strWindow = params[0];
+
+    // confirm the window destination is valid prior to switching
+    int iWindow = CButtonTranslator::TranslateWindow(strWindow);
+    if (iWindow != WINDOW_INVALID)
+    {
+      // disable the screensaver
+      g_application.WakeUpScreenSaverAndDPMS();
+#if defined(__APPLE__) && defined(__arm__)
+      if (params[0].Equals("shutdownmenu"))
+        CBuiltins::Execute("Quit");
+#endif
+      vector<CStdString> dummy;
+      g_windowManager.ActivateWindow(iWindow, dummy, !execute.Equals("activatewindow"));
+
+      unsigned int iPtr = 1;
+      while (params.size() > iPtr + 1)
+      {
+        CGUIMessage msg(GUI_MSG_SETFOCUS, g_windowManager.GetFocusedWindow(),
+            atol(params[iPtr].c_str()),
+            (params.size() >= iPtr + 2) ? atol(params[iPtr + 1].c_str())+1 : 0);
+        g_windowManager.SendMessage(msg);
+        iPtr += 2;
+      }
+    }
+    else
+    {
+      CLog::Log(LOGERROR, "ActivateWindowAndFocus called with invalid destination window: %s", strWindow.c_str());
+      return false;
+    }
+  }
   else if (execute.Equals("runscript") && params.size())
   {
 #if defined(TARGET_DARWIN_OSX)
@@ -418,6 +459,10 @@ int CBuiltins::Execute(const CStdString& execString)
     else if (parameter.Equals("ntsc")) res = RES_NTSC_4x3;
     else if (parameter.Equals("ntsc16x9")) res = RES_NTSC_16x9;
     else if (parameter.Equals("720p")) res = RES_HDTV_720p;
+    else if (parameter.Equals("720pSBS")) res = RES_HDTV_720pSBS;
+    else if (parameter.Equals("720pTB")) res = RES_HDTV_720pTB;
+    else if (parameter.Equals("1080pSBS")) res = RES_HDTV_1080pSBS;
+    else if (parameter.Equals("1080pTB")) res = RES_HDTV_1080pTB;
     else if (parameter.Equals("1080i")) res = RES_HDTV_1080i;
     if (g_graphicsContext.IsValidResolution(res))
     {

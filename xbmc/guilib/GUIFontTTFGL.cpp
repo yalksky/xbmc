@@ -79,7 +79,7 @@ void CGUIFontTTFGL::Begin()
     }
 
     // Turn Blending On
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE_MINUS_DST_ALPHA, GL_ONE);
     glEnable(GL_BLEND);
 #ifdef HAS_GL
     glEnable(GL_TEXTURE_2D);
@@ -178,6 +178,7 @@ CBaseTexture* CGUIFontTTFGL::ReallocTexture(unsigned int& newHeight)
   if (!newTexture || newTexture->GetPixels() == NULL)
   {
     CLog::Log(LOGERROR, "GUIFontTTFGL::CacheCharacter: Error creating new cache texture for size %f", m_height);
+    delete newTexture;
     return NULL;
   }
   m_textureHeight = newTexture->GetHeight();
