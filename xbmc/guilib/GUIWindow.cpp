@@ -54,7 +54,7 @@ CGUIWindow::CGUIWindow(int id, const CStdString &xmlFile)
 {
   SetID(id);
   SetProperty("xmlfile", xmlFile);
-  m_idRange = 1;
+  m_idRange.push_back(id);
   m_lastControlID = 0;
   m_overlayState = OVERLAY_STATE_PARENT_WINDOW;   // Use parent or previous window's state
   m_isDialog = false;
@@ -366,13 +366,13 @@ void CGUIWindow::Close_Internal(bool forceClose /*= false*/, int nextWindowID /*
   OnMessage(msg);
 }
 
-void CGUIWindow::Close(bool forceClose /*= false*/, int nextWindowID /*= 0*/, bool enableSound /*= true*/)
+void CGUIWindow::Close(bool forceClose /*= false*/, int nextWindowID /*= 0*/, bool enableSound /*= true*/, bool bWait /* = true */)
 {
   if (!g_application.IsCurrentThread())
   {
     // make sure graphics lock is not held
     CSingleExit leaveIt(g_graphicsContext);
-    CApplicationMessenger::Get().Close(this, forceClose, true, nextWindowID, enableSound);
+    CApplicationMessenger::Get().Close(this, forceClose, bWait, nextWindowID, enableSound);
   }
   else
     Close_Internal(forceClose, nextWindowID, enableSound);
@@ -506,6 +506,13 @@ bool CGUIWindow::OnMessage(CGUIMessage& message)
 {
   switch ( message.GetMessage() )
   {
+  case GUI_MSG_WINDOW_LOAD:
+    {
+      Initialize();
+      return true;
+    }
+    break;
+      
   case GUI_MSG_WINDOW_INIT:
     {
       CLog::Log(LOGDEBUG, "------ Window Init (%s) ------", GetProperty("xmlfile").c_str());
@@ -728,7 +735,15 @@ bool CGUIWindow::Initialize()
 {
   if (!g_windowManager.Initialized())
     return false;     // can't load if we have no skin yet
-  return Load(GetProperty("xmlfile").asString());
+  if(m_windowLoaded)
+    return false;
+  if(g_application.IsCurrentThread())
+    return Load(GetProperty("xmlfile").asString());
+  else
+  {
+    CGUIMessage msg(GUI_MSG_WINDOW_LOAD, 0, 0);
+    g_windowManager.SendThreadMessage(msg, GetID());
+  }
 }
 
 void CGUIWindow::SetInitialVisibility()
@@ -993,4 +1008,14 @@ void CGUIWindow::ClearBackground()
   color_t color = m_clearBackground;
   if (color)
     g_graphicsContext.Clear(color);
+}
+
+bool CGUIWindow::HasID(int controlID) const
+{
+  for (std::vector<int>::const_iterator it = m_idRange.begin(); it != m_idRange.end() ; it++)
+  {
+    if (controlID == *it)
+      return true;
+  }
+  return false;
 }

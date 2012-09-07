@@ -66,8 +66,8 @@ public:
 
   int SlideNumber() const { return m_iSlideNumber;};
 
-  void Zoom(int iZoomAmount, bool immediate = false);
-  void Rotate(int iRotateAmount);
+  void Zoom(float fZoomAmount, bool immediate = false);
+  void Rotate(float fRotateAngle, bool immediate = false);
   void Pause(bool bPause);
   void SetInSlideshow(bool slideshow);
   void SetOriginalSize(int iOriginalWidth, int iOriginalHeight, bool bFullSize);
@@ -79,6 +79,7 @@ public:
   float GetZoom() const { return m_fZoomAmount;};
 
   bool m_bIsComic;
+  bool m_bCanMoveHorizontally;
 private:
   void UpdateVertices(float cur_x[4], float cur_y[4], const float new_x[4], const float new_y[4], CDirtyRegionList &dirtyregions);
   void Render(float *x, float *y, CBaseTexture* pTexture, color_t color);

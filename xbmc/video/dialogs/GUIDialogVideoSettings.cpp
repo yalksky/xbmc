@@ -32,8 +32,10 @@
 #include "dialogs/GUIDialogYesNo.h"
 #include "settings/Settings.h"
 #include "addons/Skin.h"
+#include "pvr/PVRManager.h"
 
 using namespace std;
+using namespace PVR;
 
 CGUIDialogVideoSettings::CGUIDialogVideoSettings(void)
     : CGUIDialogSettings(WINDOW_DIALOG_VIDEO_OSD_SETTINGS, "VideoOSDSettings.xml")
@@ -76,7 +78,9 @@ void CGUIDialogVideoSettings::CreateSettings()
   {
     vector<pair<int, int> > entries;
     entries.push_back(make_pair(VS_DEINTERLACEMODE_OFF    , 16039));
+#ifndef TARGET_RASPBERRY_PI
     entries.push_back(make_pair(VS_DEINTERLACEMODE_AUTO   , 16040));
+#endif
     entries.push_back(make_pair(VS_DEINTERLACEMODE_FORCE  , 16041));
 
     /* remove unsupported methods */
@@ -90,6 +94,7 @@ void CGUIDialogVideoSettings::CreateSettings()
 
     AddSpin(VIDEO_SETTINGS_DEINTERLACEMODE, 16037, (int*)&g_settings.m_currentVideoSettings.m_DeinterlaceMode, entries);
   }
+#ifndef TARGET_RASPBERRY_PI
   {
     vector<pair<int, int> > entries;
     entries.push_back(make_pair(VS_INTERLACEMETHOD_AUTO                 , 16019));
@@ -110,6 +115,7 @@ void CGUIDialogVideoSettings::CreateSettings()
     entries.push_back(make_pair(VS_INTERLACEMETHOD_VDPAU_INVERSE_TELECINE     , 16314));
     entries.push_back(make_pair(VS_INTERLACEMETHOD_DXVA_BOB                   , 16320));
     entries.push_back(make_pair(VS_INTERLACEMETHOD_DXVA_BEST                  , 16321));
+    entries.push_back(make_pair(VS_INTERLACEMETHOD_AUTO_ION                   , 16325));
 
     /* remove unsupported methods */
     for(vector<pair<int, int> >::iterator it = entries.begin(); it != entries.end();)
@@ -154,6 +160,7 @@ void CGUIDialogVideoSettings::CreateSettings()
 
     AddSpin(VIDEO_SETTINGS_SCALINGMETHOD, 16300, (int*)&g_settings.m_currentVideoSettings.m_ScalingMethod, entries);
   }
+#endif
   AddBool(VIDEO_SETTINGS_CROP, 644, &g_settings.m_currentVideoSettings.m_Crop);
   {
     const int entries[] = {630, 631, 632, 633, 634, 635, 636 };
@@ -240,6 +247,9 @@ void CGUIDialogVideoSettings::OnSettingChanged(SettingInfo &setting)
   {
     EnableSettings(VIDEO_SETTINGS_INTERLACEMETHOD, g_settings.m_currentVideoSettings.m_DeinterlaceMode != VS_DEINTERLACEMODE_OFF);
   }
+
+  if (g_PVRManager.IsPlayingRadio() || g_PVRManager.IsPlayingTV())
+    g_PVRManager.TriggerSaveChannelSettings();
 }
 
 CStdString CGUIDialogVideoSettings::FormatInteger(float value, float minimum)

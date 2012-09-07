@@ -131,6 +131,14 @@ bool XMLUtils::GetString(const TiXmlNode* pRootNode, const char* strTag, CStdStr
   return false;
 }
 
+bool XMLUtils::HasChild(const TiXmlNode* pRootNode, const char* strTag)
+{
+  const TiXmlElement* pElement = pRootNode->FirstChildElement(strTag);
+  if (!pElement) return false;
+  const TiXmlNode* pNode = pElement->FirstChild();
+  return (pNode != NULL);
+}
+
 bool XMLUtils::GetAdditiveString(const TiXmlNode* pRootNode, const char* strTag,
                                  const CStdString& strSeparator, CStdString& strStringValue,
                                  bool clear)
@@ -306,7 +314,7 @@ void XMLUtils::SetInt(TiXmlNode* pRootNode, const char *strTag, int value)
 void XMLUtils::SetLong(TiXmlNode* pRootNode, const char *strTag, long value)
 {
   CStdString strValue;
-  strValue.Format("%l", value);
+  strValue.Format("%ld", value);
   SetString(pRootNode, strTag, strValue);
 }
 

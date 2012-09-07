@@ -41,6 +41,7 @@
 #include "GUIInfoManager.h"
 #include "utils/Splash.h"
 #include "cores/VideoRenderers/RenderManager.h"
+#include "cores/AudioEngine/AEFactory.h"
 #include "music/tags/MusicInfoTag.h"
 
 #include "powermanagement/PowerManager.h"
@@ -51,6 +52,8 @@
 #elif defined(TARGET_DARWIN)
 #include "CocoaInterface.h"
 #endif
+#include "addons/AddonCallbacks.h"
+#include "addons/AddonCallbacksGUI.h"
 #include "storage/MediaManager.h"
 #include "guilib/LocalizeStrings.h"
 #include "threads/SingleLock.h"
@@ -68,6 +71,9 @@
 
 #include "ThumbLoader.h"
 
+#include "pvr/PVRManager.h"
+
+using namespace PVR;
 using namespace std;
 using namespace MUSIC_INFO;
 
@@ -252,7 +258,7 @@ void CApplicationMessenger::ProcessMessage(ThreadMessage *pMsg)
       }
       break;
 
-case TMSG_POWERDOWN:
+    case TMSG_POWERDOWN:
       {
         g_application.Stop(EXITCODE_POWERDOWN);
         g_powerManager.Powerdown();
@@ -267,12 +273,14 @@ case TMSG_POWERDOWN:
 
     case TMSG_HIBERNATE:
       {
+        g_PVRManager.SetWakeupCommand();
         g_powerManager.Hibernate();
       }
       break;
 
     case TMSG_SUSPEND:
       {
+        g_PVRManager.SetWakeupCommand();
         g_powerManager.Suspend();
       }
       break;
@@ -290,6 +298,12 @@ case TMSG_POWERDOWN:
 #if defined(TARGET_WINDOWS) || defined(TARGET_LINUX)
         g_application.Stop(EXITCODE_RESTARTAPP);
 #endif
+      }
+      break;
+
+    case TMSG_INHIBITIDLESHUTDOWN:
+      {
+        g_application.InhibitIdleShutdown((bool)pMsg->dwParam1);
       }
       break;
 
@@ -511,11 +525,22 @@ case TMSG_POWERDOWN:
       break;
 
     case TMSG_EXECUTE_OS:
+      /* Suspend AE temporarily so exclusive or hog-mode sinks */
+      /* don't block external player's access to audio device  */
+      if (!CAEFactory::Suspend())
+      {
+        CLog::Log(LOGNOTICE, __FUNCTION__, "Failed to suspend AudioEngine before launching external program");
+      }
 #if defined( _LINUX) && !defined(TARGET_DARWIN)
       CUtil::RunCommandLine(pMsg->strParam.c_str(), (pMsg->dwParam1 == 1));
 #elif defined(_WIN32)
       CWIN32Util::XBMCShellExecute(pMsg->strParam.c_str(), (pMsg->dwParam1 == 1));
 #endif
+      /* Resume AE processing of XBMC native audio */
+      if (!CAEFactory::Resume())
+      {
+        CLog::Log(LOGFATAL, __FUNCTION__, "Failed to restart AudioEngine after return from external player");
+      }
       break;
 
     case TMSG_HTTPAPI:
@@ -685,6 +710,15 @@ case TMSG_POWERDOWN:
     case TMSG_GUI_ACTIVATE_WINDOW:
       {
         g_windowManager.ActivateWindow(pMsg->dwParam1, pMsg->params, pMsg->dwParam2 > 0);
+      }
+      break;
+
+    case TMSG_GUI_ADDON_DIALOG:
+      {
+        if (pMsg->lpVoid)
+        { // TODO: This is ugly - really these python dialogs should just be normal XBMC dialogs
+          ((ADDON::CGUIAddonWindowDialog *) pMsg->lpVoid)->Show_Internal(pMsg->dwParam2 > 0);
+        }
       }
       break;
 
@@ -909,10 +943,10 @@ void CApplicationMessenger::PlayFile(const CFileItem &item, bool bRestart /*= fa
   SendMessage(tMsg, false);
 }
 
-void CApplicationMessenger::MediaStop()
+void CApplicationMessenger::MediaStop(bool bWait /* = true */)
 {
   ThreadMessage tMsg = {TMSG_MEDIA_STOP};
-  SendMessage(tMsg, true);
+  SendMessage(tMsg, bWait);
 }
 
 void CApplicationMessenger::MediaPause()
@@ -1114,6 +1148,12 @@ void CApplicationMessenger::Reset()
 void CApplicationMessenger::RestartApp()
 {
   ThreadMessage tMsg = {TMSG_RESTARTAPP};
+  SendMessage(tMsg);
+}
+
+void CApplicationMessenger::InhibitIdleShutdown(bool inhibit)
+{
+  ThreadMessage tMsg = {TMSG_INHIBITIDLESHUTDOWN, (DWORD)inhibit};
   SendMessage(tMsg);
 }
 

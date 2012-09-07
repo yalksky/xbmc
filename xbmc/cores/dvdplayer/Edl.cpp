@@ -113,8 +113,9 @@ bool CEdl::ReadEditDecisionLists(const CStdString& strMovie, const float fFrameR
    * Only check for edit decision lists if the movie is on the local hard drive, or accessed over a
    * network share.
    */
-  if (URIUtils::IsHD(strMovie)
-  ||  URIUtils::IsSmb(strMovie))
+  if ((URIUtils::IsHD(strMovie) ||  URIUtils::IsSmb(strMovie)) &&
+      !URIUtils::IsPVRRecording(strMovie) &&
+      !URIUtils::IsInternetStream(strMovie))
   {
     CLog::Log(LOGDEBUG, "%s - Checking for edit decision lists (EDL) on local drive or remote share for: %s",
               __FUNCTION__, strMovie.c_str());
@@ -219,7 +220,7 @@ bool CEdl::ReadEdl(const CStdString& strMovie, const float fFramesPerSecond)
         StringUtils::SplitString(strFields[i], ".", fieldParts);
         if (fieldParts.size() == 1) // No ms
         {
-          iCutStartEnd[i] = StringUtils::TimeStringToSeconds(fieldParts[0]) * 1000; // seconds to ms
+          iCutStartEnd[i] = StringUtils::TimeStringToSeconds(fieldParts[0]) * (int64_t)1000; // seconds to ms
         }
         else if (fieldParts.size() == 2) // Has ms. Everything after the dot (.) is ms
         {
@@ -238,7 +239,7 @@ bool CEdl::ReadEdl(const CStdString& strMovie, const float fFramesPerSecond)
           {
             fieldParts[1] = fieldParts[1].Left(3);
           }
-          iCutStartEnd[i] = StringUtils::TimeStringToSeconds(fieldParts[0]) * 1000 + atoi(fieldParts[1]); // seconds to ms
+          iCutStartEnd[i] = (int64_t)StringUtils::TimeStringToSeconds(fieldParts[0]) * 1000 + atoi(fieldParts[1]); // seconds to ms
         }
         else
         {

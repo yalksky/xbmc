@@ -257,8 +257,7 @@ bool CAESinkALSA::InitializeHW(AEAudioFormat &format)
   /* ensure we opened X channels or more */
   if (format.m_channelLayout.Count() > channelCount)
   {
-    CLog::Log(LOGERROR, "CAESinkALSA::InitializeHW - Unable to open the required number of channels");
-    return false;
+    CLog::Log(LOGINFO, "CAESinkALSA::InitializeHW - Unable to open the required number of channels");
   }
 
   /* update the channelLayout to what we managed to open */
@@ -493,7 +492,7 @@ unsigned int CAESinkALSA::AddPackets(uint8_t *data, unsigned int frames, bool ha
     ret = 0;
   }
 
-  if ((unsigned int)ret < frames);
+  if ((unsigned int)ret < frames)
   {
     ret = snd_pcm_wait(m_pcm, m_timeout);
     if (ret < 0)
