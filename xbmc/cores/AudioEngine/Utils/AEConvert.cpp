@@ -13,9 +13,8 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with XBMC; see the file COPYING.  If not, write to
- *  the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
- *  http://www.gnu.org/copyleft/gpl.html
+ *  along with XBMC; see the file COPYING.  If not, see
+ *  <http://www.gnu.org/licenses/>.
  *
  */
 #ifndef __STDC_LIMIT_MACROS
@@ -670,7 +669,7 @@ unsigned int CAEConvert::Float_S16BE(float *data, const unsigned int samples, ui
 
   MEMALIGN(16, static const __m128  mul) = _mm_set_ps1((float)INT16_MAX);
   MEMALIGN(16, __m128  rand);
-  MEMALIGN(16, __m128  in  );
+  MEMALIGN(16, __m128  in  ) = _mm_setr_ps(0, 0, 0, 0);
   MEMALIGN(16, __m128i con );
 
   /* if unaligned is greater then one, use SSE to correct it */

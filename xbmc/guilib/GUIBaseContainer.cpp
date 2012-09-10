@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2005-2008 Team XBMC
+ *      Copyright (C) 2005-2012 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -13,9 +13,8 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with XBMC; see the file COPYING.  If not, write to
- *  the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
- *  http://www.gnu.org/copyleft/gpl.html
+ *  along with XBMC; see the file COPYING.  If not, see
+ *  <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -891,6 +890,12 @@ void CGUIBaseContainer::UpdateStaticItems(bool refreshItems)
   }
 }
 
+void CGUIBaseContainer::SetInitialVisibility()
+{
+  UpdateStaticItems(true);
+  CGUIControl::SetInitialVisibility();
+}
+
 void CGUIBaseContainer::CalculateLayout()
 {
   CGUIListItemLayout *oldFocusedLayout = m_focusedLayout;
@@ -1041,16 +1046,17 @@ void CGUIBaseContainer::LoadContent(TiXmlElement *content)
     }
     item = item->NextSiblingElement("item");
   }
-  SetStaticContent(items);
+  SetStaticContent(items, false);
 }
 
-void CGUIBaseContainer::SetStaticContent(const vector<CGUIListItemPtr> &items)
+void CGUIBaseContainer::SetStaticContent(const vector<CGUIListItemPtr> &items, bool forceUpdate /* = true */)
 {
   m_staticContent = true;
   m_staticUpdateTime = 0;
   m_staticItems.clear();
   m_staticItems.assign(items.begin(), items.end());
-  UpdateStaticItems(true);
+  if (forceUpdate)
+    UpdateStaticItems(true);
 }
 
 void CGUIBaseContainer::SetRenderOffset(const CPoint &offset)

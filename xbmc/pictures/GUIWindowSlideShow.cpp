@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2005-2008 Team XBMC
+ *      Copyright (C) 2005-2012 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -13,9 +13,8 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with XBMC; see the file COPYING.  If not, write to
- *  the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
- *  http://www.gnu.org/copyleft/gpl.html
+ *  along with XBMC; see the file COPYING.  If not, see
+ *  <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -144,6 +143,7 @@ CGUIWindowSlideShow::CGUIWindowSlideShow(void)
   m_pBackgroundLoader = NULL;
   m_slides = new CFileItemList;
   m_Resolution = RES_INVALID;
+  m_loadType = KEEP_IN_MEMORY;
   Reset();
 }
 
@@ -187,8 +187,21 @@ void CGUIWindowSlideShow::Reset()
   m_Resolution = g_graphicsContext.GetVideoResolution();
 }
 
-void CGUIWindowSlideShow::FreeResources()
-{ // wait for any outstanding picture loads
+void CGUIWindowSlideShow::OnDeinitWindow(int nextWindowID)
+{ 
+  if (m_Resolution != g_guiSettings.m_LookAndFeelResolution)
+  {
+    //FIXME: Use GUI resolution for now
+    //g_graphicsContext.SetVideoResolution(g_guiSettings.m_LookAndFeelResolution, TRUE);
+  }
+
+  //   Reset();
+  if (nextWindowID != WINDOW_PICTURES)
+    m_ImageLib.Unload();
+
+  g_windowManager.ShowOverlay(OVERLAY_STATE_SHOWN);
+
+  // wait for any outstanding picture loads
   if (m_pBackgroundLoader)
   {
     // sleep until the loader finishes loading the current pic
@@ -205,6 +218,8 @@ void CGUIWindowSlideShow::FreeResources()
   m_Image[0].Close();
   m_Image[1].Close();
   g_infoManager.ResetCurrentSlide();
+
+  CGUIWindow::OnDeinitWindow(nextWindowID);
 }
 
 void CGUIWindowSlideShow::Add(const CFileItem *picture)
@@ -722,23 +737,6 @@ bool CGUIWindowSlideShow::OnMessage(CGUIMessage& message)
 {
   switch ( message.GetMessage() )
   {
-  case GUI_MSG_WINDOW_DEINIT:
-    {
-      if (m_Resolution != g_guiSettings.m_LookAndFeelResolution)
-      {
-        //FIXME: Use GUI resolution for now
-        //g_graphicsContext.SetVideoResolution(g_guiSettings.m_LookAndFeelResolution, TRUE);
-      }
-
-      //   Reset();
-      if (message.GetParam1() != WINDOW_PICTURES)
-        m_ImageLib.Unload();
-
-      g_windowManager.ShowOverlay(OVERLAY_STATE_SHOWN);
-      FreeResources();
-    }
-    break;
-
   case GUI_MSG_WINDOW_INIT:
     {
       m_Resolution = (RESOLUTION) g_guiSettings.GetInt("pictures.displayresolution");
