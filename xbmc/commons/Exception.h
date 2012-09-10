@@ -13,9 +13,8 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with XBMC; see the file COPYING.  If not, write to
- *  the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
- *  http://www.gnu.org/copyleft/gpl.html
+ *  along with XBMC; see the file COPYING.  If not, see
+ *  <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -56,7 +55,7 @@ namespace XbmcCommons
   protected:
     static ILogger* logger;
 
-	inline Exception(const char* classname_) : classname(classname_) { }
+    inline Exception(const char* classname_) : classname(classname_) { }
     inline Exception(const char* classname_, const char* message_) : classname(classname_), message(message_) { }
     inline Exception(const Exception& other) : classname(other.classname), message(other.message) { }
 
@@ -78,6 +77,8 @@ namespace XbmcCommons
       // calls 'set'
       XBMCCOMMONS_COPYVARARGS(fmt);
     }
+
+    inline void setClassname(const char* cn) { classname = cn; }
 
   public:
     virtual ~Exception();

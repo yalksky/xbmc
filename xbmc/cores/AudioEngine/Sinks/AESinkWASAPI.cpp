@@ -13,9 +13,8 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with XBMC; see the file COPYING.  If not, write to
- *  the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
- *  http://www.gnu.org/copyleft/gpl.html
+ *  along with XBMC; see the file COPYING.  If not, see
+ *  <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -66,16 +65,41 @@ static const enum AEChannel AEChannelNames[]   = {AE_CH_RAW,
                                                   AE_CH_TC  ,                   AE_CH_TBL,                     AE_CH_TBR,
                                                   AE_CH_TBC,                    AE_CH_BLOC,                    AE_CH_BROC};
 
-static enum AEChannel layoutsByChCount[9][9] = {
-    {AE_CH_NULL},
-    {AE_CH_FC, AE_CH_NULL},
-    {AE_CH_FL, AE_CH_FR, AE_CH_NULL},
-    {AE_CH_FL, AE_CH_FR, AE_CH_FC, AE_CH_NULL},
-    {AE_CH_FL, AE_CH_FR, AE_CH_BL, AE_CH_BR, AE_CH_NULL},
-    {AE_CH_FL, AE_CH_FR, AE_CH_FC, AE_CH_BL, AE_CH_BR, AE_CH_NULL},
-    {AE_CH_FL, AE_CH_FR, AE_CH_FC, AE_CH_BL, AE_CH_BR, AE_CH_LFE, AE_CH_NULL},
-    {AE_CH_FL, AE_CH_FR, AE_CH_FC, AE_CH_BL, AE_CH_BR, AE_CH_BC, AE_CH_LFE, AE_CH_NULL},
-    {AE_CH_FL, AE_CH_FR, AE_CH_FC, AE_CH_BL, AE_CH_BR, AE_CH_SL, AE_CH_SR, AE_CH_LFE, AE_CH_NULL}};
+static const enum AEChannel layoutsList[][16] = 
+{
+  // Most common configurations
+  {AE_CH_FC,  AE_CH_NULL}, // Mono
+  {AE_CH_FL,  AE_CH_FR,  AE_CH_NULL}, // Stereo
+  {AE_CH_FL,  AE_CH_FR,  AE_CH_BL,  AE_CH_BR,  AE_CH_NULL}, // Quad
+  {AE_CH_FL,  AE_CH_FR,  AE_CH_FC,  AE_CH_BC,  AE_CH_NULL}, // Surround
+  {AE_CH_FL,  AE_CH_FR,  AE_CH_FC,  AE_CH_LFE, AE_CH_SL,  AE_CH_SR,  AE_CH_NULL}, // Standard 5.1
+  {AE_CH_FL,  AE_CH_FR,  AE_CH_FC,  AE_CH_LFE, AE_CH_SL,  AE_CH_SR,  AE_CH_BL,  AE_CH_BR,  AE_CH_NULL}, // Standard 7.1
+  // Less common configurations
+  {AE_CH_FL,  AE_CH_FR,  AE_CH_LFE, AE_CH_NULL}, // 2.1
+  {AE_CH_FL,  AE_CH_FR,  AE_CH_FC,  AE_CH_LFE, AE_CH_BL,  AE_CH_BR,  AE_CH_NULL}, // 5.1 wide (obsolete)
+  {AE_CH_FL,  AE_CH_FR,  AE_CH_FC,  AE_CH_LFE, AE_CH_BL,  AE_CH_BR,  AE_CH_FLOC,AE_CH_FROC,AE_CH_NULL}, // 7.1 wide (obsolete)
+  // Exotic configurations
+  {AE_CH_FL,  AE_CH_FR,  AE_CH_FC,  AE_CH_NULL}, // 3 front speakers
+  {AE_CH_FL,  AE_CH_FR,  AE_CH_FC,  AE_CH_LFE, AE_CH_NULL}, // 3 front speakers + LFE
+  {AE_CH_FL,  AE_CH_FR,  AE_CH_BL,  AE_CH_BR,  AE_CH_LFE, AE_CH_NULL}, // Quad + LFE
+  {AE_CH_FL,  AE_CH_FR,  AE_CH_FC,  AE_CH_BC,  AE_CH_LFE, AE_CH_NULL}, // Surround + LFE
+  {AE_CH_FL,  AE_CH_FR,  AE_CH_FC,  AE_CH_SL,  AE_CH_SR,  AE_CH_NULL}, // Standard 5.1 w/o LFE
+  {AE_CH_FL,  AE_CH_FR,  AE_CH_FC,  AE_CH_BL,  AE_CH_BR,  AE_CH_NULL}, // 5.1 wide w/o LFE
+  {AE_CH_FL,  AE_CH_FR,  AE_CH_FC,  AE_CH_SL,  AE_CH_SR,  AE_CH_BC,  AE_CH_NULL}, // Standard 5.1 w/o LFE + Back Center
+  {AE_CH_FL,  AE_CH_FR,  AE_CH_FC,  AE_CH_BL,  AE_CH_BC,  AE_CH_BR,  AE_CH_NULL}, // 5.1 wide w/o LFE + Back Center
+  {AE_CH_FL,  AE_CH_FR,  AE_CH_FC,  AE_CH_LFE, AE_CH_BL,  AE_CH_BR,  AE_CH_TC,  AE_CH_NULL}, // DVD speakers
+  {AE_CH_FL,  AE_CH_FR,  AE_CH_FC,  AE_CH_BL,  AE_CH_BR,  AE_CH_BC,  AE_CH_LFE, AE_CH_NULL}, // 5.1 wide + Back Center
+  {AE_CH_FL,  AE_CH_FR,  AE_CH_FC,  AE_CH_SL,  AE_CH_SR,  AE_CH_BL,  AE_CH_BR,  AE_CH_NULL}, // Standard 7.1 w/o LFE
+  {AE_CH_FL,  AE_CH_FR,  AE_CH_FC,  AE_CH_BL,  AE_CH_BR,  AE_CH_FLOC,AE_CH_FROC,AE_CH_NULL}, // 7.1 wide w/o LFE
+  {AE_CH_FL,  AE_CH_FR,  AE_CH_FC,  AE_CH_LFE, AE_CH_SL,  AE_CH_SR,  AE_CH_BL,  AE_CH_BC,  AE_CH_BR,  AE_CH_NULL}, // Standard 7.1 + Back Center
+  {AE_CH_FL,  AE_CH_FR,  AE_CH_FC,  AE_CH_LFE, AE_CH_SL,  AE_CH_SR,  AE_CH_BL,  AE_CH_BR,  AE_CH_FLOC,AE_CH_FROC,AE_CH_NULL}, // Standard 7.1 + front wide
+  {AE_CH_FL,  AE_CH_FR,  AE_CH_FC,  AE_CH_LFE, AE_CH_SL,  AE_CH_SR,  AE_CH_BL,  AE_CH_BR,  AE_CH_TFL, AE_CH_TFR, AE_CH_NULL}, // Standard 7.1 + 2 front top
+  {AE_CH_FL,  AE_CH_FR,  AE_CH_FC,  AE_CH_LFE, AE_CH_SL,  AE_CH_SR,  AE_CH_BL,  AE_CH_BR,  AE_CH_TFL, AE_CH_TFR, AE_CH_TFC, AE_CH_NULL}, // Standard 7.1 + 3 front top
+  {AE_CH_FL,  AE_CH_FR,  AE_CH_FC,  AE_CH_LFE, AE_CH_SL,  AE_CH_SR,  AE_CH_BL,  AE_CH_BR,  AE_CH_TFL, AE_CH_TFR, AE_CH_TBL, AE_CH_TBR, AE_CH_NULL}, // Standard 7.1 + 2 front top + 2 back top
+  {AE_CH_FL,  AE_CH_FR,  AE_CH_FC,  AE_CH_LFE, AE_CH_SL,  AE_CH_SR,  AE_CH_BL,  AE_CH_BR,  AE_CH_TFL, AE_CH_TFR, AE_CH_TFC, AE_CH_TBL, AE_CH_TBR, AE_CH_NULL}, // Standard 7.1 + 3 front top + 2 back top
+  {AE_CH_FL,  AE_CH_FR,  AE_CH_FC,  AE_CH_LFE, AE_CH_SL,  AE_CH_SR,  AE_CH_BL,  AE_CH_BR,  AE_CH_TFL, AE_CH_TFR, AE_CH_TFC, AE_CH_TBL, AE_CH_TBR, AE_CH_TBC, AE_CH_NULL}, // Standard 7.1 + 3 front top + 3 back top
+  {AE_CH_FL,  AE_CH_FR,  AE_CH_FC,  AE_CH_LFE, AE_CH_SL,  AE_CH_SR,  AE_CH_BL,  AE_CH_BR,  AE_CH_TFL, AE_CH_TFR, AE_CH_TFC, AE_CH_TBL, AE_CH_TBR, AE_CH_TBC, AE_CH_TC,  AE_CH_NULL} // Standard 7.1 + 3 front top + 3 back top + Top Center
+};
 
 struct sampleFormat
 {
@@ -120,6 +144,36 @@ AEDeviceInfoList DeviceInfoList;
 #define ERRTOSTR(err) case err: return #err
 
 DEFINE_PROPERTYKEY(PKEY_Device_FriendlyName, 0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0, 14);
+
+DWORD ChLayoutToChMask(const enum AEChannel * layout, unsigned int * numberOfChannels = NULL)
+{
+  if (numberOfChannels)
+    *numberOfChannels = 0;
+  if (!layout)
+    return 0;
+  
+  DWORD mask = 0;
+  unsigned int i;
+  for (i = 0; layout[i] != AE_CH_NULL; i++)
+    mask |= WASAPIChannelOrder[layout[i]];
+  
+  if (numberOfChannels)
+    *numberOfChannels = i;
+
+  return mask;
+}
+
+CStdStringA localWideToUtf(LPCWSTR wstr)
+{
+  if (wstr == NULL)
+    return "";
+  int bufSize = WideCharToMultiByte(CP_UTF8, 0, wstr, -1, NULL, 0, NULL, NULL);
+  CStdStringA strA ("", bufSize);
+  if ( bufSize == 0 || WideCharToMultiByte(CP_UTF8, 0, wstr, -1, strA.GetBuf(bufSize), bufSize, NULL, NULL) != bufSize )
+    strA.clear();
+  strA.RelBuf();
+  return strA;
+}
 
 CAESinkWASAPI::CAESinkWASAPI() :
   m_pAudioClient(NULL),
@@ -192,9 +246,7 @@ bool CAESinkWASAPI::Initialize(AEAudioFormat &format, std::string &device)
       goto failed;
     }
 
-    std::wstring strRawDevName(varName.pwszVal);
-    std::string strDevName = std::string(strRawDevName.begin(), strRawDevName.end());
-    //g_charsetConverter.ucs2CharsetToStringCharset(strRawDevName, strDevName.c_str());
+    std::string strDevName = localWideToUtf(varName.pwszVal);
 
     if (device == strDevName)
       i = uiCount;
@@ -221,9 +273,7 @@ bool CAESinkWASAPI::Initialize(AEAudioFormat &format, std::string &device)
 
     hr = pProperty->GetValue(PKEY_AudioEndpoint_GUID, &varName);
 
-    std::wstring strRawDevName(varName.pwszVal);
-    std::string strDevName = std::string(strRawDevName.begin(), strRawDevName.end());
-
+    std::string strDevName = localWideToUtf(varName.pwszVal);
     PropVariantClear(&varName);
     SAFE_RELEASE(pProperty);
   }
@@ -269,7 +319,11 @@ failed:
   SAFE_RELEASE(m_pRenderClient);
   SAFE_RELEASE(m_pAudioClient);
   SAFE_RELEASE(m_pDevice);
-  CloseHandle(m_needDataEvent);
+  if(m_needDataEvent)
+  {
+    CloseHandle(m_needDataEvent);
+    m_needDataEvent = 0;
+  }
 
   return false;
 }
@@ -293,8 +347,6 @@ void CAESinkWASAPI::Deinitialize()
   m_running = false;
 
   CloseHandle(m_needDataEvent);
-
-  Sleep((DWORD)(m_sinkLatency * 1.1 * 1000.0)); //let buffers drain
 
   SAFE_RELEASE(m_pRenderClient);
   SAFE_RELEASE(m_pAudioClient);
@@ -392,6 +444,12 @@ unsigned int CAESinkWASAPI::AddPackets(uint8_t *data, unsigned int frames, bool 
 
   if (!m_running) //first time called, pre-fill buffer then start audio client
   {
+    hr = m_pAudioClient->Reset();
+    if (FAILED(hr))
+    {
+      CLog::Log(LOGERROR, __FUNCTION__ " AudioClient reset failed due to %s", WASAPIErrToStr(hr));
+      return 0;
+    }
     hr = m_pRenderClient->GetBuffer(NumFramesRequested, &buf);
     if (FAILED(hr))
     {
@@ -401,7 +459,14 @@ unsigned int CAESinkWASAPI::AddPackets(uint8_t *data, unsigned int frames, bool 
       m_isDirty = true; //flag new device or re-init needed
       return INT_MAX;
     }
-    memcpy(buf, data, NumFramesRequested * m_format.m_frameSize); //fill buffer
+
+    /* Inject one buffer of silence if sink has just opened */
+    /* to avoid losing start of stream or GUI sound         */
+    if (g_advancedSettings.m_streamSilence)
+      memcpy(buf, data, NumFramesRequested * m_format.m_frameSize); //fill buffer with audio
+    else
+      memset(buf,    0, NumFramesRequested * m_format.m_frameSize); //fill buffer with silence
+
     hr = m_pRenderClient->ReleaseBuffer(NumFramesRequested, flags); //pass back to audio driver
     if (FAILED(hr))
     {
@@ -415,7 +480,7 @@ unsigned int CAESinkWASAPI::AddPackets(uint8_t *data, unsigned int frames, bool 
     if FAILED(hr)
       CLog::Log(LOGERROR, __FUNCTION__": AudioClient Start Failed");
     m_running = true; //signal that we're processing frames
-    return NumFramesRequested;
+    return g_advancedSettings.m_streamSilence ? NumFramesRequested : 0U;
   }
 
 #ifndef _DEBUG
@@ -463,7 +528,7 @@ unsigned int CAESinkWASAPI::AddPackets(uint8_t *data, unsigned int frames, bool 
     #ifdef _DEBUG
       CLog::Log(LOGERROR, __FUNCTION__": GetBuffer failed due to %s", WASAPIErrToStr(hr));
     #endif
-    return 0;
+    return INT_MAX;
   }
   memcpy(buf, data, NumFramesRequested * m_format.m_frameSize); //fill buffer
   hr = m_pRenderClient->ReleaseBuffer(NumFramesRequested, flags); //pass back to audio driver
@@ -472,7 +537,7 @@ unsigned int CAESinkWASAPI::AddPackets(uint8_t *data, unsigned int frames, bool 
     #ifdef _DEBUG
     CLog::Log(LOGDEBUG, __FUNCTION__": ReleaseBuffer failed due to %s.", WASAPIErrToStr(hr));
     #endif
-    return 0;
+    return INT_MAX;
   }
 
   return NumFramesRequested;
@@ -535,9 +600,7 @@ void CAESinkWASAPI::EnumerateDevicesEx(AEDeviceInfoList &deviceInfoList)
       goto failed;
     }
 
-    std::wstring strRawFriendlyName(varName.pwszVal);
-    std::string strFriendlyName = std::string(strRawFriendlyName.begin(), strRawFriendlyName.end());
-
+    std::string strFriendlyName = localWideToUtf(varName.pwszVal);
     PropVariantClear(&varName);
 
     hr = pProperty->GetValue(PKEY_AudioEndpoint_GUID, &varName);
@@ -549,9 +612,7 @@ void CAESinkWASAPI::EnumerateDevicesEx(AEDeviceInfoList &deviceInfoList)
       goto failed;
     }
 
-    std::wstring strRawDevName(varName.pwszVal);
-    std::string strDevName = std::string(strRawDevName.begin(), strRawDevName.end());
-
+    std::string strDevName = localWideToUtf(varName.pwszVal);
     PropVariantClear(&varName);
 
     hr = pProperty->GetValue(PKEY_AudioEndpoint_FormFactor, &varName);
@@ -575,7 +636,7 @@ void CAESinkWASAPI::EnumerateDevicesEx(AEDeviceInfoList &deviceInfoList)
       SAFE_RELEASE(pProperty);
       goto failed;
     }
-    unsigned int uiChannelMask = std::max(varName.uintVal, (unsigned int) AE_CH_FL | AE_CH_FR);
+    unsigned int uiChannelMask = std::max(varName.uintVal, (unsigned int) KSAUDIO_SPEAKER_STEREO);
 
     deviceChannels.Reset();
 
@@ -645,7 +706,7 @@ void CAESinkWASAPI::EnumerateDevicesEx(AEDeviceInfoList &deviceInfoList)
 
       /* Test format for PCM format iteration */
       wfxex.Format.cbSize               = sizeof(WAVEFORMATEXTENSIBLE)-sizeof(WAVEFORMATEX);
-      wfxex.dwChannelMask               = AE_CH_FL | AE_CH_FR;
+      wfxex.dwChannelMask               = KSAUDIO_SPEAKER_STEREO;
       wfxex.Format.wFormatTag           = WAVE_FORMAT_EXTENSIBLE;
       wfxex.SubFormat                   = KSDATAFORMAT_SUBTYPE_IEEE_FLOAT;
 
@@ -672,7 +733,7 @@ void CAESinkWASAPI::EnumerateDevicesEx(AEDeviceInfoList &deviceInfoList)
 
       /* Test format for sample rate iteration */
       wfxex.Format.cbSize               = sizeof(WAVEFORMATEXTENSIBLE)-sizeof(WAVEFORMATEX);
-      wfxex.dwChannelMask               = AE_CH_FL | AE_CH_FR;
+      wfxex.dwChannelMask               = KSAUDIO_SPEAKER_STEREO;
       wfxex.Format.wFormatTag           = WAVE_FORMAT_EXTENSIBLE;
       wfxex.SubFormat                   = KSDATAFORMAT_SUBTYPE_PCM;
       wfxex.Format.wBitsPerSample       = 16;
@@ -692,7 +753,7 @@ void CAESinkWASAPI::EnumerateDevicesEx(AEDeviceInfoList &deviceInfoList)
 
       /* Test format for channels iteration */
       wfxex.Format.cbSize               = sizeof(WAVEFORMATEXTENSIBLE)-sizeof(WAVEFORMATEX);
-      wfxex.dwChannelMask               = AE_CH_FL | AE_CH_FR;
+      wfxex.dwChannelMask               = KSAUDIO_SPEAKER_STEREO;
       wfxex.Format.wFormatTag           = WAVE_FORMAT_EXTENSIBLE;
       wfxex.SubFormat                   = KSDATAFORMAT_SUBTYPE_PCM;
       wfxex.Format.nSamplesPerSec       = 48000;
@@ -702,31 +763,64 @@ void CAESinkWASAPI::EnumerateDevicesEx(AEDeviceInfoList &deviceInfoList)
       wfxex.Format.nBlockAlign          = wfxex.Format.nChannels * (wfxex.Format.wBitsPerSample >> 3);
       wfxex.Format.nAvgBytesPerSec      = wfxex.Format.nSamplesPerSec * wfxex.Format.nBlockAlign;
 
-      //bool mpcmFlagged                  = false;
+      bool hasLpcm = false;
 
-      for (int k = AE_CH_LAYOUT_MAX; k > 0; k--)
+      // Try with KSAUDIO_SPEAKER_DIRECTOUT
+      for (unsigned int k = WASAPI_SPEAKER_COUNT; k > 0; k--)
       {
-        DWORD mask = 0;
-        for (int c = 0; c < WASAPI_SPEAKER_COUNT; c++)
-        {
-          if (uiChannelMask & WASAPIChannelOrder[c])
-            mask |= WASAPIChannelOrder[c];
-        }
-
-        wfxex.dwChannelMask             = mask;
+        wfxex.dwChannelMask             = KSAUDIO_SPEAKER_DIRECTOUT;
         wfxex.Format.nChannels          = k;
         wfxex.Format.nBlockAlign        = wfxex.Format.nChannels * (wfxex.Format.wBitsPerSample >> 3);
         wfxex.Format.nAvgBytesPerSec    = wfxex.Format.nSamplesPerSec * wfxex.Format.nBlockAlign;
         hr = pClient->IsFormatSupported(AUDCLNT_SHAREMODE_EXCLUSIVE, &wfxex.Format, NULL);
         if (SUCCEEDED(hr))
         {
-          deviceChannels                = layoutsByChCount[k];
-          if (k > AE_CH_LAYOUT_2_1) // && !mpcmFlagged)
+          if (k > 3) // Add only multichannel 
           {
             deviceInfo.m_dataFormats.push_back(AE_FMT_LPCM);
-            //mpcmFlagged = true;
+            hasLpcm = true;
           }
           break;
+        }
+      }
+
+      // Try with reported channel mask
+      for (unsigned int k = WASAPI_SPEAKER_COUNT; k > 0; k--)
+      {
+        wfxex.dwChannelMask             = uiChannelMask;
+        wfxex.Format.nChannels          = k;
+        wfxex.Format.nBlockAlign        = wfxex.Format.nChannels * (wfxex.Format.wBitsPerSample >> 3);
+        wfxex.Format.nAvgBytesPerSec    = wfxex.Format.nSamplesPerSec * wfxex.Format.nBlockAlign;
+        hr = pClient->IsFormatSupported(AUDCLNT_SHAREMODE_EXCLUSIVE, &wfxex.Format, NULL);
+        if (SUCCEEDED(hr))
+        {
+          if ( !hasLpcm && k > 3) // Add only multichannel 
+          {
+            deviceInfo.m_dataFormats.push_back(AE_FMT_LPCM);
+            hasLpcm = true;
+          }
+          break;
+        }
+      }
+
+      // Try with specific speakers configurations
+      for (unsigned int i = 0; i < ARRAYSIZE(layoutsList); i++)
+      {
+        unsigned int nmbOfCh;
+        wfxex.dwChannelMask             = ChLayoutToChMask(layoutsList[i], &nmbOfCh);
+        wfxex.Format.nChannels          = nmbOfCh;
+        wfxex.Format.nBlockAlign        = wfxex.Format.nChannels * (wfxex.Format.wBitsPerSample >> 3);
+        wfxex.Format.nAvgBytesPerSec    = wfxex.Format.nSamplesPerSec * wfxex.Format.nBlockAlign;
+        hr = pClient->IsFormatSupported(AUDCLNT_SHAREMODE_EXCLUSIVE, &wfxex.Format, NULL);
+        if (SUCCEEDED(hr))
+        {
+          if ( deviceChannels.Count() < nmbOfCh)
+            deviceChannels = layoutsList[i];
+          if ( !hasLpcm && nmbOfCh > 3) // Add only multichannel 
+          {
+            deviceInfo.m_dataFormats.push_back(AE_FMT_LPCM);
+            hasLpcm = true;
+          }
         }
       }
       pClient->Release();

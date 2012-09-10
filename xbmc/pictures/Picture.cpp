@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2005-2008 Team XBMC
+ *      Copyright (C) 2005-2012 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -13,9 +13,8 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with XBMC; see the file COPYING.  If not, write to
- *  the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
- *  http://www.gnu.org/copyleft/gpl.html
+ *  along with XBMC; see the file COPYING.  If not, see
+ *  <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -35,7 +34,7 @@
 #include "DllSwScale.h"
 #include "guilib/JpegIO.h"
 #include "guilib/Texture.h"
-#if defined(TARGET_RASPBERRY_PI)
+#if defined(HAS_OMXPLAYER)
 #include "cores/omxplayer/OMXImage.h"
 #endif
 
@@ -46,7 +45,7 @@ bool CPicture::CreateThumbnailFromSurface(const unsigned char *buffer, int width
   CLog::Log(LOGDEBUG, "cached image '%s' size %dx%d", thumbFile.c_str(), width, height);
   if (URIUtils::GetExtension(thumbFile).Equals(".jpg"))
   {
-#if defined(TARGET_RASPBERRY_PI)
+#if defined(HAS_OMXPLAYER)
     COMXImage omxImage;
     if (omxImage.CreateThumbnailFromSurface((BYTE *)buffer, width, height, XB_FMT_A8R8G8B8, stride, thumbFile.c_str()))
       return true;
