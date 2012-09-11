@@ -25,6 +25,7 @@
 
 #include "utils/StdString.h"
 #include "interfaces/legacy/Exception.h"
+#include "interfaces/legacy/AddonClass.h"
 #include "threads/ThreadLocal.h"
 
 namespace PythonBindings
@@ -83,19 +84,32 @@ namespace PythonBindings
     return ((PyHolder*)pythonType)->pSelf;
   }
 
+  inline void prepareForReturn(XBMCAddon::AddonClass* c) { if(c) c->Acquire(); }
+
+  inline void cleanForDealloc(XBMCAddon::AddonClass* c) { if(c) c->Release(); }
+
   /**
    * This method allows for conversion of the native api Type to the Python type
    *
    * NOTE: swigTypeString must be in the data segment. That is, it should be an explicit string since
    * the const char* is stored in a PyHolder struct and never deleted.
    */
-  inline PyObject* makePythonInstance(void* api, PyTypeObject* typeObj, const char* swigTypeString)
+  inline PyObject* makePythonInstance(void* api, PyTypeObject* typeObj, const char* swigTypeString, bool incrementRefCount)
   {
+    // null api types result in Py_None
+    if (!api)
+    {
+      Py_INCREF(Py_None);
+      return Py_None;
+    }
+
     PyHolder* self = (PyHolder*)typeObj->tp_alloc(typeObj,0);
     if (!self) return NULL;
     self->magicNumber = XBMC_PYTHON_TYPE_MAGIC_NUMBER;
     self->swigType = swigTypeString;
     self->pSelf = api;
+    if (incrementRefCount)
+      Py_INCREF((PyObject*)self);
     return (PyObject*)self;
   }
 
