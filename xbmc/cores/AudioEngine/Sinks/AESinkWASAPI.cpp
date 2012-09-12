@@ -1046,11 +1046,11 @@ bool CAESinkWASAPI::InitializeExclusive(AEAudioFormat &format)
       wfxex.Format.nSamplesPerSec    = WASAPISampleRates[i];
       wfxex.Format.nAvgBytesPerSec   = wfxex.Format.nSamplesPerSec * wfxex.Format.nBlockAlign;
 
-      /* Uncomment to trace format match iteration loop via log */
-      CLog::Log(LOGDEBUG, "WASAPI: Trying Sample Format    : %s", CAEUtil::DataFormatToStr(testFormats[j].subFormatType));
-      CLog::Log(LOGDEBUG, "WASAPI: Trying Sample Rate      : %d", wfxex.Format.nSamplesPerSec);
-      CLog::Log(LOGDEBUG, "WASAPI: Trying Bits/Sample      : %d", wfxex.Format.wBitsPerSample);
-      CLog::Log(LOGDEBUG, "WASAPI: Trying Valid Bits/Sample: %d", wfxex.Samples.wValidBitsPerSample);
+      /* Trace format match iteration loop via log */
+      CLog::Log(LOGDEBUG, "WASAPI: Trying Format: %s, %d, %d, %d", CAEUtil::DataFormatToStr(testFormats[j].subFormatType),
+                                                                   wfxex.Format.nSamplesPerSec,
+                                                                   wfxex.Format.wBitsPerSample,
+                                                                   wfxex.Samples.wValidBitsPerSample);
 
       hr = m_pAudioClient->IsFormatSupported(AUDCLNT_SHAREMODE_EXCLUSIVE, &wfxex.Format, NULL);
 
@@ -1105,7 +1105,7 @@ initialize:
       else
         format.m_dataFormat = AE_FMT_S24NE4;
     }
-    else if (wfxex.Format.wBitsPerSample = 24)
+    else if (wfxex.Format.wBitsPerSample == 24)
       format.m_dataFormat = AE_FMT_S24NE3;
     else
       format.m_dataFormat = AE_FMT_S16NE;
