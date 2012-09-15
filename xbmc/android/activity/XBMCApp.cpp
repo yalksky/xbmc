@@ -806,11 +806,11 @@ bool CXBMCApp::StartActivity(const string &package)
   jclass cActivity = env->GetObjectClass(oActivity);
 
 
-  CLog::Log(LOGERROR, "CXBMCApp::StartActivity exec %s", package.c_str());
-
   // oPackageManager = new PackageManager();
   jmethodID mgetPackageManager = env->GetMethodID(cActivity, "getPackageManager", "()Landroid/content/pm/PackageManager;");
   jobject oPackageManager = (jobject)env->CallObjectMethod(oActivity, mgetPackageManager);
+
+  CLog::Log(LOGERROR, "CXBMCApp::StartActivity exec %s", package.c_str());
 
   // oPackageIntent = oPackageManager.getLaunchIntentForPackage(package);
   jclass cPackageManager = env->GetObjectClass(oPackageManager);

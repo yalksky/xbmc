@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2005-2008 Team XBMC
+ *      Copyright (C) 2005-2012 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -13,9 +13,8 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with XBMC; see the file COPYING.  If not, write to
- *  the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
- *  http://www.gnu.org/copyleft/gpl.html
+ *  along with XBMC; see the file COPYING.  If not, see
+ *  <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -212,6 +211,7 @@ void CSysInfo::Reset()
 
 CSysInfo::CSysInfo(void) : CInfoLoader(15 * 1000)
 {
+  memset(MD5_Sign, 0, sizeof(MD5_Sign));
 }
 
 CSysInfo::~CSysInfo()
@@ -280,7 +280,14 @@ bool CSysInfo::GetDiskSpace(const CStdString drive,int& iTotal, int& iTotalFree,
     iTotal = (int)( ULTotal.QuadPart / MB );
     iTotalFree = (int)( ULTotalFree.QuadPart / MB );
     iTotalUsed = iTotal - iTotalFree;
-    iPercentUsed = (int)( 100.0f * ( ULTotal.QuadPart - ULTotalFree.QuadPart ) / ULTotal.QuadPart + 0.5f );
+    if( ULTotal.QuadPart > 0 )
+    {
+      iPercentUsed = (int)( 100.0f * ( ULTotal.QuadPart - ULTotalFree.QuadPart ) / ULTotal.QuadPart + 0.5f );
+    }
+    else
+    {
+      iPercentUsed = 0;
+    }
     iPercentFree = 100 - iPercentUsed;
   }
 

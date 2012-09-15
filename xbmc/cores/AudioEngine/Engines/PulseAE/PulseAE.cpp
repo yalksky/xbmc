@@ -13,9 +13,8 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with XBMC; see the file COPYING.  If not, write to
- *  the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
- *  http://www.gnu.org/copyleft/gpl.html
+ *  along with XBMC; see the file COPYING.  If not, see
+ *  <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -149,6 +148,28 @@ bool CPulseAE::Initialize()
 
   pa_threaded_mainloop_unlock(m_MainLoop);
   return true;
+}
+
+bool CPulseAE::Suspend()
+{
+  /* TODO: add implementation here. See SoftAE for example. Code should */
+  /* release exclusive or hog mode and sleep each time packets would    */
+  /* normally be written to sink if m_isSuspended = true. False return  */
+  /* here will simply generate a debug log entry in externalplayer.cpp  */
+
+  return false;
+}
+
+bool CPulseAE::IsSuspended()
+{
+  return false;
+}
+
+bool CPulseAE::Resume()
+{
+  /* TODO: see comments in Suspend() above */
+
+  return false;
 }
 
 void CPulseAE::OnSettingsChange(std::string setting)

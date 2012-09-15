@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2005-2008 Team XBMC
+ *      Copyright (C) 2005-2012 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -13,9 +13,8 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with XBMC; see the file COPYING.  If not, write to
- *  the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
- *  http://www.gnu.org/copyleft/gpl.html
+ *  along with XBMC; see the file COPYING.  If not, see
+ *  <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -353,6 +352,7 @@ CDVDOverlayCodec* CDVDFactoryCodec::CreateOverlayCodec( CDVDStreamInfo &hint )
     case CODEC_ID_TEXT:
       pCodec = OpenCodec(new CDVDOverlayCodecText(), hint, options);
       if( pCodec ) return pCodec;
+      break;
 
     case CODEC_ID_SSA:
       pCodec = OpenCodec(new CDVDOverlayCodecSSA(), hint, options);
@@ -360,14 +360,17 @@ CDVDOverlayCodec* CDVDFactoryCodec::CreateOverlayCodec( CDVDStreamInfo &hint )
 
       pCodec = OpenCodec(new CDVDOverlayCodecText(), hint, options);
       if( pCodec ) return pCodec;
+      break;
 
     case CODEC_ID_MOV_TEXT:
       pCodec = OpenCodec(new CDVDOverlayCodecTX3G(), hint, options);
       if( pCodec ) return pCodec;
+      break;
 
     default:
       pCodec = OpenCodec(new CDVDOverlayCodecFFmpeg(), hint, options);
       if( pCodec ) return pCodec;
+      break;
   }
 
   return NULL;

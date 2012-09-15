@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2005-2008 Team XBMC
+ *      Copyright (C) 2005-2012 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -13,9 +13,8 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with XBMC; see the file COPYING.  If not, write to
- *  the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
- *  http://www.gnu.org/copyleft/gpl.html
+ *  along with XBMC; see the file COPYING.  If not, see
+ *  <http://www.gnu.org/licenses/>.
  *
  */
 #include "threads/SystemClock.h"
@@ -41,6 +40,7 @@
 #include "Application.h"
 #include "Util.h"
 #include "addons/Addon.h"
+#include "filesystem/PVRDirectory.h"
 #include "filesystem/Directory.h"
 #include "filesystem/StackDirectory.h"
 #include "filesystem/MultiPathDirectory.h"
@@ -249,7 +249,6 @@ bool CUtil::GetVolumeFromFileName(const CStdString& strFileName, CStdString& str
       CLog::Log(LOGERROR, "Invalid RegExp:[%s]", regexps[i].c_str());
       continue;
     }
-//    CLog::Log(LOGDEBUG, "Regexp:[%s]", regexps[i].c_str());
 
     int iFoundToken = reg.RegFind(strFileName.c_str());
     if (iFoundToken >= 0)
@@ -341,8 +340,12 @@ void CUtil::CleanString(const CStdString& strFileName, CStdString& strTitle, CSt
   {
     if (reYear.RegFind(strTitleAndYear.c_str()) >= 0)
     {
-      strTitleAndYear = reYear.GetReplaceString("\\1");
-      strYear = reYear.GetReplaceString("\\2");
+      char* ty = reYear.GetReplaceString("\\1");
+      char* y = reYear.GetReplaceString("\\2");
+      strTitleAndYear = ty;
+      strYear = y;
+      free(ty);
+      free(y);
     }
   }
 
@@ -555,6 +558,39 @@ void CUtil::GetHomePath(CStdString& strPath, const CStdString& strTarget)
     }
   }
 #endif
+}
+
+bool CUtil::IsPVR(const CStdString& strFile)
+{
+  return strFile.Left(4).Equals("pvr:");
+}
+
+bool CUtil::IsHTSP(const CStdString& strFile)
+{
+  return strFile.Left(5).Equals("htsp:");
+}
+
+bool CUtil::IsLiveTV(const CStdString& strFile)
+{
+  if (strFile.Left(14).Equals("pvr://channels"))
+    return true;
+
+  if(URIUtils::IsTuxBox(strFile)
+  || URIUtils::IsVTP(strFile)
+  || URIUtils::IsHDHomeRun(strFile)
+  || URIUtils::IsHTSP(strFile)
+  || strFile.Left(4).Equals("sap:"))
+    return true;
+
+  if (URIUtils::IsMythTV(strFile) && CMythDirectory::IsLiveTV(strFile))
+    return true;
+
+  return false;
+}
+
+bool CUtil::IsTVRecording(const CStdString& strFile)
+{
+  return strFile.Left(15).Equals("pvr://recording");
 }
 
 bool CUtil::IsPicture(const CStdString& strFile)
@@ -1413,8 +1449,6 @@ int CUtil::GetMatchingSource(const CStdString& strPath1, VECSOURCES& VECSOURCES,
   if (strPath1.IsEmpty())
     return -1;
 
-  //CLog::Log(LOGDEBUG,"CUtil::GetMatchingSource, testing original path/name [%s]", strPath1.c_str());
-
   // copy as we may change strPath
   CStdString strPath = strPath1;
 
@@ -1436,7 +1470,6 @@ int CUtil::GetMatchingSource(const CStdString& strPath1, VECSOURCES& VECSOURCES,
   if (checkURL.GetProtocol() == "multipath")
     strPath = CMultiPathDirectory::GetFirstPath(strPath);
 
-  //CLog::Log(LOGDEBUG,"CUtil::GetMatchingSource, testing for matching name [%s]", strPath.c_str());
   bIsSourceName = false;
   int iIndex = -1;
   int iLength = -1;
@@ -1459,7 +1492,6 @@ int CUtil::GetMatchingSource(const CStdString& strPath1, VECSOURCES& VECSOURCES,
       if (iPos > 1)
         strName = strName.Mid(0, iPos - 1);
     }
-    //CLog::Log(LOGDEBUG,"CUtil::GetMatchingSource, comparing name [%s]", strName.c_str());
     if (strPath.Equals(strName))
     {
       bIsSourceName = true;
@@ -1478,8 +1510,6 @@ int CUtil::GetMatchingSource(const CStdString& strPath1, VECSOURCES& VECSOURCES,
   if (!URIUtils::HasSlashAtEnd(strDest))
     strDest += "/";
   int iLenPath = strDest.size();
-
-  //CLog::Log(LOGDEBUG,"CUtil::GetMatchingSource, testing url [%s]", strDest.c_str());
 
   for (int i = 0; i < (int)VECSOURCES.size(); ++i)
   {
@@ -1515,12 +1545,9 @@ int CUtil::GetMatchingSource(const CStdString& strPath1, VECSOURCES& VECSOURCES,
       if (!URIUtils::HasSlashAtEnd(strShare))
         strShare += "/";
       int iLenShare = strShare.size();
-      //CLog::Log(LOGDEBUG,"CUtil::GetMatchingSource, comparing url [%s]", strShare.c_str());
 
       if ((iLenPath >= iLenShare) && (strDest.Left(iLenShare).Equals(strShare)) && (iLenShare > iLength))
       {
-        //CLog::Log(LOGDEBUG,"Found matching source at index %i: [%s], Len = [%i]", i, strShare.c_str(), iLenShare);
-
         // if exact match, return it immediately
         if (iLenPath == iLenShare)
         {
@@ -1876,6 +1903,8 @@ bool CUtil::SupportsFileOperations(const CStdString& strPath)
     return true;
   if (URIUtils::IsSmb(strPath))
     return true;
+  if (CUtil::IsTVRecording(strPath))
+    return CPVRDirectory::SupportsFileOperations(strPath);
   if (URIUtils::IsNfs(strPath))
     return true;
   if (URIUtils::IsAfp(strPath))
@@ -2186,9 +2215,12 @@ CStdString CUtil::ResolveExecutablePath()
   snprintf(linkname, sizeof(linkname), "/proc/%i/exe", pid);
 
   /* Now read the symbolic link */
-  char buf[PATH_MAX];
-  int ret = readlink(linkname, buf, PATH_MAX);
-  buf[ret] = 0;
+  char buf[PATH_MAX + 1];
+  buf[0] = 0;
+
+  int ret = readlink(linkname, buf, sizeof(buf) - 1);
+  if (ret != -1)
+    buf[ret] = 0;
 
   strExecutablePath = buf;
 #endif
@@ -2228,14 +2260,15 @@ void CUtil::ScanForExternalSubtitles(const CStdString& strMovie, std::vector<CSt
     NULL};
   
   vector<CStdString> vecExtensionsCached;
-  //strExtensionCached = "";
   
   CFileItem item(strMovie, false);
-  if (item.IsInternetStream()) return ;
-  if (item.IsHDHomeRun()) return ;
-  if (item.IsSlingbox()) return ;
-  if (item.IsPlayList()) return ;
-  if (!item.IsVideo()) return ;
+  if ( item.IsInternetStream()
+    || item.IsHDHomeRun()
+    || item.IsSlingbox()
+    || item.IsPlayList()
+    || item.IsLiveTV()
+    || !item.IsVideo())
+    return;
   
   vector<CStdString> strLookInPaths;
   

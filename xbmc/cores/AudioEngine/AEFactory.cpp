@@ -13,9 +13,8 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with XBMC; see the file COPYING.  If not, write to
- *  the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
- *  http://www.gnu.org/copyleft/gpl.html
+ *  along with XBMC; see the file COPYING.  If not, see
+ *  <http://www.gnu.org/licenses/>.
  *
  */
 #include "system.h"
@@ -43,6 +42,10 @@ IAE *CAEFactory::GetEngine()
 
 bool CAEFactory::LoadEngine()
 {
+#if defined(TARGET_RASPBERRY_PI)
+  return true;
+#endif
+
   bool loaded = false;
 
   std::string engine;
@@ -128,6 +131,31 @@ bool CAEFactory::StartEngine()
   delete AE;
   AE = NULL;
   return false;
+}
+
+bool CAEFactory::Suspend()
+{
+  if(AE)
+    return AE->Suspend();
+
+  return false;
+}
+
+bool CAEFactory::Resume()
+{
+  if(AE)
+    return AE->Resume();
+
+  return false;
+}
+
+bool CAEFactory::IsSuspended()
+{
+  if(AE)
+    return AE->IsSuspended();
+
+  /* No engine to process audio */
+  return true;
 }
 
 /* engine wrapping */

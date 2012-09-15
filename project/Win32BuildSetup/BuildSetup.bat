@@ -160,6 +160,10 @@ IF %comp%==vs2010 (
   Echo .svn>exclude.txt
   Echo CVS>>exclude.txt
   Echo .so>>exclude.txt
+  Echo .h>>exclude.txt
+  Echo .cpp>>exclude.txt
+  Echo .exp>>exclude.txt
+  Echo .lib>>exclude.txt
   Echo Thumbs.db>>exclude.txt
   Echo Desktop.ini>>exclude.txt
   Echo dsstdfx.bin>>exclude.txt
@@ -184,6 +188,7 @@ IF %comp%==vs2010 (
   Echo asound.conf>>exclude.txt
   Echo voicemasks.xml>>exclude.txt
   Echo Lircmap.xml>>exclude.txt
+  Echo addons\skin.touched\>>exclude.txt
   
   md BUILD_WIN32\Xbmc
 

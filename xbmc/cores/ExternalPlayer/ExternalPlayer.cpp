@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2005-2008 Team XBMC
+ *      Copyright (C) 2005-2012 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -13,9 +13,8 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with XBMC; see the file COPYING.  If not, write to
- *  the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
- *  http://www.gnu.org/copyleft/gpl.html
+ *  along with XBMC; see the file COPYING.  If not, see
+ *  <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -37,6 +36,7 @@
 #include "utils/XMLUtils.h"
 #include "utils/TimeUtils.h"
 #include "utils/log.h"
+#include "cores/AudioEngine/AEFactory.h"
 #if defined(_WIN32)
   #include "Windows.h"
   #ifdef HAS_IRSERVERSUITE
@@ -290,6 +290,15 @@ void CExternalPlayer::Process()
 #endif
 
   m_playbackStartTime = XbmcThreads::SystemClockMillis();
+
+  /* Suspend AE temporarily so exclusive or hog-mode sinks */
+  /* don't block external player's access to audio device  */
+  if (!CAEFactory::Suspend())
+  {
+    CLog::Log(LOGNOTICE, __FUNCTION__, "Failed to suspend AudioEngine before launching external player");
+  }
+
+
   BOOL ret = TRUE;
 #if defined(_WIN32)
   ret = ExecuteAppW32(strFName.c_str(),strFArgs.c_str());
@@ -356,6 +365,12 @@ void CExternalPlayer::Process()
     SetCursorPos(m_xPos,m_yPos);
   }
 #endif
+
+  /* Resume AE processing of XBMC native audio */
+  if (!CAEFactory::Resume())
+  {
+    CLog::Log(LOGFATAL, __FUNCTION__, "Failed to restart AudioEngine after return from external player");
+  }
 
   // We don't want to come back to an active screensaver
   g_application.ResetScreenSaver();
@@ -573,7 +588,7 @@ int64_t CExternalPlayer::GetTime() // in millis
 
 int64_t CExternalPlayer::GetTotalTime() // in milliseconds
 {
-  return m_totalTime * 1000;
+  return (int64_t)m_totalTime * 1000;
 }
 
 void CExternalPlayer::ToFFRW(int iSpeed)

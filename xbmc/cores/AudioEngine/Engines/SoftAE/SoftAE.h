@@ -14,9 +14,8 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with XBMC; see the file COPYING.  If not, write to
- *  the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
- *  http://www.gnu.org/copyleft/gpl.html
+ *  along with XBMC; see the file COPYING.  If not, see
+ *  <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -57,6 +56,9 @@ public:
 
   virtual void   Run();
   virtual void   Stop();
+  virtual bool   Suspend();
+  virtual bool   Resume();
+  virtual bool   IsSuspended();
   virtual double GetDelay();
 
   virtual float GetVolume();
@@ -128,7 +130,9 @@ private:
   bool m_stereoUpmix;
 
   /* internal vars */
-  bool             m_running, m_reOpen;
+  bool             m_running, m_reOpen, m_isSuspended;
+  bool             m_softSuspend;      /* latches after last stream or sound played for timer below */
+  unsigned int     m_softSuspendTimer; /* time in milliseconds to hold sink open before soft suspend */
   CEvent           m_reOpenEvent;
   CEvent           m_wake;
 

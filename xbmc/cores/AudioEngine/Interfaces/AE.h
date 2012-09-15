@@ -14,9 +14,8 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with XBMC; see the file COPYING.  If not, write to
- *  the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
- *  http://www.gnu.org/copyleft/gpl.html
+ *  along with XBMC; see the file COPYING.  If not, see
+ *  <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -62,6 +61,28 @@ public:
    * Called when the application needs to terminate the engine
    */
   virtual void Shutdown() { }
+
+  /**
+   * Suspends output and de-initializes sink
+   * Used to avoid conflicts with external players or to reduce power consumption
+   * @return True if successful
+   */
+  virtual bool Suspend() = 0;
+
+  /**
+   * Resumes output and re-initializes sink
+   * Used to resume output from Suspend() state above
+   * @return True if successful
+   */
+  virtual bool Resume() = 0;
+
+  /**
+   * Get the current Suspend() state
+   * Used by players to determine if audio is being processed
+   * Default is true so players drop audio or pause if engine unloaded
+   * @return True if processing suspended
+   */
+  virtual bool IsSuspended() {return true;}
   
   /**
    * Callback to alert the AudioEngine of setting changes

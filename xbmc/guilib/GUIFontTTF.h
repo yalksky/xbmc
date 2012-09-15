@@ -8,7 +8,7 @@
 #pragma once
 
 /*
- *      Copyright (C) 2005-2008 Team XBMC
+ *      Copyright (C) 2005-2012 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -22,9 +22,8 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with XBMC; see the file COPYING.  If not, write to
- *  the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
- *  http://www.gnu.org/copyleft/gpl.html
+ *  along with XBMC; see the file COPYING.  If not, see
+ *  <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -76,7 +75,7 @@ public:
 
   void Clear();
 
-  bool Load(const CStdString& strFilename, float height = 20.0f, float aspect = 1.0f, float lineSpacing = 1.0f, bool border = false);
+  bool Load(const CStdString& strFilename, float height = 20.0f, float aspect = 1.0f, float lineSpacing = 1.0f, bool border = false, bool precache = false);
 
   virtual void Begin() = 0;
   virtual void End() = 0;
@@ -111,6 +110,7 @@ protected:
   bool CacheCharacter(wchar_t letter, uint32_t style, Character *ch);
   void RenderCharacter(float posX, float posY, const Character *ch, color_t color, bool roundX);
   void ClearCharacterCache();
+  bool PreCacheCharacters();
 
   virtual CBaseTexture* ReallocTexture(unsigned int& newHeight) = 0;
   virtual bool CopyCharToTexture(FT_BitmapGlyph bitGlyph, Character *ch) = 0;
