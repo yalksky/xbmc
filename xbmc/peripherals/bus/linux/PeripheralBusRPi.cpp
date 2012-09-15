@@ -19,6 +19,7 @@
  */
 
 #include "PeripheralBusRPi.h"
+#include <libcec/cectypes.h>
 
 extern "C" {
 #include <interface/vmcs_host/vc_cecservice.h>
@@ -44,7 +45,7 @@ bool CPeripheralBusRPi::PerformDeviceScan(PeripheralScanResults &results)
     result.m_iVendorId   = RPI_PERIPHERAL_BUS_VID;
     result.m_iProductId  = RPI_PERIPHERAL_CEC_PID;
     result.m_type        = PERIPHERAL_CEC;
-    result.m_strLocation = "RPI/CEC";
+    result.m_strLocation = CEC_RPI_VIRTUAL_COM;
 
     if (!results.ContainsResult(result))
       results.m_results.push_back(result);

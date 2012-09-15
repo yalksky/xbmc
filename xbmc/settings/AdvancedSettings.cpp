@@ -320,6 +320,8 @@ void CAdvancedSettings::Initialize()
 
   m_databaseMusic.Reset();
   m_databaseVideo.Reset();
+
+  m_logLevelHint = m_logLevel = LOG_LEVEL_NONE;
 }
 
 bool CAdvancedSettings::Load()
