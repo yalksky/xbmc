@@ -28,7 +28,7 @@
  *
  * Comment out (or uncomment out) to change the setting.
  */
-#define LOG_LIFECYCLE_EVENTS
+//#define LOG_LIFECYCLE_EVENTS
 
 /** 
  * Defining XBMC_ADDON_DEBUG_MEMORY will make the Acquire and Release
@@ -48,8 +48,6 @@
 #include "utils/log.h"
 
 #include "AddonUtils.h"
-
-#define __PRETTY_FUNCTION__ __FUNCTION__
 
 namespace XBMCAddon
 {

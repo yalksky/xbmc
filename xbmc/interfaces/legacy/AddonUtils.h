@@ -28,11 +28,15 @@
 
 #pragma once
 
-#define ENABLE_TRACE_API
+//#define ENABLE_TRACE_API
 
 #include "threads/SingleLock.h"
 
 #include <vector>
+
+#ifdef TARGET_WINDOWS
+#define __PRETTY_FUNCTION__ __FUNCTION__
+#endif
 
 /**
  * This file contains the public definitions for the Addon api. It's meant to be used
@@ -88,7 +92,10 @@ namespace XBMCAddonUtils
     TraceGuard* parent;
     int depth;
 
+    const char* getSpaces();
+
     TraceGuard(const char* _function);
+    TraceGuard();
     ~TraceGuard();
   };
 #endif
