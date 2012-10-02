@@ -141,6 +141,7 @@
 		DF93D8331444B88B007C6459 /* HDHomeRunDirectory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DF93D82F1444B88B007C6459 /* HDHomeRunDirectory.cpp */; };
 		DF93D8341444B88B007C6459 /* HDHomeRunFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DF93D8311444B88B007C6459 /* HDHomeRunFile.cpp */; };
 		DF98D9A81434F4B400A6EBE1 /* SkinVariable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DF98D9A61434F4B400A6EBE1 /* SkinVariable.cpp */; };
+		DFA0F9551618E1CD00611CBB /* DVDOverlayCodec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DFA0F9541618E1CD00611CBB /* DVDOverlayCodec.cpp */; };
 		DFA6BE8713FED2A10048CC11 /* AirPlayServer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DFA6BE8513FED2A10048CC11 /* AirPlayServer.cpp */; };
 		DFA6BE8A13FED2B40048CC11 /* HttpParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DFA6BE8813FED2B40048CC11 /* HttpParser.cpp */; };
 		DFAB04C113F8385F00B70BFB /* InertialScrollingHandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DFAB04BF13F8385F00B70BFB /* InertialScrollingHandler.cpp */; };
@@ -177,6 +178,8 @@
 		DFBE7FFD15F7D1A100D7D102 /* PltProtocolInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DFBE7FFA15F7D1A100D7D102 /* PltProtocolInfo.cpp */; };
 		DFBE7FFF15F7D1B900D7D102 /* NptAppleAutoreleasePool.mm in Sources */ = {isa = PBXBuildFile; fileRef = DFBE7FFE15F7D1B900D7D102 /* NptAppleAutoreleasePool.mm */; };
 		DFBE800215F7D1EE00D7D102 /* NptCocoaEnviroment.mm in Sources */ = {isa = PBXBuildFile; fileRef = DFBE800115F7D1EE00D7D102 /* NptCocoaEnviroment.mm */; };
+		DFC0F8F51613A1960066D598 /* XLCDproc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DFC0F8F31613A1960066D598 /* XLCDproc.cpp */; };
+		DFC0F91C1613A3A00066D598 /* LCDFactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DFC0F91A1613A3A00066D598 /* LCDFactory.cpp */; };
 		DFC5393A1526659D00D5FD5C /* AppIcon.png in Resources */ = {isa = PBXBuildFile; fileRef = DFC539391526659D00D5FD5C /* AppIcon.png */; };
 		DFCA6B0B15224684000BFAAE /* HTTPApiHandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DFCA6AFE15224684000BFAAE /* HTTPApiHandler.cpp */; };
 		DFCA6B0C15224684000BFAAE /* HTTPJsonRpcHandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DFCA6B0015224684000BFAAE /* HTTPJsonRpcHandler.cpp */; };
@@ -1330,6 +1333,7 @@
 		DF93D8321444B88B007C6459 /* HDHomeRunFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HDHomeRunFile.h; sourceTree = "<group>"; };
 		DF98D9A61434F4B400A6EBE1 /* SkinVariable.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SkinVariable.cpp; sourceTree = "<group>"; };
 		DF98D9A71434F4B400A6EBE1 /* SkinVariable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SkinVariable.h; sourceTree = "<group>"; };
+		DFA0F9541618E1CD00611CBB /* DVDOverlayCodec.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DVDOverlayCodec.cpp; sourceTree = "<group>"; };
 		DFA6BE8513FED2A10048CC11 /* AirPlayServer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AirPlayServer.cpp; sourceTree = "<group>"; };
 		DFA6BE8613FED2A10048CC11 /* AirPlayServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AirPlayServer.h; sourceTree = "<group>"; };
 		DFA6BE8813FED2B40048CC11 /* HttpParser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = HttpParser.cpp; sourceTree = "<group>"; };
@@ -1412,6 +1416,10 @@
 		DFBE800015F7D1D100D7D102 /* NptAutoreleasePool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NptAutoreleasePool.h; path = lib/libUPnP/Neptune/Source/Core/NptAutoreleasePool.h; sourceTree = SOURCE_ROOT; };
 		DFBE800115F7D1EE00D7D102 /* NptCocoaEnviroment.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = NptCocoaEnviroment.mm; path = lib/libUPnP/Neptune/Source/System/Cocoa/NptCocoaEnviroment.mm; sourceTree = SOURCE_ROOT; };
 		DFBE800C15F7D2B000D7D102 /* PltUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PltUtilities.h; sourceTree = "<group>"; };
+		DFC0F8F31613A1960066D598 /* XLCDproc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = XLCDproc.cpp; sourceTree = "<group>"; };
+		DFC0F8F41613A1960066D598 /* XLCDproc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XLCDproc.h; sourceTree = "<group>"; };
+		DFC0F91A1613A3A00066D598 /* LCDFactory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LCDFactory.cpp; sourceTree = "<group>"; };
+		DFC0F91B1613A3A00066D598 /* LCDFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LCDFactory.h; sourceTree = "<group>"; };
 		DFC539391526659D00D5FD5C /* AppIcon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = AppIcon.png; path = media/AppIcon.png; sourceTree = "<group>"; };
 		DFCA6AFE15224684000BFAAE /* HTTPApiHandler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = HTTPApiHandler.cpp; sourceTree = "<group>"; };
 		DFCA6AFF15224684000BFAAE /* HTTPApiHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HTTPApiHandler.h; sourceTree = "<group>"; };
@@ -4297,6 +4305,7 @@
 			children = (
 				F56C727C131EC151000AD0F6 /* libspucc */,
 				F56C7271131EC151000AD0F6 /* DVDOverlay.h */,
+				DFA0F9541618E1CD00611CBB /* DVDOverlayCodec.cpp */,
 				F56C7272131EC151000AD0F6 /* DVDOverlayCodec.h */,
 				F56C7273131EC151000AD0F6 /* DVDOverlayCodecCC.cpp */,
 				F56C7274131EC151000AD0F6 /* DVDOverlayCodecCC.h */,
@@ -5210,6 +5219,8 @@
 				F56C75BA131EC153000AD0F6 /* XFileUtils.h */,
 				F56C75BB131EC153000AD0F6 /* XHandle.cpp */,
 				F56C75BC131EC153000AD0F6 /* XHandle.h */,
+				DFC0F8F31613A1960066D598 /* XLCDproc.cpp */,
+				DFC0F8F41613A1960066D598 /* XLCDproc.h */,
 				F56C75BD131EC153000AD0F6 /* XMemUtils.cpp */,
 				F56C75BE131EC153000AD0F6 /* XMemUtils.h */,
 				F56C75C3131EC153000AD0F6 /* XTimeUtils.cpp */,
@@ -5729,6 +5740,8 @@
 				F56C771E131EC154000AD0F6 /* LangCodeExpander.h */,
 				F56C7748131EC154000AD0F6 /* LCD.cpp */,
 				F56C7749131EC154000AD0F6 /* LCD.h */,
+				DFC0F91A1613A3A00066D598 /* LCDFactory.cpp */,
+				DFC0F91B1613A3A00066D598 /* LCDFactory.h */,
 				F56C774A131EC154000AD0F6 /* log.cpp */,
 				F56C774B131EC154000AD0F6 /* log.h */,
 				F56C770F131EC153000AD0F6 /* MathUtils.h */,
@@ -6565,7 +6578,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "make -C ${SRCROOT}/xbmc/interfaces/legacy";
+			shellScript = "if [ \"$ACTION\" = build ] ; then\nmake -C ${SRCROOT}/xbmc/interfaces/legacy\nfi";
 		};
 		F502C0CA160F425200C96C76 /* Make interface-python */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -6579,7 +6592,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "make -C ${SRCROOT}/xbmc/interfaces/python";
+			shellScript = "if [ \"$ACTION\" = build ] ; then\nmake -C ${SRCROOT}/xbmc/interfaces/python\nfi";
 		};
 		F589B48B128A696700D8079E /* copy root files */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -7568,6 +7581,9 @@
 				DF23461315FA671900A934F6 /* UPnPServer.cpp in Sources */,
 				DFAB4C0F15FCCB4300E1BAF6 /* TagLibVFSStream.cpp in Sources */,
 				DFAB4C1015FCCB4300E1BAF6 /* TagLoaderTagLib.cpp in Sources */,
+				DFC0F8F51613A1960066D598 /* XLCDproc.cpp in Sources */,
+				DFC0F91C1613A3A00066D598 /* LCDFactory.cpp in Sources */,
+				DFA0F9551618E1CD00611CBB /* DVDOverlayCodec.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

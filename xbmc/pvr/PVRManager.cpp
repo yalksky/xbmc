@@ -39,6 +39,7 @@
 #include "utils/StringUtils.h"
 #include "threads/Atomics.h"
 #include "windows/GUIWindowPVRCommon.h"
+#include "utils/JobManager.h"
 
 #include "PVRManager.h"
 #include "PVRDatabase.h"
@@ -124,8 +125,28 @@ void CPVRManager::ResetProperties(void)
   }
 }
 
-void CPVRManager::Start(void)
+class CPVRManagerStartJob : public CJob
 {
+public:
+  CPVRManagerStartJob(void) {}
+  ~CPVRManagerStartJob(void) {}
+
+  bool DoWork(void)
+  {
+    g_PVRManager.Start(false);
+    return true;
+  }
+};
+
+void CPVRManager::Start(bool bAsync /* = false */)
+{
+  if (bAsync)
+  {
+    CPVRManagerStartJob *job = new CPVRManagerStartJob;
+    CJobManager::GetInstance().AddJob(job, NULL);
+    return;
+  }
+
   CSingleLock lock(m_critSection);
 
   /* first stop and remove any clients */
@@ -239,9 +260,7 @@ void CPVRManager::Process(void)
   if (GetState() == ManagerStateStarted)
   {
     CLog::Log(LOGNOTICE, "PVRManager - %s - no add-ons enabled anymore. restarting the pvrmanager", __FUNCTION__);
-    Stop();
-    Start();
-    return;
+    CApplicationMessenger::Get().ExecBuiltIn("StartPVRManager", false);
   }
 }
 
@@ -326,7 +345,6 @@ bool CPVRManager::Load(void)
   ShowProgressDialog(g_localizeStrings.Get(19238), 75); // Loading recordings from clients
   m_recordings->Load();
 
-  CSingleLock lock(m_critSection);
   if (GetState() != ManagerStateStarting)
     return false;
 
@@ -712,12 +730,16 @@ void CPVRManager::LoadCurrentChannelSettings()
 
 void CPVRManager::SetPlayingGroup(CPVRChannelGroupPtr group)
 {
-  m_channelGroups->Get(group->IsRadio())->SetSelectedGroup(group);
+  if (m_channelGroups && group)
+    m_channelGroups->Get(group->IsRadio())->SetSelectedGroup(group);
 }
 
 CPVRChannelGroupPtr CPVRManager::GetPlayingGroup(bool bRadio /* = false */)
 {
-  return m_channelGroups->GetSelectedGroup(bRadio);
+  if (m_channelGroups)
+    return m_channelGroups->GetSelectedGroup(bRadio);
+
+  return CPVRChannelGroupPtr();
 }
 
 bool CPVRRecordingsUpdateJob::DoWork(void)
