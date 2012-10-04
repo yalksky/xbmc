@@ -9896,6 +9896,10 @@ msgctxt "#23054"
 msgid "Running"
 msgstr ""
 
+msgctxt "#23055"
+msgid "Scale Teletext to 4:3"
+msgstr ""
+
 #strings 23100 thru 23150 reserved for external player
 #empty strings from id 23055 to 23099
 
@@ -10823,11 +10827,17 @@ msgstr ""
 
 #empty strings from id 35010 to 35099
 
+#: xbmc/settings/GUISettings.cpp
 msgctxt "#35100"
 msgid "Enable joystick and gamepad support"
 msgstr ""
 
-#empty strings from id 35101 to 35499
+#: xbmc/settings/GUISettings.cpp
+msgctxt "#35101"
+msgid "Disable joystick when iMON is present"
+msgstr ""
+
+#empty strings from id 35102 to 35499
 
 msgctxt "#35500"
 msgid "Location"

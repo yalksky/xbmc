@@ -176,6 +176,7 @@
 #include "peripherals/Peripherals.h"
 #include "peripherals/dialogs/GUIDialogPeripheralManager.h"
 #include "peripherals/dialogs/GUIDialogPeripheralSettings.h"
+#include "peripherals/devices/PeripheralImon.h"
 
 // Windows includes
 #include "guilib/GUIWindowManager.h"
@@ -890,7 +891,7 @@ bool CApplication::CreateGUI()
     return false;
 
   int iResolution = g_graphicsContext.GetVideoResolution();
-  CLog::Log(LOGINFO, "GUI format %ix%i %s",
+  CLog::Log(LOGINFO, "GUI format %ix%i, Display %s",
             g_settings.m_ResInfo[iResolution].iWidth,
             g_settings.m_ResInfo[iResolution].iHeight,
             g_settings.m_ResInfo[iResolution].strMode.c_str());
@@ -1417,7 +1418,8 @@ bool CApplication::Initialize()
   ResetScreenSaver();
 
 #ifdef HAS_SDL_JOYSTICK
-  g_Joystick.SetEnabled(g_guiSettings.GetBool("input.enablejoystick"));
+  g_Joystick.SetEnabled(g_guiSettings.GetBool("input.enablejoystick") &&
+                    (CPeripheralImon::GetCountOfImonsConflictWithDInput() == 0 || !g_guiSettings.GetBool("input.disablejoystickwithimon")) );
 #endif
 
   return true;
@@ -2929,6 +2931,10 @@ void CApplication::UpdateLCD()
   {
     if (g_application.NavigationIdleTime() < 5)
       g_lcd->Render(ILCD::LCD_MODE_NAVIGATION);
+    else if (g_PVRManager.IsPlayingTV())
+      g_lcd->Render(ILCD::LCD_MODE_PVRTV);
+    else if (g_PVRManager.IsPlayingRadio())
+      g_lcd->Render(ILCD::LCD_MODE_PVRRADIO);
     else if (IsPlayingVideo())
       g_lcd->Render(ILCD::LCD_MODE_VIDEO);
     else if (IsPlayingAudio())

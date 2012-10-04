@@ -333,13 +333,15 @@ void CSoftAE::InternalOpenSink()
     ASSERT(newFormat.m_frameSize            == (CAEUtil::DataFormatToBits(newFormat.m_dataFormat) >> 3) * newFormat.m_channelLayout.Count());
     ASSERT(newFormat.m_sampleRate            > 0);
 
-    CLog::Log(LOGINFO, "CSoftAE::InternalOpenSink - %s Initialized:", m_sink->GetName());
-    CLog::Log(LOGINFO, "  Output Device : %s", m_deviceFriendlyName.c_str());
-    CLog::Log(LOGINFO, "  Sample Rate   : %d", newFormat.m_sampleRate);
-    CLog::Log(LOGINFO, "  Sample Format : %s", CAEUtil::DataFormatToStr(newFormat.m_dataFormat));
-    CLog::Log(LOGINFO, "  Channel Count : %d", newFormat.m_channelLayout.Count());
-    CLog::Log(LOGINFO, "  Channel Layout: %s", ((std::string)newFormat.m_channelLayout).c_str());
-    CLog::Log(LOGINFO, "  Frame Size    : %d", newFormat.m_frameSize);
+    CLog::Log(LOGDEBUG, "CSoftAE::InternalOpenSink - %s Initialized:", m_sink->GetName());
+    CLog::Log(LOGDEBUG, "  Output Device : %s", m_deviceFriendlyName.c_str());
+    CLog::Log(LOGDEBUG, "  Sample Rate   : %d", newFormat.m_sampleRate);
+    CLog::Log(LOGDEBUG, "  Sample Format : %s", CAEUtil::DataFormatToStr(newFormat.m_dataFormat));
+    CLog::Log(LOGDEBUG, "  Channel Count : %d", newFormat.m_channelLayout.Count());
+    CLog::Log(LOGDEBUG, "  Channel Layout: %s", ((std::string)newFormat.m_channelLayout).c_str());
+    CLog::Log(LOGDEBUG, "  Frames        : %d", newFormat.m_frames);
+    CLog::Log(LOGDEBUG, "  Frame Samples : %d", newFormat.m_frameSamples);
+    CLog::Log(LOGDEBUG, "  Frame Size    : %d", newFormat.m_frameSize);
 
     m_sinkFormat              = newFormat;
     m_sinkFormatSampleRateMul = 1.0 / (double)newFormat.m_sampleRate;
@@ -425,6 +427,7 @@ void CSoftAE::InternalOpenSink()
     m_frameSize      = m_bytesPerSample * m_chLayout.Count();
   }
 
+  CLog::Log(LOGDEBUG, "CSoftAE::InternalOpenSink - Internal Buffer Size: %d", neededBufferSize);
   if (m_buffer.Size() < neededBufferSize)
     m_buffer.Alloc(neededBufferSize);
 
@@ -873,8 +876,7 @@ double CSoftAE::GetDelay()
   CSharedLock sinkLock(m_sinkLock);
   if (m_sink)
     delaySink = m_sink->GetDelay();
-  sinkLock.Leave();
-
+ 
   if (m_transcode && m_encoder && !m_rawPassthrough)
   {
     delayBuffer     = (double)m_buffer.Used() * m_encoderInitFrameSizeMul * m_encoderInitSampleRateMul;
@@ -882,9 +884,6 @@ double CSoftAE::GetDelay()
   }
   else
     delayBuffer = (double)m_buffer.Used() * m_sinkFormatFrameSizeMul *m_sinkFormatSampleRateMul;
-
-  //CLog::Log(LOGNOTICE, "Buffer:%f  Sink:%f  Transcoder:%f  Total:%f", (float)delaybuffer, (float)delaysink, (float)delaytranscoder,
-       //(float)(delaybuffer + delaysink + delaytranscoder));
 
   return delayBuffer + delaySink + delayTranscoder;
 }
@@ -896,7 +895,6 @@ double CSoftAE::GetCacheTime()
   CSharedLock sinkLock(m_sinkLock);
   if (m_sink)
     timeSink = m_sink->GetCacheTime();
-  sinkLock.Leave();
 
   if (m_transcode && m_encoder && !m_rawPassthrough)
   {
@@ -911,14 +909,21 @@ double CSoftAE::GetCacheTime()
 
 double CSoftAE::GetCacheTotal()
 {
-  double total = (double)m_buffer.Size() * m_sinkFormatFrameSizeMul * m_sinkFormatSampleRateMul;
+  double timeBuffer = 0.0, timeSink = 0.0, timeTranscoder = 0.0;
 
   CSharedLock sinkLock(m_sinkLock);
   if (m_sink)
-    total += m_sink->GetCacheTotal();
-  sinkLock.Leave();
+    timeSink = m_sink->GetCacheTotal();
 
-  return total;
+  if (m_transcode && m_encoder && !m_rawPassthrough)
+  {
+    timeBuffer     = (double)m_buffer.Size() * m_encoderInitFrameSizeMul * m_encoderInitSampleRateMul;
+    timeTranscoder = m_encoder->GetDelay((double)m_encodedBuffer.Size() * m_encoderFrameSizeMul);
+  }
+  else
+    timeBuffer = (double)m_buffer.Size() * m_sinkFormatFrameSizeMul *m_sinkFormatSampleRateMul;
+
+  return timeBuffer + timeSink + timeTranscoder;
 }
 
 bool CSoftAE::IsSuspended()
