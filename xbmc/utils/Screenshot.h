@@ -1,3 +1,4 @@
+#pragma once
 /*
  *      Copyright (C) 2005-2012 Team XBMC
  *      http://www.xbmc.org
@@ -18,11 +19,25 @@
  *
  */
 
-(function () {
-    "use strict"
+#include "utils/StdString.h"
 
-    var mediaLibrary = new MediaLibrary(),
-        nowPlayingManager = new NowPlayingManager();
-    xbmc.core.applyDeviceFixes();
-}());
+class CScreenshotSurface
+{
 
+public:
+  int            m_width;
+  int            m_height;
+  int            m_stride;
+  unsigned char* m_buffer;
+
+  CScreenshotSurface(void);
+  bool capture( void );
+};
+
+class CScreenShot
+{
+
+public:
+  static void TakeScreenshot();
+  static void TakeScreenshot(const CStdString &filename, bool sync);
+};

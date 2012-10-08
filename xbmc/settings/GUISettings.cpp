@@ -663,6 +663,9 @@ void CGUISettings::Initialize()
 
   CSettingsCategory* vp = AddCategory(SETTINGS_VIDEOS, "videoplayer", 14086);
 
+  AddBool(vp, "videoplayer.autoplaynextitem", 13433, false);
+  AddSeparator(vp, "videoplayer.sep1");
+
   map<int, int> renderers;
   renderers.insert(make_pair(13416, RENDER_METHOD_AUTO));
 
@@ -1070,15 +1073,13 @@ void CGUISettings::AddBool(CSettingsCategory* cat, const char *strSetting, int i
 bool CGUISettings::GetBool(const char *strSetting) const
 {
   ASSERT(settingsMap.size());
-  CStdString lower(strSetting);
-  lower.ToLower();
-  constMapIter it = settingsMap.find(lower);
+  constMapIter it = settingsMap.find(strSetting);
   if (it != settingsMap.end())
   { // old category
     return ((CSettingBool*)(*it).second)->GetData();
   }
   // Backward compatibility (skins use this setting)
-  if (lower == "lookandfeel.enablemouse")
+  if (strncmp(strSetting, "lookandfeel.enablemouse", 23) == 0)
     return GetBool("input.enablemouse");
   // Assert here and write debug output
   CLog::Log(LOGDEBUG,"Error: Requested setting (%s) was not found.  It must be case-sensitive", strSetting);
@@ -1088,7 +1089,7 @@ bool CGUISettings::GetBool(const char *strSetting) const
 void CGUISettings::SetBool(const char *strSetting, bool bSetting)
 {
   ASSERT(settingsMap.size());
-  mapIter it = settingsMap.find(CStdString(strSetting).ToLower());
+  mapIter it = settingsMap.find(strSetting);
   if (it != settingsMap.end())
   { // old category
     ((CSettingBool*)(*it).second)->SetData(bSetting);
@@ -1128,7 +1129,7 @@ void CGUISettings::AddFloat(CSettingsCategory* cat, const char *strSetting, int 
 float CGUISettings::GetFloat(const char *strSetting) const
 {
   ASSERT(settingsMap.size());
-  constMapIter it = settingsMap.find(CStdString(strSetting).ToLower());
+  constMapIter it = settingsMap.find(strSetting);
   if (it != settingsMap.end())
   {
     return ((CSettingFloat *)(*it).second)->GetData();
@@ -1142,7 +1143,7 @@ float CGUISettings::GetFloat(const char *strSetting) const
 void CGUISettings::SetFloat(const char *strSetting, float fSetting)
 {
   ASSERT(settingsMap.size());
-  mapIter it = settingsMap.find(CStdString(strSetting).ToLower());
+  mapIter it = settingsMap.find(strSetting);
   if (it != settingsMap.end())
   {
     ((CSettingFloat *)(*it).second)->SetData(fSetting);
@@ -1202,7 +1203,7 @@ int CGUISettings::GetInt(const char *strSetting) const
 {
   ASSERT(settingsMap.size());
 
-  constMapIter it = settingsMap.find(CStdString(strSetting).ToLower());
+  constMapIter it = settingsMap.find(strSetting);
   if (it != settingsMap.end())
   {
     return ((CSettingInt *)(*it).second)->GetData();
@@ -1216,7 +1217,7 @@ int CGUISettings::GetInt(const char *strSetting) const
 void CGUISettings::SetInt(const char *strSetting, int iSetting)
 {
   ASSERT(settingsMap.size());
-  mapIter it = settingsMap.find(CStdString(strSetting).ToLower());
+  mapIter it = settingsMap.find(strSetting);
   if (it != settingsMap.end())
   {
     ((CSettingInt *)(*it).second)->SetData(iSetting);
@@ -1256,7 +1257,7 @@ void CGUISettings::AddDefaultAddon(CSettingsCategory* cat, const char *strSettin
 const CStdString &CGUISettings::GetString(const char *strSetting, bool bPrompt /* = true */) const
 {
   ASSERT(settingsMap.size());
-  constMapIter it = settingsMap.find(CStdString(strSetting).ToLower());
+  constMapIter it = settingsMap.find(strSetting);
   if (it != settingsMap.end())
   {
     CSettingString* result = ((CSettingString *)(*it).second);
@@ -1290,7 +1291,7 @@ const CStdString &CGUISettings::GetString(const char *strSetting, bool bPrompt /
 void CGUISettings::SetString(const char *strSetting, const char *strData)
 {
   ASSERT(settingsMap.size());
-  mapIter it = settingsMap.find(CStdString(strSetting).ToLower());
+  mapIter it = settingsMap.find(strSetting);
   if (it != settingsMap.end())
   {
     ((CSettingString *)(*it).second)->SetData(strData);
@@ -1307,7 +1308,7 @@ void CGUISettings::SetString(const char *strSetting, const char *strData)
 CSetting *CGUISettings::GetSetting(const char *strSetting)
 {
   ASSERT(settingsMap.size());
-  mapIter it = settingsMap.find(CStdString(strSetting).ToLower());
+  mapIter it = settingsMap.find(strSetting);
   if (it != settingsMap.end())
     return (*it).second;
   else

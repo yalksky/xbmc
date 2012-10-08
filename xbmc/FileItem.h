@@ -99,7 +99,7 @@ public:
   void Reset();
   const CFileItem& operator=(const CFileItem& item);
   virtual void Archive(CArchive& ar);
-  virtual void Serialize(CVariant& value);
+  virtual void Serialize(CVariant& value) const;
   virtual void ToSortable(SortItem &sortable);
   virtual bool IsFileItem() const { return true; };
 
@@ -173,7 +173,6 @@ public:
   void FillInDefaultIcon();
   void SetFileSizeLabel();
   virtual void SetLabel(const CStdString &strLabel);
-  virtual void SetLabel2(const CStdString &strLabel);
   CURL GetAsUrl() const;
   int GetVideoContentType() const; /* return VIDEODB_CONTENT_TYPE, but don't want to include videodb in this header */
   bool IsLabelPreformated() const { return m_bLabelPreformated; }

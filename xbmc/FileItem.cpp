@@ -591,6 +591,7 @@ void CFileItem::Reset()
   m_pictureInfoTag=NULL;
   m_extrainfo.Empty();
   m_specialSort = SortSpecialNone;
+  ClearProperties();
   SetInvalid();
 }
 
@@ -688,7 +689,7 @@ void CFileItem::Archive(CArchive& ar)
   }
 }
 
-void CFileItem::Serialize(CVariant& value)
+void CFileItem::Serialize(CVariant& value) const
 {
   //CGUIListItem::Serialize(value["CGUIListItem"]);
 
@@ -1333,12 +1334,6 @@ void CFileItem::SetLabel(const CStdString &strLabel)
   }
   CGUIListItem::SetLabel(strLabel);
 }
-
-void CFileItem::SetLabel2(const CStdString &strLabel)
-{
-  m_strLabel2 = strLabel;
-}
-
 
 void CFileItem::SetFileSizeLabel()
 {
