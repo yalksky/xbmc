@@ -82,6 +82,8 @@
 #include "pvr/windows/GUIWindowPVR.h"
 #include "filesystem/PVRFile.h"
 
+#include "utils/StringUtils.h"
+
 using namespace XFILE;
 using namespace PVR;
 
@@ -769,13 +771,13 @@ bool COMXPlayer::ReadPacket(DemuxPacket*& packet, CDemuxStream*& stream)
 
     if(packet)
     {
+      // stream changed, update and open defaults
       if(packet->iStreamId == DMX_SPECIALID_STREAMCHANGE)
       {
-        // reset the caching state for pvr streams
-        if (m_pInputStream->IsStreamType(DVDSTREAM_TYPE_PVRMANAGER))
-          SetCaching(CACHESTATE_PVR);
-        CDVDDemuxUtils::FreeDemuxPacket(packet);
-        return true;
+          m_SelectionStreams.Clear(STREAM_NONE, STREAM_SOURCE_DEMUX);
+          m_SelectionStreams.Update(m_pInputStream, m_pDemuxer);
+          OpenDefaultStreams();
+          return true;
       }
 
       UpdateCorrection(packet, m_offset_pts);
@@ -2055,6 +2057,9 @@ void COMXPlayer::HandleMessages()
 
         double start = DVD_NOPTS_VALUE;
 
+        if (m_pInputStream->IsStreamType(DVDSTREAM_TYPE_PVRMANAGER) && !m_State.canseek)
+          break;
+
         int time = msg.GetRestore() ? (int)m_Edl.RestoreCutTime(msg.GetTime()) : msg.GetTime();
         CLog::Log(LOGDEBUG, "demuxer seek to: %d", time);
         if (m_pDemuxer && m_pDemuxer->SeekTime(time, msg.GetBackward(), &start))
@@ -2216,6 +2221,12 @@ void COMXPlayer::HandleMessages()
         if (speed != DVD_PLAYSPEED_PAUSE && m_playSpeed != DVD_PLAYSPEED_PAUSE && speed != m_playSpeed)
           m_callback.OnPlayBackSpeedChanged(speed / DVD_PLAYSPEED_NORMAL);
 
+        if (m_pInputStream->IsStreamType(DVDSTREAM_TYPE_PVRMANAGER) && speed != m_playSpeed)
+        {
+          CDVDInputStreamPVRManager* pvrinputstream = static_cast<CDVDInputStreamPVRManager*>(m_pInputStream);
+          pvrinputstream->Pause( speed == 0 );
+        }
+
         // if playspeed is different then DVD_PLAYSPEED_NORMAL or DVD_PLAYSPEED_PAUSE
         // audioplayer, stops outputing audio to audiorendere, but still tries to
         // sleep an correct amount for each packet
@@ -2375,8 +2386,17 @@ void COMXPlayer::SetPlaySpeed(int speed)
   SynchronizeDemuxer(100);
 }
 
+bool COMXPlayer::CanPause()
+{
+  CSingleLock lock(m_StateSection);
+  return m_State.canpause;
+}
+
 void COMXPlayer::Pause()
 {
+  if (m_pInputStream->IsStreamType(DVDSTREAM_TYPE_PVRMANAGER) && !m_State.canpause)
+    return;
+
   if(m_playSpeed != DVD_PLAYSPEED_PAUSE && (m_caching == CACHESTATE_FULL || m_caching == CACHESTATE_PVR))
   {
     SetCaching(CACHESTATE_DONE);
@@ -2420,11 +2440,20 @@ bool COMXPlayer::IsPassthrough() const
 
 bool COMXPlayer::CanSeek()
 {
-  return GetTotalTime() > 0;
+  if (m_pInputStream->IsStreamType(DVDSTREAM_TYPE_PVRMANAGER))
+  {
+    CSingleLock lock(m_StateSection);
+    return m_State.canseek;
+  }
+  else
+    return GetTotalTime() > 0;
 }
 
 void COMXPlayer::Seek(bool bPlus, bool bLargeStep)
 {
+  if (m_pInputStream->IsStreamType(DVDSTREAM_TYPE_PVRMANAGER) && !m_State.canseek)
+    return;
+
   if(((bPlus && GetChapter() < GetChapterCount())
   || (!bPlus && GetChapter() > 1)) && bLargeStep)
   {
@@ -3753,6 +3782,13 @@ void COMXPlayer::UpdatePlayState(double timeout)
       state.recording = pChannel->IsRecording();
     }
 
+    if (m_pInputStream->IsStreamType(DVDSTREAM_TYPE_PVRMANAGER))
+    {
+      CDVDInputStreamPVRManager* pvrinputstream = static_cast<CDVDInputStreamPVRManager*>(m_pInputStream);
+      state.canpause = pvrinputstream->CanPause();
+      state.canseek = pvrinputstream->CanSeek();
+    }
+
     CDVDInputStream::IDisplayTime* pDisplayTime = dynamic_cast<CDVDInputStream::IDisplayTime*>(m_pInputStream);
     if (pDisplayTime && pDisplayTime->GetTotalTime() > 0)
     {
@@ -3995,6 +4031,41 @@ void COMXPlayer::Update(bool bPauseDrawing)
 void COMXPlayer::GetVideoAspectRatio(float &fAR)
 {
   fAR = g_renderManager.GetAspectRatio();
+}
+
+void COMXPlayer::GetRenderFeatures(std::vector<int> &renderFeatures)
+{
+  renderFeatures.push_back(RENDERFEATURE_STRETCH);
+  renderFeatures.push_back(RENDERFEATURE_CROP);
+}
+
+void COMXPlayer::GetDeinterlaceMethods(std::vector<int> &deinterlaceMethods)
+{
+  deinterlaceMethods.push_back(VS_INTERLACEMETHOD_DEINTERLACE);
+}
+
+void COMXPlayer::GetDeinterlaceModes(std::vector<int> &deinterlaceModes)
+{
+  deinterlaceModes.push_back(VS_DEINTERLACEMODE_AUTO);
+  deinterlaceModes.push_back(VS_DEINTERLACEMODE_OFF);
+  deinterlaceModes.push_back(VS_DEINTERLACEMODE_FORCE);
+}
+
+void COMXPlayer::GetScalingMethods(std::vector<int> &scalingMethods)
+{
+}
+
+void COMXPlayer::GetAudioCapabilities(std::vector<int> &audioCaps)
+{
+  audioCaps.push_back(IPC_AUD_OFFSET);
+  audioCaps.push_back(IPC_AUD_SELECT_STREAM);
+  audioCaps.push_back(IPC_AUD_SELECT_OUTPUT);
+  audioCaps.push_back(IPC_AUD_OFFSET);
+}
+
+void COMXPlayer::GetSubtitleCapabilities(std::vector<int> &subCaps)
+{
+  subCaps.push_back(IPC_SUBS_ALL);
 }
 
 #endif
