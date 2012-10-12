@@ -275,7 +275,7 @@ CUPnPDirectory::GetDirectory(const CStdString& strPath, CFileItemList &items)
             CFileItemPtr pItem(new CFileItem((const char*)name));
             pItem->SetPath(CStdString((const char*) "upnp://" + uuid + "/"));
             pItem->m_bIsFolder = true;
-            pItem->SetArt("thumb", (const char*)(*device)->GetIconUrl("image/jpeg"));
+            pItem->SetArt("thumb", (const char*)(*device)->GetIconUrl("image/png"));
 
             items.Add(pItem);
 
@@ -491,8 +491,8 @@ CUPnPDirectory::GetDirectory(const CStdString& strPath, CFileItemList &items)
                     pItem->SetProperty("unwatchedepisodes", episodes - played);
                     watched = (episodes && played == episodes);
                 }
-                else if (type == "episode")
-                    watched = played;
+                else if (type == "episode" || type == "movie")
+                    watched = (played > 0);
                 pItem->SetOverlayImage(CGUIListItem::ICON_OVERLAY_UNWATCHED, watched);
             }
             items.Add(pItem);

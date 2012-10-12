@@ -771,15 +771,6 @@ bool COMXPlayer::ReadPacket(DemuxPacket*& packet, CDemuxStream*& stream)
 
     if(packet)
     {
-      // stream changed, update and open defaults
-      if(packet->iStreamId == DMX_SPECIALID_STREAMCHANGE)
-      {
-          m_SelectionStreams.Clear(STREAM_NONE, STREAM_SOURCE_DEMUX);
-          m_SelectionStreams.Update(m_pInputStream, m_pDemuxer);
-          OpenDefaultStreams();
-          return true;
-      }
-
       UpdateCorrection(packet, m_offset_pts);
       if(packet->iStreamId < 0)
         return true;
@@ -805,6 +796,15 @@ bool COMXPlayer::ReadPacket(DemuxPacket*& packet, CDemuxStream*& stream)
 
   if(packet)
   {
+    // stream changed, update and open defaults
+    if(packet->iStreamId == DMX_SPECIALID_STREAMCHANGE)
+    {
+        m_SelectionStreams.Clear(STREAM_NONE, STREAM_SOURCE_DEMUX);
+        m_SelectionStreams.Update(m_pInputStream, m_pDemuxer);
+        OpenDefaultStreams();
+        return true;
+    }
+
     UpdateCorrection(packet, m_offset_pts);
     // this groupId stuff is getting a bit messy, need to find a better way
     // currently it is used to determine if a menu overlay is associated with a picture
@@ -4060,7 +4060,6 @@ void COMXPlayer::GetAudioCapabilities(std::vector<int> &audioCaps)
   audioCaps.push_back(IPC_AUD_OFFSET);
   audioCaps.push_back(IPC_AUD_SELECT_STREAM);
   audioCaps.push_back(IPC_AUD_SELECT_OUTPUT);
-  audioCaps.push_back(IPC_AUD_OFFSET);
 }
 
 void COMXPlayer::GetSubtitleCapabilities(std::vector<int> &subCaps)
