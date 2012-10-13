@@ -197,6 +197,10 @@ bool CTagLoaderTagLib::Load(const string& strFileName, CMusicInfoTag& tag, Embed
   else if (xiph)
     ParseXiphComment(xiph, art, tag);
 
+  // art for flac files is outside the tag
+  if (flacFile)
+    SetFlacArt(flacFile, art, tag);
+
   // Add APE tags over the top of ID3 tags if we want to prioritize them
   if (ape && g_advancedSettings.m_prioritiseAPEv2tags)
     ParseAPETag(ape, art, tag);
@@ -242,9 +246,8 @@ bool CTagLoaderTagLib::ParseASF(ASF::Tag *asf, EmbeddedArt *art, CMusicInfoTag& 
   return true;
 }
 
-bool CTagLoaderTagLib::ParseID3v2Tag(ID3v2::Tag *id3v2, EmbeddedArt *art, CMusicInfoTag& tag)
+char POPMtoXBMC(int popm)
 {
-  // Notes:
   // Ratings:
   // FROM: http://thiagoarrais.com/repos/banshee/src/Core/Banshee.Core/Banshee.Streaming/StreamRatingTagger.cs
   // The following schemes are used by the other POPM-compatible players:
@@ -256,7 +259,16 @@ bool CTagLoaderTagLib::ParseID3v2Tag(ID3v2::Tag *id3v2, EmbeddedArt *art, CMusic
   // Quod Libet: "quodlibet@lists.sacredchao.net" ratings
   //   (but that email can be changed):
   //   arbitrary scale from 0-255
+  if (popm == 0) return '0';
+  if (popm < 0x40) return '1';
+  if (popm < 0x80) return '2';
+  if (popm < 0xc0) return '3';
+  if (popm < 0xff) return '4';
+  return '5';
+}
 
+bool CTagLoaderTagLib::ParseID3v2Tag(ID3v2::Tag *id3v2, EmbeddedArt *art, CMusicInfoTag& tag)
+{
   //  tag.SetURL(strFile);
   if (!id3v2) return false;
 
@@ -274,6 +286,11 @@ bool CTagLoaderTagLib::ParseID3v2Tag(ID3v2::Tag *id3v2, EmbeddedArt *art, CMusic
     else if (it->first == "TYER")   tag.SetYear(strtol(it->second.front()->toString().toCString(true), NULL, 10));
     else if (it->first == "TCMP")   tag.SetCompilation((strtol(it->second.front()->toString().toCString(true), NULL, 10) == 0) ? false : true);
     else if (it->first == "TENC")   {} // EncodedBy
+    else if (it->first == "TCOP")   {} // Copyright message
+    else if (it->first == "TDRC")   tag.SetYear(strtol(it->second.front()->toString().toCString(true), NULL, 10));
+    else if (it->first == "TDRL")   tag.SetYear(strtol(it->second.front()->toString().toCString(true), NULL, 10));
+    else if (it->first == "TDTG")   {} // Tagging time
+    else if (it->first == "TLAN")   {} // Languages
     else if (it->first == "USLT")
       // Loop through any lyrics frames. Could there be multiple frames, how to choose?
       for (ID3v2::FrameList::ConstIterator lt = it->second.begin(); lt != it->second.end(); ++lt)
@@ -346,14 +363,15 @@ bool CTagLoaderTagLib::ParseID3v2Tag(ID3v2::Tag *id3v2, EmbeddedArt *art, CMusic
         // @xbmc.org ratings trump others (of course)
         if      (popFrame->email() == "ratings@xbmc.org")
           tag.SetRating(popFrame->rating() / 51 + '0');
-        else if (popFrame->email() == "Windows Media Player 9 Series" && tag.GetRating() == '0')  
-          tag.SetRating(popFrame->rating() / 51 + '0');
-        else if (popFrame->email() == "no@email" && tag.GetRating() == '0')                       
-          tag.SetRating(popFrame->rating() / 51 + '0');
-        else if (popFrame->email() == "quodlibet@lists.sacredchao.net" && tag.GetRating() == '0') 
-          tag.SetRating(popFrame->rating() / 51 + '0');
-        else
-          CLog::Log(LOGDEBUG, "unrecognized ratings schema detected: %s", popFrame->email().toCString(true));
+        else if (tag.GetRating() == '0')
+        {
+          if (popFrame->email() != "Windows Media Player 9 Series" &&
+              popFrame->email() != "no@email" &&
+              popFrame->email() != "quodlibet@lists.sacredchao.net" &&
+              popFrame->email() != "rating@winamp.com")
+            CLog::Log(LOGDEBUG, "unrecognized ratings schema detected: %s", popFrame->email().toCString(true));
+          tag.SetRating(POPMtoXBMC(popFrame->rating()));
+        }
       }
     else
       CLog::Log(LOGDEBUG, "unrecognized ID3 frame detected: %c%c%c%c", it->first[0], it->first[1], it->first[2], it->first[3]);
@@ -420,14 +438,17 @@ bool CTagLoaderTagLib::ParseXiphComment(Ogg::XiphComment *xiph, EmbeddedArt *art
   {
     if (it->first == "ARTIST")                         tag.SetArtist(StringListToVectorString(it->second));
     else if (it->first == "ALBUMARTIST")               tag.SetAlbumArtist(StringListToVectorString(it->second));
+    else if (it->first == "ALBUM ARTIST")              tag.SetAlbumArtist(StringListToVectorString(it->second));
     else if (it->first == "ALBUM")                     tag.SetAlbum(it->second.front().to8Bit(true));
     else if (it->first == "TITLE")                     tag.SetTitle(it->second.front().to8Bit(true));
     else if (it->first == "TRACKNUMBER")               tag.SetTrackNumber(it->second.front().toInt());
     else if (it->first == "DISCNUMBER")                tag.SetPartOfSet(it->second.front().toInt());
     else if (it->first == "YEAR")                      tag.SetYear(it->second.front().toInt());
+    else if (it->first == "DATE")                      tag.SetYear(it->second.front().toInt());
     else if (it->first == "GENRE")                     tag.SetGenre(StringListToVectorString(it->second));
     else if (it->first == "COMMENT")                   tag.SetComment(it->second.front().to8Bit(true));
     else if (it->first == "ENCODEDBY")                 {}
+    else if (it->first == "ENSEMBLE")                  {}
     else if (it->first == "COMPILATION")               tag.SetCompilation(it->second.front().toInt() == 1);
     else if (it->first == "LYRICS")                    tag.SetLyrics(it->second.front().to8Bit(true));
     else if (it->first == "REPLAYGAIN_TRACK_GAIN")     tag.SetReplayGainTrackGain((int)(atof(it->second.front().toCString(true)) * 100 + 0.5));
@@ -518,6 +539,30 @@ bool CTagLoaderTagLib::ParseGenericTag(Tag *generic, EmbeddedArt *art, CMusicInf
   }
 
   return true;
+}
+
+void CTagLoaderTagLib::SetFlacArt(FLAC::File *flacFile, EmbeddedArt *art, CMusicInfoTag &tag)
+{
+  FLAC::Picture *cover[2] = {};
+  List<FLAC::Picture *> pictures = flacFile->pictureList();
+  for (List<FLAC::Picture *>::ConstIterator i = pictures.begin(); i != pictures.end(); ++i)
+  {
+    FLAC::Picture *picture = *i;
+    if (picture->type() == FLAC::Picture::FrontCover)
+      cover[0] = picture;
+    else // anything else is taken as second priority
+      cover[1] = picture;
+  }
+  for (unsigned int i = 0; i < 2; i++)
+  {
+    if (cover[i])
+    {
+      tag.SetCoverArtInfo(cover[i]->data().size(), cover[i]->mimeType().to8Bit(true));
+      if (art)
+        art->set((const uint8_t*)cover[i]->data().data(), cover[i]->data().size(), cover[i]->mimeType().to8Bit(true));
+      return; // one is enough
+    }
+  }
 }
 
 const vector<string> CTagLoaderTagLib::GetASFStringList(const List<ASF::Attribute>& list)
