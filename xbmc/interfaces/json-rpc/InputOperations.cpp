@@ -94,16 +94,12 @@ JSONRPC_STATUS CInputOperations::activateWindow(int windowID)
 
 JSONRPC_STATUS CInputOperations::SendText(const CStdString &method, ITransportLayer *transport, IClient *client, const CVariant &parameterObject, CVariant &result)
 {
-  std::string text = parameterObject["text"].asString();
-  if (text.empty())
-    return InvalidParams;
-
   CGUIWindow *window = g_windowManager.GetWindow(g_windowManager.GetFocusedWindow());
   if (!window)
     return InternalError;
 
   CGUIMessage msg(GUI_MSG_SET_TEXT, 0, 0);
-  msg.SetLabel(text);
+  msg.SetLabel(parameterObject["text"].asString());
   msg.SetParam1(parameterObject["done"].asBoolean() ? 1 : 0);
   CApplicationMessenger::Get().SendGUIMessage(msg, window->GetID());
   return ACK;
