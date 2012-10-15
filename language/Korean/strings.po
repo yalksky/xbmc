@@ -1,12 +1,16 @@
 # XBMC Media Center language file
 # XBMC-core v12.0-ALPHA6
-# Translators: xbmc-korea.com, 2012.
+# Translators:
+#   <airplanez@gmail.com>, 2012.
+# Junghwan Oh <junghwan@gmail.com>, 2012.
+#   <neurostar@gmail.com>, 2012.
+#   <piodio@gmail.com>, 2012.
 msgid ""
 msgstr ""
 "Project-Id-Version: XBMC Main Translation Project (Frodo)\n"
 "Report-Msgid-Bugs-To: http://trac.xbmc.org/\n"
 "POT-Creation-Date: 2012-05-04 12:46+0000\n"
-"PO-Revision-Date: 2012-10-08 14:08+0000\n"
+"PO-Revision-Date: 2012-10-13 04:57+0000\n"
 "Last-Translator: Junghwan Oh <junghwan@gmail.com>\n"
 "Language-Team: Korean (http://www.transifex.com/projects/p/XBMC-Main-Frodo/language/ko/)\n"
 "MIME-Version: 1.0\n"
@@ -891,11 +895,11 @@ msgstr "HTTP를 통해 XBMC 제어 허용"
 
 msgctxt "#264"
 msgid "Record"
-msgstr "녹음"
+msgstr "녹화"
 
 msgctxt "#265"
 msgid "Stop Rec."
-msgstr "녹음 중지"
+msgstr "녹화 중지"
 
 msgctxt "#266"
 msgid "Sort by: Track"
@@ -5855,7 +5859,7 @@ msgstr "녹화 예약"
 
 msgctxt "#19026"
 msgid "Add timer..."
-msgstr "녹화 추가..."
+msgstr "예약 추가..."
 
 msgctxt "#19027"
 msgid "No search results"
@@ -5953,7 +5957,7 @@ msgstr "채널 보기"
 
 msgctxt "#19050"
 msgid "Show visible channels"
-msgstr ""
+msgstr "볼수있는 채널 보이기"
 
 msgctxt "#19051"
 msgid "Show hidden channels"
@@ -5961,7 +5965,7 @@ msgstr "숨겨진 채널 보기"
 
 msgctxt "#19052"
 msgid "Move channel to:"
-msgstr ""
+msgstr "다음으로 채널 이동:"
 
 msgctxt "#19053"
 msgid "Recording information"
@@ -5985,7 +5989,7 @@ msgstr "예약 편집"
 
 msgctxt "#19058"
 msgid "Timer enabled"
-msgstr ""
+msgstr "타이머 사용됨"
 
 msgctxt "#19059"
 msgid "Stop recording"
@@ -6017,7 +6021,7 @@ msgstr "기본 EPG 윈도우"
 
 msgctxt "#19067"
 msgid "This event is already being recorded."
-msgstr ""
+msgstr "이 이벤트는 이미 녹화중입니다."
 
 msgctxt "#19068"
 msgid "This recording could not be deleted. Check the log for details."
@@ -6153,11 +6157,11 @@ msgstr "녹화를 저장할 폴더명 입력"
 
 msgctxt "#19106"
 msgid "Next timer on"
-msgstr ""
+msgstr "다음 타이머 : "
 
 msgctxt "#19107"
 msgid "at"
-msgstr ""
+msgstr ":"
 
 msgctxt "#19109"
 msgid "Couldn't save timer. Check the log for details."
@@ -6198,11 +6202,11 @@ msgstr "어느 서버에서 검색하겠습니까?"
 
 msgctxt "#19120"
 msgid "Client number"
-msgstr ""
+msgstr "클라이언트 번호"
 
 msgctxt "#19121"
 msgid "Avoid repeats"
-msgstr ""
+msgstr "반복 금지"
 
 msgctxt "#19122"
 msgid ""
@@ -6263,11 +6267,11 @@ msgstr "대소문자 구분"
 
 msgctxt "#19136"
 msgid "Channel unavailable"
-msgstr ""
+msgstr "채널 사용할수 없음"
 
 msgctxt "#19137"
 msgid "No groups defined"
-msgstr ""
+msgstr "그룹이 정의되지 않음"
 
 msgctxt "#19138"
 msgid "Please create a group first"
@@ -6295,7 +6299,7 @@ msgstr "그룹이 정의되지 않음"
 
 msgctxt "#19145"
 msgid "Grouped"
-msgstr ""
+msgstr "그룹화 됨"
 
 msgctxt "#19146"
 msgid "Groups"
@@ -6340,7 +6344,7 @@ msgstr "일"
 
 msgctxt "#19156"
 msgid "from"
-msgstr ""
+msgstr ":"
 
 msgctxt "#19157"
 msgid "Next recording"
@@ -6352,19 +6356,19 @@ msgstr "현재 녹화중"
 
 msgctxt "#19159"
 msgid "from"
-msgstr ""
+msgstr ":"
 
 msgctxt "#19160"
 msgid "to"
-msgstr ""
+msgstr ":"
 
 msgctxt "#19161"
 msgid "On"
-msgstr ""
+msgstr ":"
 
 msgctxt "#19162"
 msgid "Recording active"
-msgstr ""
+msgstr "녹화 활성화"
 
 msgctxt "#19163"
 msgid "Recordings"
@@ -6480,7 +6484,7 @@ msgstr "PVR 서비스"
 
 msgctxt "#19192"
 msgid "None of the connected PVR backends supports scanning for channels."
-msgstr ""
+msgstr "채널 검색을 지원하는 연결된 PVR 백엔드가 없습니다."
 
 msgctxt "#19193"
 msgid "The channel scan cannot be started. Check the log for details."
@@ -6496,7 +6500,7 @@ msgstr "클라이언트 동작"
 
 msgctxt "#19196"
 msgid "PVR client specific actions"
-msgstr ""
+msgstr "PVR 클라이언트 특정 동작"
 
 msgctxt "#19197"
 msgid "Recording started on: %s"
@@ -6560,7 +6564,7 @@ msgstr "채널 삭제"
 
 msgctxt "#19212"
 msgid "This list contains changes"
-msgstr ""
+msgstr "이 목록은 변경이 포함됨"
 
 msgctxt "#19213"
 msgid "Select backend"
@@ -6592,7 +6596,7 @@ msgstr "그룹이 없는 채널"
 
 msgctxt "#19220"
 msgid "Channels in"
-msgstr ""
+msgstr "채널"
 
 msgctxt "#19221"
 msgid "Synchronise channel groups with backends"
@@ -6670,7 +6674,7 @@ msgstr "클라이언트에서 녹화를 불러오는 중"
 
 msgctxt "#19239"
 msgid "Starting background threads"
-msgstr ""
+msgstr "백그라운드 스레드 시작중"
 
 msgctxt "#19240"
 msgid "No PVR add-on enabled"
@@ -6726,11 +6730,11 @@ msgstr "이 채널의 EPG 업데이트를 예약하겠습니까?"
 
 msgctxt "#19253"
 msgid "EPG update scheduled for channel"
-msgstr ""
+msgstr "채널을 위한 EPG 업데이트 계획됨"
 
 msgctxt "#19254"
 msgid "EPG update failed for channel"
-msgstr ""
+msgstr "채널을 위한 EPG 업데이트 실패"
 
 msgctxt "#19255"
 msgid "Start recording"
@@ -7194,7 +7198,7 @@ msgstr "재생목록 폴더"
 
 msgctxt "#20007"
 msgid "Recordings"
-msgstr "녹음"
+msgstr "녹화"
 
 msgctxt "#20008"
 msgid "Screenshots"
@@ -8546,7 +8550,7 @@ msgstr "시리즈 영화"
 
 msgctxt "#20458"
 msgid "Group movies in sets"
-msgstr "시리즈 영화 묶기"
+msgstr "세트의 그룹 영화"
 
 msgctxt "#20459"
 msgid "Tags"
@@ -8582,7 +8586,7 @@ msgstr "TuxBox 클라이언트"
 
 msgctxt "#21332"
 msgid "WARNING: Target TuxBox device is in recording-mode!"
-msgstr "경고: 대상 TuxBox 장치가 녹음-모드 입니다!"
+msgstr "경고: 대상 TuxBox 장치가 레코딩-모드 입니다!"
 
 msgctxt "#21333"
 msgid "The stream will be stopped!"
@@ -9362,7 +9366,7 @@ msgstr "비디오 재생중 일시중지되면 흐림 사용"
 
 msgctxt "#22015"
 msgid "All recordings"
-msgstr "모든 녹음"
+msgstr "모든 녹화"
 
 msgctxt "#22016"
 msgid "By title"
@@ -9378,7 +9382,7 @@ msgstr "라이브 채널"
 
 msgctxt "#22019"
 msgid "Recordings by title"
-msgstr "제목별 녹음"
+msgstr "제목별 녹화"
 
 msgctxt "#22020"
 msgid "Guide"
@@ -10493,7 +10497,7 @@ msgstr "PC를 절전모드로 전환할 때 장치도 절전모드로 전환"
 
 msgctxt "#36027"
 msgid "This device needs servicing"
-msgstr ""
+msgstr "이 장치는 서비스가 필요함"
 
 msgctxt "#36028"
 msgid "Ignore"
