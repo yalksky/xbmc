@@ -562,6 +562,7 @@ msgctxt "#166"
 msgid "Skin"
 msgstr ""
 
+#: xbmc/windows/GUIWindowFileManager.cpp
 msgctxt "#167"
 msgid "Cancel file operations"
 msgstr ""
@@ -3795,13 +3796,36 @@ msgctxt "#12348"
 msgid "Item locked"
 msgstr ""
 
-#empty strings from id 12349 to 12352
+#: xbmc/utils/EdenVideoArtUpdater.cpp
+msgctxt "#12349"
+msgid "Updating video library art"
+msgstr ""
+
+#: xbmc/utils/EdenVideoArtUpdater.cpp
+msgctxt "#12350"
+msgid "Processing %s"
+msgstr ""
+
+#: xbmc/video/windows/GUIWindowVideoBase.cpp
+msgctxt "#12351"
+msgid "The art cache in your video library needs updating."
+msgstr ""
+
+#: xbmc/video/windows/GUIWindowVideoBase.cpp
+msgctxt "#12352"
+msgid "No downloading is needed."
+msgstr ""
 
 msgctxt "#12353"
 msgid "Reactivate lock"
 msgstr ""
 
-#empty strings from id 12354 to 12355
+#: xbmc/video/windows/GUIWindowVideoBase.cpp
+msgctxt "#12354"
+msgid "Would you like to update it now?"
+msgstr ""
+
+#empty strings with id 12355
 
 msgctxt "#12356"
 msgid "Change lock"
@@ -4839,10 +4863,13 @@ msgctxt "#13432"
 msgid "Allow hardware acceleration (VideoToolbox)"
 msgstr ""
 
+#: xbmc/settings/GUISettings.cpp
 msgctxt "#13433"
 msgid "Play the next video automatically"
 msgstr ""
 
+#. If autoplay next video is set true
+#: xbmc/video/windows/GUIWindowVideoBase.cpp
 msgctxt "#13434"
 msgid "Play only this"
 msgstr ""
@@ -4893,22 +4920,27 @@ msgctxt "#13510"
 msgid "Sync playback to display"
 msgstr ""
 
+#: xbmc/video/dialogs/GUIDialogVideoInfo.cpp
 msgctxt "#13511"
 msgid "Choose art"
 msgstr ""
 
+#: xbmc/video/dialogs/GUIDialogVideoInfo.cpp
 msgctxt "#13512"
 msgid "Current art"
 msgstr ""
 
+#: xbmc/video/dialogs/GUIDialogVideoInfo.cpp
 msgctxt "#13513"
 msgid "Remote art"
 msgstr ""
 
+#: xbmc/video/dialogs/GUIDialogVideoInfo.cpp
 msgctxt "#13514"
 msgid "Local art"
 msgstr ""
 
+#: xbmc/video/dialogs/GUIDialogVideoInfo.cpp
 msgctxt "#13515"
 msgid "No art"
 msgstr ""
@@ -5355,6 +5387,7 @@ msgctxt "#14099"
 msgid "Eject disc when CD ripping is complete"
 msgstr ""
 
+#: xbmc/music/windows/GUIWindowMusicSongs.cpp
 msgctxt "#14100"
 msgid "Stop ripping CD"
 msgstr ""
@@ -7163,18 +7196,22 @@ msgctxt "#19274"
 msgid "Please visit xbmc.org/pvr to learn more."
 msgstr ""
 
+#: xbmc/pvr/timers/PVRTimerInfoTag.cpp
 msgctxt "#19275"
 msgid "Conflict warning"
 msgstr ""
 
+#: xbmc/pvr/timers/PVRTimerInfoTag.cpp
 msgctxt "#19276"
 msgid "Conflict error"
 msgstr ""
 
+#: xbmc/pvr/timers/PVRTimerInfoTag.cpp
 msgctxt "#19277"
 msgid "Recording conflict"
 msgstr ""
 
+#: xbmc/pvr/timers/PVRTimerInfoTag.cpp
 msgctxt "#19278"
 msgid "Recording error"
 msgstr ""
@@ -8259,6 +8296,7 @@ msgctxt "#20187"
 msgid "UPnP"
 msgstr ""
 
+#: xbmc/network/upnp/UPnPServer.cpp
 msgctxt "#20188"
 msgid "Announce library updates via UPnP"
 msgstr ""
@@ -9446,9 +9484,7 @@ msgctxt "#21465"
 msgid "Above video"
 msgstr ""
 
-msgctxt "#21466"
-msgid "between"
-msgstr ""
+#empty string with id 21466
 
 #. Filter (media data) from float value to float value
 #: xbmc/dialogs/GUIDialogMediaFilter.cpp
@@ -9980,6 +10016,7 @@ msgctxt "#23054"
 msgid "Running"
 msgstr ""
 
+#: xbmc/settings/GUISettings.cpp
 msgctxt "#23055"
 msgid "Scale Teletext to 4:3"
 msgstr ""
@@ -10106,6 +10143,7 @@ msgctxt "#24028"
 msgid "Weather.com (standard)"
 msgstr ""
 
+#: xbmc/settings/GUISettings.cpp
 msgctxt "#24029"
 msgid "Service for weather information"
 msgstr ""
@@ -11095,10 +11133,12 @@ msgctxt "#36037"
 msgid "TV"
 msgstr ""
 
+#: xbmc/peripherals/devices/PeripheralCecAdapter.cpp
 msgctxt "#36038"
 msgid "Amplifier / AVR device"
 msgstr ""
 
+#: xbmc/peripherals/devices/PeripheralCecAdapter.cpp
 msgctxt "#36039"
 msgid "TV and AVR device (explicit)"
 msgstr ""

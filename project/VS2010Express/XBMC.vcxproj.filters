@@ -1132,9 +1132,6 @@
     <ClCompile Include="..\..\xbmc\guilib\GUISpinControlEx.cpp">
       <Filter>guilib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\xbmc\guilib\GUIStandardWindow.cpp">
-      <Filter>guilib</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\xbmc\guilib\GUIStaticItem.cpp">
       <Filter>guilib</Filter>
     </ClCompile>
@@ -2532,6 +2529,12 @@
     <ClCompile Include="..\..\xbmc\pictures\PictureThumbLoader.cpp">
       <Filter>pictures</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\xbmc\music\MusicThumbLoader.cpp">
+      <Filter>music</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xbmc\video\VideoThumbLoader.cpp">
+      <Filter>video</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\xbmc\dbwrappers\Database.cpp">
       <Filter>dbwrappers</Filter>
     </ClCompile>
@@ -2577,6 +2580,9 @@
     </ClCompile>
     <ClCompile Include="..\..\xbmc\filesystem\VideoDatabaseDirectory\DirectoryNodeTags.cpp">
       <Filter>filesystem\VideoDatabaseDirectory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xbmc\utils\EdenVideoArtUpdater.cpp">
+      <Filter>utils</Filter>
     </ClCompile>
     <ClCompile Include="..\..\xbmc\utils\EndianSwap.cpp">
       <Filter>utils</Filter>
@@ -3939,9 +3945,6 @@
     <ClInclude Include="..\..\xbmc\guilib\GUISpinControlEx.h">
       <Filter>guilib</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\xbmc\guilib\GUIStandardWindow.h">
-      <Filter>guilib</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\xbmc\guilib\GUIStaticItem.h">
       <Filter>guilib</Filter>
     </ClInclude>
@@ -4399,6 +4402,9 @@
       <Filter>utils</Filter>
     </ClInclude>
     <ClInclude Include="..\..\xbmc\utils\DownloadQueueManager.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\utils\EdenVideoArtUpdater.h">
       <Filter>utils</Filter>
     </ClInclude>
     <ClInclude Include="..\..\xbmc\utils\EndianSwap.h">
@@ -5480,6 +5486,12 @@
     <ClInclude Include="..\..\xbmc\ThumbLoader.h" />
     <ClInclude Include="..\..\xbmc\pictures\PictureThumbLoader.h">
       <Filter>pictures</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\music\MusicThumbLoader.h">
+      <Filter>music</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\video\VideoThumbLoader.h">
+      <Filter>video</Filter>
     </ClInclude>
     <ClInclude Include="..\..\xbmc\dbwrappers\Database.h">
       <Filter>dbwrappers</Filter>
