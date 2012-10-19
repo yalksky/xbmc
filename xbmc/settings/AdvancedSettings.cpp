@@ -303,7 +303,7 @@ void CAdvancedSettings::Initialize()
   m_measureRefreshrate = false;
 
   m_cacheMemBufferSize = 1024 * 1024 * 20;
-  m_addonPackageFolderSize = 200*1024*1024;
+  m_addonPackageFolderSize = 200;
 
   m_jsonOutputCompact = true;
   m_jsonTcpPort = 9090;

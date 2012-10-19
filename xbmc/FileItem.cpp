@@ -218,6 +218,7 @@ CFileItem::CFileItem(const CPVRChannel& channel)
 
   SetProperty("channelid", channel.ChannelID());
   SetProperty("path", channel.Path());
+  SetArt("thumb", channel.IconPath());
 }
 
 CFileItem::CFileItem(const CPVRRecording& record)
@@ -937,6 +938,9 @@ bool CFileItem::IsFileFolder() const
 
 bool CFileItem::IsSmartPlayList() const
 {
+  if (HasProperty("library.smartplaylist") && GetProperty("library.smartplaylist").asBoolean())
+    return true;
+
   CStdString strExtension;
   URIUtils::GetExtension(m_strPath, strExtension);
   strExtension.ToLower();

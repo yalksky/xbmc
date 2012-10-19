@@ -6522,9 +6522,7 @@ msgctxt "#19102"
 msgid "Please switch to another channel."
 msgstr ""
 
-msgctxt "#19103"
-msgid "Scan for missing icons"
-msgstr ""
+#empty string with id 19103
 
 msgctxt "#19104"
 msgid "Enter the name of the folder for the recording"
@@ -6742,9 +6740,7 @@ msgctxt "#19160"
 msgid "to"
 msgstr ""
 
-msgctxt "#19161"
-msgid "On"
-msgstr ""
+#empty string with id 19161
 
 msgctxt "#19162"
 msgid "Recording active"

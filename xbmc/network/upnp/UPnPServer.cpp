@@ -174,10 +174,10 @@ CUPnPServer::SetupIcons()
 {
     NPT_String file_root = CSpecialProtocol::TranslatePath("special://xbmc/media/").c_str();
     AddIcon(
-        PLT_DeviceIcon("image/png", 256, 256, 32, "/icon.png"),
+        PLT_DeviceIcon("image/png", 256, 256, 24, "/icon-flat-256x256.png"),
         file_root);
     AddIcon(
-        PLT_DeviceIcon("image/png", 32, 32, 32, "/icon32x32.png"),
+        PLT_DeviceIcon("image/png", 120, 120, 24, "/icon-flat-120x120.png"),
         file_root);
     return NPT_SUCCESS;
 }
@@ -614,12 +614,10 @@ CUPnPServer::BuildResponse(PLT_ActionReference&          action,
     // we will reuse this ThumbLoader for all items
     NPT_Reference<CThumbLoader> thumb_loader;
 
-    // this isn't ideal, just grabbing first item to identify the content type
-    // of this FileItemList, but there's no other option
-    if (!items.IsEmpty() && items.Get(0)->HasVideoInfoTag()) {
+    if (URIUtils::IsVideoDb(items.GetPath())) {
         thumb_loader = NPT_Reference<CThumbLoader>(new CVideoThumbLoader());
     }
-    else if (!items.IsEmpty() && items.Get(0)->HasMusicInfoTag()) {
+    else if (URIUtils::IsMusicDb(items.GetPath())) {
         thumb_loader = NPT_Reference<CThumbLoader>(new CMusicThumbLoader());
     }
     if (!thumb_loader.IsNull()) {
