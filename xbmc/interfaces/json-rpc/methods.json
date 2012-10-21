@@ -1461,7 +1461,7 @@
       },
       { "name": "displaytime", "type": "integer", "minimum": 1500, "default": 5000, "description": "The time in milliseconds the notification will be visible" }
     ],
-    "returns":  { "$ref": "System.Property.Value", "required": true }
+    "returns": "string"
   },
   "GUI.GetProperties": {
     "type": "method",
@@ -1865,7 +1865,8 @@
     ],
     "returns": {
       "type": "object",
-      "description": "List of key-value pairs of the retrieved info labels"
+      "description": "Object containing key-value pairs of the retrieved info labels",
+      "additionalProperties": { "type": "string" }
     }
   },
   "XBMC.GetInfoBooleans": {
@@ -1878,7 +1879,8 @@
     ],
     "returns": {
       "type": "object",
-      "description": "List of key-value pairs of the retrieved info booleans"
+      "description": "Object containing key-value pairs of the retrieved info booleans",
+      "additionalProperties": { "type": "string" }
     }
   }
 }

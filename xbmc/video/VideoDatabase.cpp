@@ -5993,6 +5993,10 @@ void CVideoDatabase::Stack(CFileItemList& items, VIDEODB_CONTENT_TYPE type, bool
             pItem->IncrementProperty("watchedepisodes", (int)jItem->GetProperty("watchedepisodes").asInteger());
             pItem->IncrementProperty("unwatchedepisodes", (int)jItem->GetProperty("unwatchedepisodes").asInteger());
 
+            // adjust lastplayed
+            if (jItem->GetVideoInfoTag()->m_lastPlayed > pItem->GetVideoInfoTag()->m_lastPlayed)
+              pItem->GetVideoInfoTag()->m_lastPlayed = jItem->GetVideoInfoTag()->m_lastPlayed;
+
             // check for fanart if not already set
             if (strFanArt.IsEmpty())
               strFanArt = jItem->GetArt("fanart");
@@ -9359,7 +9363,8 @@ bool CVideoDatabase::GetFilter(CDbUrl &videoUrl, Filter &filter, SortDescription
         sorting.limitEnd = xsp.GetLimit();
       if (xsp.GetOrder() != SortByNone)
         sorting.sortBy = xsp.GetOrder();
-      sorting.sortOrder = xsp.GetOrderAscending() ? SortOrderAscending : SortOrderDescending;
+      if (xsp.GetOrderDirection() != SortOrderNone)
+        sorting.sortOrder = xsp.GetOrderDirection();
       if (g_guiSettings.GetBool("filelists.ignorethewhensorting"))
         sorting.sortAttributes = SortAttributeIgnoreArticle;
     }

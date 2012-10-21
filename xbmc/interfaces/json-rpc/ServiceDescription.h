@@ -784,9 +784,8 @@ namespace JSONRPC
         "\"channeltype\": { \"$ref\": \"PVR.Channel.Type\" },"
         "\"hidden\": { \"type\": \"boolean\" },"
         "\"locked\": { \"type\": \"boolean\" },"
-        "\"starttime\": { \"type\": \"string\" },"
-        "\"endtime\": { \"type\": \"string\" },"
-        "\"thumbnail\": { \"type\": \"string\" }"
+        "\"thumbnail\": { \"type\": \"string\" },"
+        "\"lastplayed\": { \"type\": \"string\" }"
       "}"
     "}",
     "\"PVR.Details.ChannelGroup\": {"
@@ -2686,7 +2685,7 @@ namespace JSONRPC
         "},"
         "{ \"name\": \"displaytime\", \"type\": \"integer\", \"minimum\": 1500, \"default\": 5000, \"description\": \"The time in milliseconds the notification will be visible\" }"
       "],"
-      "\"returns\":  { \"$ref\": \"System.Property.Value\", \"required\": true }"
+      "\"returns\": \"string\""
     "}",
     "\"GUI.GetProperties\": {"
       "\"type\": \"method\","
@@ -3090,7 +3089,8 @@ namespace JSONRPC
       "],"
       "\"returns\": {"
         "\"type\": \"object\","
-        "\"description\": \"List of key-value pairs of the retrieved info labels\""
+        "\"description\": \"Object containing key-value pairs of the retrieved info labels\","
+        "\"additionalProperties\": { \"type\": \"string\" }"
       "}"
     "}",
     "\"XBMC.GetInfoBooleans\": {"
@@ -3103,7 +3103,8 @@ namespace JSONRPC
       "],"
       "\"returns\": {"
         "\"type\": \"object\","
-        "\"description\": \"List of key-value pairs of the retrieved info booleans\""
+        "\"description\": \"Object containing key-value pairs of the retrieved info booleans\","
+        "\"additionalProperties\": { \"type\": \"string\" }"
       "}"
     "}"
   };
