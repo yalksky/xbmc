@@ -6208,10 +6208,6 @@ msgctxt "#19102"
 msgid "Please switch to another channel."
 msgstr "다른 채널로 변경하세요"
 
-msgctxt "#19103"
-msgid "Scan for missing icons"
-msgstr "없는 아이콘 검색"
-
 msgctxt "#19104"
 msgid "Enter the name of the folder for the recording"
 msgstr "녹화를 저장할 폴더명 입력"
