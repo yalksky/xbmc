@@ -389,12 +389,13 @@ BuildObject(CFileItem&                    item,
             } else {
                 object->m_Resources.Insert(object->m_Resources.GetFirstItem(), resource);
             }
-            // copy across the known metadata
-            for(unsigned i=0; i<object->m_Resources.GetItemCount(); i++) {
-                object->m_Resources[i].m_Size = resource.m_Size;
-                object->m_Resources[i].m_Duration = resource.m_Duration;
-                object->m_Resources[i].m_Resolution = resource.m_Resolution;
-            }
+        }
+
+        // copy across the known metadata
+        for(unsigned i=0; i<object->m_Resources.GetItemCount(); i++) {
+            object->m_Resources[i].m_Size       = resource.m_Size;
+            object->m_Resources[i].m_Duration   = resource.m_Duration;
+            object->m_Resources[i].m_Resolution = resource.m_Resolution;
         }
 
         // Some upnp clients expect all audio items to have parent root id 4
@@ -536,12 +537,13 @@ BuildObject(CFileItem&                    item,
         fetched_art = thumb_loader->FillLibraryArt(item);
 
     // finally apply the found artwork
-    if (fetched_art && upnp_server) {
+    thumb = item.GetArt("thumb");
+    if (upnp_server && !thumb.empty()) {
         PLT_AlbumArtInfo art;
         art.uri = upnp_server->BuildSafeResourceUri(
             rooturi,
             (*ips.GetFirstItem()).ToString(),
-            CTextureCache::GetWrappedImageURL(item.GetArt("thumb")).c_str());
+            CTextureCache::GetWrappedImageURL(thumb).c_str());
 
         // Set DLNA profileID by extension, defaulting to JPEG.
         NPT_String ext = URIUtils::GetExtension(thumb).c_str();
@@ -551,10 +553,11 @@ BuildObject(CFileItem&                    item,
             art.dlna_profile = "JPEG_TN";
         }
         object->m_ExtraInfo.album_arts.Add(art);
-        std::string fanart = item.GetArt("fanart");
-        if (!fanart.empty())
-            upnp_server->AddSafeResourceUri(object, rooturi, ips, CTextureCache::GetWrappedImageURL(fanart), "xbmc.org:*:fanart:*");
     }
+
+    fanart = item.GetArt("fanart");
+    if (upnp_server && !fanart.empty())
+        upnp_server->AddSafeResourceUri(object, rooturi, ips, CTextureCache::GetWrappedImageURL(fanart), "xbmc.org:*:fanart:*");
 
     return object;
 
