@@ -1172,73 +1172,6 @@ bool CMusicDatabase::SearchArtists(const CStdString& search, CFileItemList &arti
   return false;
 }
 
-bool CMusicDatabase::GetArbitraryQuery(const CStdString& strQuery, const CStdString& strOpenRecordSet, const CStdString& strCloseRecordSet,
-                                       const CStdString& strOpenRecord, const CStdString& strCloseRecord, const CStdString& strOpenField,
-                                       const CStdString& strCloseField, CStdString& strResult)
-{
-  try
-  {
-    strResult = "";
-    if (NULL == m_pDB.get()) return false;
-    if (NULL == m_pDS.get()) return false;
-    CStdString strSQL=strQuery;
-    if (!m_pDS->query(strSQL.c_str()))
-    {
-      strResult = m_pDB->getErrorMsg();
-      return false;
-    }
-    strResult=strOpenRecordSet;
-    while (!m_pDS->eof())
-    {
-      strResult += strOpenRecord;
-      for (int i=0; i<m_pDS->fieldCount(); i++)
-      {
-        strResult += strOpenField;
-        strResult += m_pDS->fv(i).get_asString();
-        strResult += strCloseField;
-      }
-      strResult += strCloseRecord;
-      m_pDS->next();
-    }
-    strResult += strCloseRecordSet;
-    m_pDS->close();
-    return true;
-  }
-  catch (...)
-  {
-    CLog::Log(LOGERROR, "%s(%s) failed", __FUNCTION__, strQuery.c_str());
-  }
-  try
-  {
-    if (NULL == m_pDB.get()) return false;
-      strResult = m_pDB->getErrorMsg();
-  }
-  catch (...)
-  {
-
-  }
-
-  return false;
-}
-
-bool CMusicDatabase::ArbitraryExec(const CStdString& strExec)
-{
-  try
-  {
-    if (NULL == m_pDB.get()) return false;
-    if (NULL == m_pDS.get()) return false;
-    CStdString strSQL = strExec;
-    m_pDS->exec(strSQL.c_str());
-    m_pDS->close();
-    return true;
-  }
-  catch (...)
-  {
-    CLog::Log(LOGERROR, "%s failed", __FUNCTION__);
-  }
-  return false;
-}
-
 bool CMusicDatabase::GetAlbumInfo(int idAlbum, CAlbum &info, VECSONGS* songs)
 {
   try
@@ -2633,7 +2566,8 @@ bool CMusicDatabase::GetGenresNav(const CStdString& strBaseDir, CFileItemList& i
 
     Filter extFilter = filter;
     CMusicDbUrl musicUrl;
-    if (!musicUrl.FromString(strBaseDir) || !GetFilter(musicUrl, extFilter))
+    SortDescription sorting;
+    if (!musicUrl.FromString(strBaseDir) || !GetFilter(musicUrl, extFilter, sorting))
       return false;
 
     // if there are extra WHERE conditions we might need access
@@ -2810,8 +2744,6 @@ bool CMusicDatabase::GetCommonNav(const CStdString &strBaseDir, const CStdString
     CMusicDbUrl musicUrl;
     if (!BuildSQL(strBaseDir, strSQL, extFilter, strSQL, musicUrl))
       return false;
-
-    items.SetPath(musicUrl.ToString());
     
     strSQL = PrepareSQL(strSQL, !extFilter.fields.empty() ? extFilter.fields.c_str() : labelField.c_str());
     
@@ -2925,7 +2857,8 @@ bool CMusicDatabase::GetArtistsByWhere(const CStdString& strBaseDir, const Filte
 
     Filter extFilter = filter;
     CMusicDbUrl musicUrl;
-    if (!musicUrl.FromString(strBaseDir) || !GetFilter(musicUrl, extFilter))
+    SortDescription sorting = sortDescription;
+    if (!musicUrl.FromString(strBaseDir) || !GetFilter(musicUrl, extFilter, sorting))
       return false;
 
     // if there are extra WHERE conditions we might need access
@@ -2958,8 +2891,6 @@ bool CMusicDatabase::GetArtistsByWhere(const CStdString& strBaseDir, const Filte
     CStdString strSQLExtra;
     if (!BuildSQL(strSQLExtra, extFilter, strSQLExtra))
       return false;
-
-    items.SetPath(musicUrl.ToString());
 
     // Apply the limiting directly here if there's no special sorting but limiting
     if (extFilter.limit.empty() &&
@@ -3138,7 +3069,8 @@ bool CMusicDatabase::GetAlbumsByWhere(const CStdString &baseDir, const Filter &f
 
     Filter extFilter = filter;
     CMusicDbUrl musicUrl;
-    if (!musicUrl.FromString(baseDir) || !GetFilter(musicUrl, extFilter))
+    SortDescription sorting = sortDescription;
+    if (!musicUrl.FromString(baseDir) || !GetFilter(musicUrl, extFilter, sorting))
       return false;
 
     // if there are extra WHERE conditions we might need access
@@ -3152,8 +3084,6 @@ bool CMusicDatabase::GetAlbumsByWhere(const CStdString &baseDir, const Filter &f
     CStdString strSQLExtra;
     if (!BuildSQL(strSQLExtra, extFilter, strSQLExtra))
       return false;
-
-    items.SetPath(musicUrl.ToString());
 
     // Apply the limiting directly here if there's no special sorting but limiting
     if (extFilter.limit.empty() &&
@@ -3252,7 +3182,8 @@ bool CMusicDatabase::GetSongsByWhere(const CStdString &baseDir, const Filter &fi
 
     Filter extFilter = filter;
     CMusicDbUrl musicUrl;
-    if (!musicUrl.FromString(baseDir) || !GetFilter(musicUrl, extFilter))
+    SortDescription sorting = sortDescription;
+    if (!musicUrl.FromString(baseDir) || !GetFilter(musicUrl, extFilter, sorting))
       return false;
 
     // if there are extra WHERE conditions we might need access
@@ -3266,8 +3197,6 @@ bool CMusicDatabase::GetSongsByWhere(const CStdString &baseDir, const Filter &fi
     CStdString strSQLExtra;
     if (!BuildSQL(strSQLExtra, extFilter, strSQLExtra))
       return false;
-
-    items.SetPath(musicUrl.ToString());
 
     // Apply the limiting directly here if there's no special sorting but limiting
     if (extFilter.limit.empty() &&
@@ -3707,6 +3636,37 @@ bool CMusicDatabase::UpdateOldVersion(int version)
     g_settings.Save();
   }
 
+  if (version < 29)
+  { // update old art URLs
+    m_pDS->query("select art_id,url from art where url like 'image://%%'");
+    vector< pair<int, string> > art;
+    while (!m_pDS->eof())
+    {
+      art.push_back(make_pair(m_pDS->fv(0).get_asInt(), CURL(m_pDS->fv(1).get_asString()).Get()));
+      m_pDS->next();
+    }
+    m_pDS->close();
+    for (vector< pair<int, string> >::iterator i = art.begin(); i != art.end(); ++i)
+      m_pDS->exec(PrepareSQL("update art set url='%s' where art_id=%d", i->second.c_str(), i->first));
+  }
+  if (version < 30)
+  { // update URL encoded paths
+    m_pDS->query("select idSong, strFileName from song");
+    vector< pair<int, string> > files;
+    while (!m_pDS->eof())
+    {
+      files.push_back(make_pair(m_pDS->fv(0).get_asInt(), m_pDS->fv(1).get_asString()));
+      m_pDS->next();
+    }
+    m_pDS->close();
+
+    for (vector< pair<int, string> >::iterator i = files.begin(); i != files.end(); ++i)
+    {
+      std::string filename = i->second;
+      if (URIUtils::UpdateUrlEncoding(filename))
+        m_pDS->exec(PrepareSQL("UPDATE song SET strFileName='%s' WHERE idSong=%d", filename.c_str(), i->first));
+    }
+  }
   // always recreate the views after any table change
   CreateViews();
 
@@ -4183,6 +4143,10 @@ bool CMusicDatabase::RemoveSongsFromPath(const CStdString &path1, CSongMap &song
 
       m_pDS->close();
 
+      //TODO: move this below the m_pDS->exec block, once UPnP doesn't rely on this anymore
+      for (unsigned int i = 0; i < ids.size(); i++)
+        AnnounceRemove("song", ids[i]);
+
       // and delete all songs, and anything linked to them
       sql = "delete from song where idSong in " + songIds;
       m_pDS->exec(sql.c_str());
@@ -4193,8 +4157,6 @@ bool CMusicDatabase::RemoveSongsFromPath(const CStdString &path1, CSongMap &song
       sql = "delete from karaokedata where idSong in " + songIds;
       m_pDS->exec(sql.c_str());
 
-      for (unsigned int i = 0; i < ids.size(); i++)
-        AnnounceRemove("song", ids[i]);
     }
     // and remove the path as well (it'll be re-added later on with the new hash if it's non-empty)
     sql = "delete from path" + where;
@@ -5266,7 +5228,7 @@ string CMusicDatabase::GetArtistArtForItem(int mediaId, const string &mediaType,
   return GetSingleValue(query, m_pDS2);
 }
 
-bool CMusicDatabase::GetFilter(CDbUrl &musicUrl, Filter &filter)
+bool CMusicDatabase::GetFilter(CDbUrl &musicUrl, Filter &filter, SortDescription &sorting)
 {
   if (!musicUrl.IsValid())
     return false;
@@ -5444,10 +5406,18 @@ bool CMusicDatabase::GetFilter(CDbUrl &musicUrl, Filter &filter)
       return false;
 
     // check if the filter playlist matches the item type
-    if (xsp.GetType() != "artists"|| xsp.GetType()  == type)
+    if (xsp.GetType() != "artists" || xsp.GetType()  == type)
     {
       std::set<CStdString> playlists;
       filter.AppendWhere(xsp.GetWhereClause(*this, playlists));
+
+      if (xsp.GetLimit() > 0)
+        sorting.limitEnd = xsp.GetLimit();
+      if (xsp.GetOrder() != SortByNone)
+        sorting.sortBy = xsp.GetOrder();
+      sorting.sortOrder = xsp.GetOrderAscending() ? SortOrderAscending : SortOrderDescending;
+      if (g_guiSettings.GetBool("filelists.ignorethewhensorting"))
+        sorting.sortAttributes = SortAttributeIgnoreArticle;
     }
   }
 

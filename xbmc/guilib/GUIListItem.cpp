@@ -119,12 +119,38 @@ void CGUIListItem::SetArt(const std::string &type, const std::string &url)
   }
 }
 
+void CGUIListItem::SetArt(const ArtMap &art, bool setFallback /* = true */)
+{
+  m_art = art;
+  // ensure that the fallback "thumb" is available
+  if (setFallback && m_art.find("thumb") == m_art.end())
+  {
+    if (HasArt("poster"))
+      m_art["thumb"] = m_art["poster"];
+    else if (HasArt("banner"))
+      m_art["thumb"] = m_art["banner"];
+  }
+  
+  SetInvalid();
+}
+
+void CGUIListItem::AppendArt(const ArtMap &art)
+{
+  for (ArtMap::const_iterator i = art.begin(); i != art.end(); ++i)
+    SetArt(i->first, i->second);
+}
+
 std::string CGUIListItem::GetArt(const std::string &type) const
 {
   ArtMap::const_iterator i = m_art.find(type);
   if (i != m_art.end())
     return i->second;
   return "";
+}
+
+const CGUIListItem::ArtMap &CGUIListItem::GetArt() const
+{
+  return m_art;
 }
 
 bool CGUIListItem::HasArt(const std::string &type) const
@@ -178,24 +204,6 @@ CStdString CGUIListItem::GetOverlayImage() const
   default:
     return "";
   }
-}
-
-const map<string, string> &CGUIListItem::GetArt() const
-{
-  return m_art;
-}
-
-void CGUIListItem::SetArt(const map<string, string> &art)
-{
-  m_art = art;
-  // ensure that the fallback "thumb" is available
-  if (m_art.find("thumb") == m_art.end())
-  {
-    if (HasArt("poster"))
-      m_art["thumb"] = m_art["poster"];
-    else if (HasArt("banner"))
-      m_art["thumb"] = m_art["banner"];      
-  }  
 }
 
 void CGUIListItem::Select(bool bOnOff)
@@ -312,9 +320,7 @@ void CGUIListItem::Serialize(CVariant &value)
 void CGUIListItem::FreeIcons()
 {
   FreeMemory();
-  ArtMap::iterator i = m_art.find("thumb");
-  if (i != m_art.end())
-    m_art.erase(i);
+  m_art.clear();
   m_strIcon = "";
   SetInvalid();
 }

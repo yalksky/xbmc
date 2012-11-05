@@ -75,7 +75,9 @@
 
 #include "addons/AddonManager.h"
 #include "interfaces/info/InfoBool.h"
-#include "ThumbLoader.h"
+#include "video/VideoThumbLoader.h"
+#include "music/MusicThumbLoader.h"
+#include "video/VideoDatabase.h"
 #include "cores/AudioEngine/Utils/AEUtil.h"
 
 #define SYSHEATUPDATEINTERVAL 60000
@@ -3134,13 +3136,13 @@ CStdString CGUIInfoManager::GetImage(int info, int contextWindow, CStdString *fa
   {
     CGUIWindow *window = GetWindowWithCondition(contextWindow, WINDOW_CONDITION_IS_MEDIA_WINDOW);
     if (window)
-      return ((CGUIMediaWindow *)window)->CurrentDirectory().GetArt("tvshowthumb");
+      return ((CGUIMediaWindow *)window)->CurrentDirectory().GetArt("tvshow.thumb");
   }
   else if (info == CONTAINER_SEASONTHUMB)
   {
     CGUIWindow *window = GetWindowWithCondition(contextWindow, WINDOW_CONDITION_IS_MEDIA_WINDOW);
     if (window)
-      return ((CGUIMediaWindow *)window)->CurrentDirectory().GetArt("seasonthumb");
+      return ((CGUIMediaWindow *)window)->CurrentDirectory().GetArt("season.thumb");
   }
   else if (info == LISTITEM_THUMB || info == LISTITEM_ICON || info == LISTITEM_ACTUAL_ICON ||
           info == LISTITEM_OVERLAY || info == LISTITEM_RATING || info == LISTITEM_STAR_RATING)
@@ -3360,8 +3362,9 @@ const CStdString CGUIInfoManager::GetMusicPlaylistInfo(const GUIInfo& info)
   // try to set a thumbnail
   if (!playlistItem->HasArt("thumb"))
   {
-    CMusicThumbLoader::FillThumb(*playlistItem);
-    // still no thumb? then just the set the default cover TODO: remove me?
+    CMusicThumbLoader loader;
+    loader.LoadItem(playlistItem.get());
+    // still no thumb? then just the set the default cover
     if (!playlistItem->HasArt("thumb"))
       playlistItem->SetArt("thumb", "DefaultAlbumCover.png");
   }
@@ -3874,7 +3877,7 @@ void CGUIInfoManager::SetCurrentItem(CFileItem &item)
     SetCurrentMovie(item);
 
   SetChanged();
-  NotifyObservers(ObservableMessageCurrentItem, true);
+  NotifyObservers(ObservableMessageCurrentItem);
 }
 
 void CGUIInfoManager::SetCurrentAlbumThumb(const CStdString thumbFileName)
@@ -4053,6 +4056,7 @@ CStdString CGUIInfoManager::GetBuild()
 
 void CGUIInfoManager::SetDisplayAfterSeek(unsigned int timeOut, int seekOffset)
 {
+  g_infoManager.m_performingSeek = false;
   if (timeOut>0)
   {
     m_AfterSeekTimeout = CTimeUtils::GetFrameTime() +  timeOut;

@@ -916,9 +916,6 @@ bool CDVDPlayer::IsBetterStream(CCurrentStream& current, CDemuxStream* stream)
     if(current.type == STREAM_SUBTITLE)
       return false;
 
-    if(current.type == STREAM_TELETEXT)
-      return false;
-
     if(current.id < 0)
       return true;
   }
@@ -2015,6 +2012,12 @@ void CDVDPlayer::HandleMessages()
       {
         CDVDMsgPlayerSeek &msg(*((CDVDMsgPlayerSeek*)pMsg));
 
+        if (!m_State.canseek)
+        {
+          pMsg->Release();
+          continue;
+        }
+
         if(!msg.GetTrickPlay())
         {
           g_infoManager.SetDisplayAfterSeek(100000);
@@ -2023,9 +2026,6 @@ void CDVDPlayer::HandleMessages()
         }
 
         double start = DVD_NOPTS_VALUE;
-
-        if (m_pInputStream->IsStreamType(DVDSTREAM_TYPE_PVRMANAGER) && !m_State.canseek)
-          break;
 
         int time = msg.GetRestore() ? (int)m_Edl.RestoreCutTime(msg.GetTime()) : msg.GetTime();
         CLog::Log(LOGDEBUG, "demuxer seek to: %d", time);
@@ -2044,10 +2044,7 @@ void CDVDPlayer::HandleMessages()
 
         // set flag to indicate we have finished a seeking request
         if(!msg.GetTrickPlay())
-        {
-          g_infoManager.m_performingSeek = false;
           g_infoManager.SetDisplayAfterSeek();
-        }
 
         // dvd's will issue a HOP_CHANNEL that we need to skip
         if(m_pInputStream->IsStreamType(DVDSTREAM_TYPE_DVD))
@@ -2355,8 +2352,10 @@ bool CDVDPlayer::CanPause()
 
 void CDVDPlayer::Pause()
 {
-  if (m_pInputStream->IsStreamType(DVDSTREAM_TYPE_PVRMANAGER) && !m_State.canpause)
+  CSingleLock lock(m_StateSection);
+  if (!m_State.canpause)
     return;
+  lock.Leave();
 
   if(m_playSpeed != DVD_PLAYSPEED_PAUSE && (m_caching == CACHESTATE_FULL || m_caching == CACHESTATE_PVR))
   {
@@ -2401,13 +2400,8 @@ bool CDVDPlayer::IsPassthrough() const
 
 bool CDVDPlayer::CanSeek()
 {
-  if (m_pInputStream->IsStreamType(DVDSTREAM_TYPE_PVRMANAGER))
-  {
-    CSingleLock lock(m_StateSection);
-    return m_State.canseek;
-  }
-  else
-    return GetTotalTime() > 0;
+  CSingleLock lock(m_StateSection);
+  return m_State.canseek;
 }
 
 void CDVDPlayer::Seek(bool bPlus, bool bLargeStep)
@@ -2421,7 +2415,7 @@ void CDVDPlayer::Seek(bool bPlus, bool bLargeStep)
     return;
   }
 #endif
-  if (m_pInputStream->IsStreamType(DVDSTREAM_TYPE_PVRMANAGER) && !m_State.canseek)
+  if (!m_State.canseek)
     return;
 
   if(((bPlus && GetChapter() < GetChapterCount())
@@ -3831,13 +3825,6 @@ void CDVDPlayer::UpdatePlayState(double timeout)
       state.recording = pChannel->IsRecording();
     }
 
-    if (m_pInputStream->IsStreamType(DVDSTREAM_TYPE_PVRMANAGER))
-    {
-      CDVDInputStreamPVRManager* pvrinputstream = static_cast<CDVDInputStreamPVRManager*>(m_pInputStream);
-      state.canpause = pvrinputstream->CanPause();
-      state.canseek = pvrinputstream->CanSeek();
-    }
-
     CDVDInputStream::IDisplayTime* pDisplayTime = dynamic_cast<CDVDInputStream::IDisplayTime*>(m_pInputStream);
     if (pDisplayTime && pDisplayTime->GetTotalTime() > 0)
     {
@@ -3852,6 +3839,18 @@ void CDVDPlayer::UpdatePlayState(double timeout)
         state.time       = XbmcThreads::SystemClockMillis() - m_dvd.iDVDStillStartTime;
         state.time_total = m_dvd.iDVDStillTime;
       }
+    }
+
+    if (m_pInputStream->IsStreamType(DVDSTREAM_TYPE_PVRMANAGER))
+    {
+      CDVDInputStreamPVRManager* pvrinputstream = static_cast<CDVDInputStreamPVRManager*>(m_pInputStream);
+      state.canpause = pvrinputstream->CanPause();
+      state.canseek  = pvrinputstream->CanSeek();
+    }
+    else
+    {
+      state.canseek  = state.time_total > 0 ? true : false;
+      state.canpause = true;
     }
   }
 

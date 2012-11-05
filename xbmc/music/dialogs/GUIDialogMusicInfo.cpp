@@ -39,6 +39,7 @@
 #include "utils/URIUtils.h"
 #include "utils/StringUtils.h"
 #include "TextureCache.h"
+#include "music/MusicThumbLoader.h"
 
 using namespace std;
 using namespace XFILE;
@@ -142,6 +143,16 @@ bool CGUIDialogMusicInfo::OnMessage(CGUIMessage& message)
   }
 
   return CGUIDialog::OnMessage(message);
+}
+
+bool CGUIDialogMusicInfo::OnAction(const CAction &action)
+{
+  if (action.GetID() == ACTION_SHOW_INFO)
+  {
+    Close();
+    return true;
+  }
+  return CGUIDialog::OnAction(action);
 }
 
 void CGUIDialogMusicInfo::SetAlbum(const CAlbum& album, const CStdString &path)

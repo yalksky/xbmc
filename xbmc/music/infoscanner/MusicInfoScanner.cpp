@@ -48,7 +48,7 @@
 #include "utils/log.h"
 #include "utils/URIUtils.h"
 #include "TextureCache.h"
-#include "ThumbLoader.h"
+#include "music/MusicThumbLoader.h"
 #include "interfaces/AnnouncementManager.h"
 #include "GUIUserMessages.h"
 
@@ -173,7 +173,7 @@ void CMusicInfoScanner::Process()
         if (m_handle)
         {
           m_handle->SetText(StringUtils::Join(it->artist, g_advancedSettings.m_musicItemSeparator)+" - "+it->strAlbum);
-          m_handle->SetPercentage(iCurrentItem++/(double)m_albumsToScan.size());
+          m_handle->SetPercentage(iCurrentItem++/(float)m_albumsToScan.size());
         }
 
         CMusicAlbumInfo albumInfo;
@@ -194,7 +194,7 @@ void CMusicInfoScanner::Process()
         if (m_handle)
         {
           m_handle->SetText(it->strArtist);
-          m_handle->SetPercentage(iCurrentItem++/(double)m_artistsToScan.size()*100);
+          m_handle->SetPercentage(iCurrentItem++/(float)m_artistsToScan.size()*100);
         }
 
         DownloadArtistInfo(it->genre[0],it->strArtist,bCanceled); // genre field holds path - see fetchartistinfo()
@@ -209,17 +209,15 @@ void CMusicInfoScanner::Process()
   {
     CLog::Log(LOGERROR, "MusicInfoScanner: Exception while scanning.");
   }
-  ANNOUNCEMENT::CAnnouncementManager::Announce(ANNOUNCEMENT::AudioLibrary, "xbmc", "OnScanFinished");
-  m_bRunning = false;
-  if (m_showDialog)
-  {
-    // clear cache
-    CUtil::DeleteMusicDatabaseDirectoryCache();
 
-    // send message
-    CGUIMessage msg(GUI_MSG_SCAN_FINISHED, 0, 0, 0);
-    g_windowManager.SendThreadMessage(msg);
-  }
+  m_bRunning = false;
+  ANNOUNCEMENT::CAnnouncementManager::Announce(ANNOUNCEMENT::AudioLibrary, "xbmc", "OnScanFinished");
+  
+  // we need to clear the musicdb cache and update any active lists
+  CUtil::DeleteMusicDatabaseDirectoryCache();
+  CGUIMessage msg(GUI_MSG_SCAN_FINISHED, 0, 0, 0);
+  g_windowManager.SendThreadMessage(msg);
+  
   if (m_handle)
     m_handle->MarkFinished();
   m_handle = NULL;
@@ -440,7 +438,7 @@ bool CMusicInfoScanner::DoScan(const CStdString& strDirectory)
     if (m_handle)
     {
       if (m_itemCount>0)
-        m_handle->SetPercentage(m_currentItem/(double)m_itemCount*100);
+        m_handle->SetPercentage(m_currentItem/(float)m_itemCount*100);
       OnDirectoryScanned(strDirectory);
     }
   }
@@ -512,7 +510,7 @@ int CMusicInfoScanner::RetrieveMusicInfo(CFileItemList& items, const CStdString&
       // if we have the itemcount, update our
       // dialog with the progress we made
       if (m_handle && m_itemCount>0)
-        m_handle->SetPercentage(m_currentItem/(double)m_itemCount*100);
+        m_handle->SetPercentage(m_currentItem/(float)m_itemCount*100);
 
       if (tag.Loaded())
       {
@@ -1122,7 +1120,7 @@ void CMusicInfoScanner::GetAlbumArtwork(long id, const CAlbum &album)
 {
   if (album.thumbURL.m_url.size())
   {
-    if (!m_musicDatabase.GetArtForItem(id, "album", "thumb").empty())
+    if (m_musicDatabase.GetArtForItem(id, "album", "thumb").empty())
     {
       string thumb = CScraperUrl::GetThumbURL(album.thumbURL.GetFirstThumb());
       if (!thumb.empty())

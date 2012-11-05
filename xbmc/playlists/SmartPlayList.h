@@ -94,8 +94,10 @@ public:
   static std::vector<SortBy>  GetOrders(const CStdString &type);
   static FIELD_TYPE           GetFieldType(Field field);
 
-  CStdString                  GetLocalizedRule(const CStdString &type) const;
-  CStdString                  GetLocalizedParameter(const CStdString &type) const;
+  CStdString                  GetLocalizedRule() const;
+  CStdString                  GetParameter() const;
+  void                        SetParameter(const CStdString &value);
+  void                        SetParameter(const std::vector<CStdString> &values);
 
   Field                       m_field;
   SEARCH_OPERATOR             m_operator;
@@ -177,8 +179,9 @@ public:
   void SetOrder(SortBy order) { m_orderField = order; };
   SortBy GetOrder() const { return m_orderField; };
 
-  void SetOrderAscending(bool orderAscending) { m_orderAscending = orderAscending; };
-  bool GetOrderAscending() const { return m_orderAscending; };
+  void SetOrderAscending(bool orderAscending) { m_orderDirection = orderAscending ? SortOrderAscending : SortOrderDescending; };
+  bool GetOrderAscending() const { return m_orderDirection != SortOrderDescending; };
+  SortOrder GetOrderDirection() const { return m_orderDirection; }
 
   /*! \brief get the where clause for a playlist
    We handle playlists inside playlists separately in order to ensure we don't introduce infinite loops
@@ -195,7 +198,7 @@ public:
   static void GetAvailableFields(const std::string &type, std::vector<std::string> &fieldList);
   static void GetAvailableOperators(std::vector<std::string> &operatorList);
 
-  bool IsEmpty() const { return m_ruleCombination.m_rules.empty() && m_ruleCombination.m_combinations.empty(); }
+  bool IsEmpty(bool ignoreSortAndLimit = true) const;
 private:
   friend class CGUIDialogSmartPlaylistEditor;
   friend class CGUIDialogMediaFilter;
@@ -211,7 +214,7 @@ private:
   // order information
   unsigned int m_limit;
   SortBy m_orderField;
-  bool m_orderAscending;
+  SortOrder m_orderDirection;
 
   CXBMCTinyXML m_xmlDoc;
 };

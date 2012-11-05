@@ -95,9 +95,7 @@ bool CGUIWindowMusicSongs::OnMessage(CGUIMessage& message)
         CStdString strParent;
         URIUtils::GetParentPath(directory.GetPath(), strParent);
         if (directory.GetPath() == m_vecItems->GetPath() || strParent == m_vecItems->GetPath())
-        {
-          Update(m_vecItems->GetPath());
-        }
+          Refresh();
       }
     }
     break;
@@ -420,7 +418,7 @@ bool CGUIWindowMusicSongs::OnContextButton(int itemNumber, CONTEXT_BUTTON button
 
   case CONTEXT_BUTTON_CDDB:
     if (m_musicdatabase.LookupCDDBInfo(true))
-      Update(m_vecItems->GetPath());
+      Refresh();
     return true;
 
   case CONTEXT_BUTTON_DELETE:
@@ -463,12 +461,12 @@ void CGUIWindowMusicSongs::PlayItem(int iItem)
     CGUIWindowMusicBase::PlayItem(iItem);
 }
 
-bool CGUIWindowMusicSongs::Update(const CStdString &strDirectory)
+bool CGUIWindowMusicSongs::Update(const CStdString &strDirectory, bool updateFilterPath /* = true */)
 {
   if (m_thumbLoader.IsLoading())
     m_thumbLoader.StopThread();
 
-  if (!CGUIMediaWindow::Update(strDirectory))
+  if (!CGUIMediaWindow::Update(strDirectory, updateFilterPath))
     return false;
 
   if (m_vecItems->GetContent().IsEmpty())

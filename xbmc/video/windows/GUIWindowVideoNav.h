@@ -21,7 +21,6 @@
  */
 
 #include "GUIWindowVideoBase.h"
-#include "ThumbLoader.h"
 
 class CFileItemList;
 
@@ -47,6 +46,11 @@ protected:
    \param items the items to load information for.
    */
   void LoadVideoInfo(CFileItemList &items);
+
+  /*! \brief Pop up a fanart chooser. Does not utilise remote URLs.
+   \param videoItem the item to choose fanart for.
+   */
+  void OnChooseFanart(const CFileItem &videoItem);
 
   bool ApplyWatchedFilter(CFileItemList &items);
   virtual bool GetFilteredItems(const CStdString &filter, CFileItemList &items);

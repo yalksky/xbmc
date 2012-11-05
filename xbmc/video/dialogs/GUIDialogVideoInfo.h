@@ -21,11 +21,7 @@
  */
 
 #include "guilib/GUIDialog.h"
-#include "guilib/GUIListItem.h"
-#include "ThumbLoader.h"
-#include "video/VideoDatabase.h"
-
-class CFileItem;
+#include "FileItem.h"
 
 class CGUIDialogVideoInfo :
       public CGUIDialog
@@ -34,6 +30,7 @@ public:
   CGUIDialogVideoInfo(void);
   virtual ~CGUIDialogVideoInfo(void);
   virtual bool OnMessage(CGUIMessage& message);
+  virtual bool OnAction(const CAction &action);
   void SetMovie(const CFileItem *item);
   bool NeedRefresh() const;
   bool RefreshAll() const;
@@ -43,6 +40,8 @@ public:
   virtual CFileItemPtr GetCurrentListItem(int offset = 0) { return m_movieItem; }
   const CFileItemList& CurrentDirectory() const { return *m_castList; };
   virtual bool HasListItems() const { return true; };
+
+  static std::string ChooseArtType(const CFileItem &item, std::map<std::string, std::string> &currentArt);
 protected:
   void Update();
   void SetLabel(int iControl, const CStdString& strLabel);
@@ -63,6 +62,4 @@ protected:
   bool m_bRefresh;
   bool m_bRefreshAll;
   bool m_hasUpdatedThumb;
-  CGUIDialogProgress* m_dlgProgress;
-  CVideoThumbLoader m_loader;
 };

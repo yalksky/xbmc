@@ -235,91 +235,6 @@ CStdString CUtil::GetTitleFromPath(const CStdString& strFileNameAndPath, bool bI
   return strFilename;
 }
 
-bool CUtil::GetVolumeFromFileName(const CStdString& strFileName, CStdString& strFileTitle, CStdString& strVolumeNumber)
-{
-  const CStdStringArray &regexps = g_advancedSettings.m_videoStackRegExps;
-
-  CStdString strFileNameTemp = strFileName;
-
-  CRegExp reg(true);
-
-  for (unsigned int i = 0; i < regexps.size(); i++)
-  {
-    CStdString strRegExp = regexps[i];
-    if (!reg.RegComp(strRegExp.c_str()))
-    { // invalid regexp - complain in logs
-      CLog::Log(LOGERROR, "Invalid RegExp:[%s]", regexps[i].c_str());
-      continue;
-    }
-
-    int iFoundToken = reg.RegFind(strFileName.c_str());
-    if (iFoundToken >= 0)
-    {
-      int iRegLength = reg.GetFindLen();
-      int iCount = reg.GetSubCount();
-
-      /*
-      reg.DumpOvector(LOGDEBUG);
-      CLog::Log(LOGDEBUG, "Subcount=%i", iCount);
-      for (int j = 0; j <= iCount; j++)
-      {
-        CStdString str = reg.GetMatch(j);
-        CLog::Log(LOGDEBUG, "Sub(%i):[%s]", j, str.c_str());
-      }
-      */
-
-      // simple regexp, only the volume is captured
-      if (iCount == 1)
-      {
-        strVolumeNumber = reg.GetMatch(1);
-        if (strVolumeNumber.IsEmpty()) return false;
-
-        // Remove the extension (if any).  We do this on the base filename, as the regexp
-        // match may include some of the extension (eg the "." in particular).
-        // The extension will then be added back on at the end - there is no reason
-        // to clean it off here. It will be cleaned off during the display routine, if
-        // the settings to hide extensions are turned on.
-        CStdString strFileNoExt = strFileNameTemp;
-        URIUtils::RemoveExtension(strFileNoExt);
-        CStdString strFileExt = strFileNameTemp.Right(strFileNameTemp.length() - strFileNoExt.length());
-        CStdString strFileRight = strFileNoExt.Mid(iFoundToken + iRegLength);
-        strFileTitle = strFileName.Left(iFoundToken) + strFileRight + strFileExt;
-
-        return true;
-      }
-
-      // advanced regexp with prefix (1), volume (2), and suffix (3)
-      else if (iCount == 3)
-      {
-        // second subpatten contains the stacking volume
-        strVolumeNumber = reg.GetMatch(2);
-        if (strVolumeNumber.IsEmpty()) return false;
-
-        // everything before the regexp match
-        strFileTitle = strFileName.Left(iFoundToken);
-
-        // first subpattern contains prefix
-        strFileTitle += reg.GetMatch(1);
-
-        // third subpattern contains suffix
-        strFileTitle += reg.GetMatch(3);
-
-        // everything after the regexp match
-        strFileTitle += strFileNameTemp.Mid(iFoundToken + iRegLength);
-
-        return true;
-      }
-
-      // unknown regexp format
-      else
-      {
-        CLog::Log(LOGERROR, "Incorrect movie stacking regexp format:[%s]", regexps[i].c_str());
-      }
-    }
-  }
-  return false;
-}
-
 void CUtil::CleanString(const CStdString& strFileName, CStdString& strTitle, CStdString& strTitleAndYear, CStdString& strYear, bool bRemoveExtension /* = false */, bool bCleanChars /* = true */)
 {
   strTitleAndYear = strFileName;
@@ -1474,114 +1389,6 @@ void CUtil::DeleteDirectoryCache(const CStdString &prefix)
   }
 }
 
-bool CUtil::SetSysDateTimeYear(int iYear, int iMonth, int iDay, int iHour, int iMinute)
-{
-  TIME_ZONE_INFORMATION tziNew;
-  SYSTEMTIME CurTime;
-  SYSTEMTIME NewTime;
-  GetLocalTime(&CurTime);
-  GetLocalTime(&NewTime);
-  int iRescBiases, iHourUTC;
-  int iMinuteNew;
-
-  DWORD dwRet = GetTimeZoneInformation(&tziNew);  // Get TimeZone Informations
-  float iGMTZone = (float(tziNew.Bias)/(60));     // Calc's the GMT Time
-
-  CLog::Log(LOGDEBUG, "------------ TimeZone -------------");
-  CLog::Log(LOGDEBUG, "-      GMT Zone: GMT %.1f",iGMTZone);
-  CLog::Log(LOGDEBUG, "-          Bias: %lu minutes",tziNew.Bias);
-  CLog::Log(LOGDEBUG, "-  DaylightBias: %lu",tziNew.DaylightBias);
-  CLog::Log(LOGDEBUG, "-  StandardBias: %lu",tziNew.StandardBias);
-
-  switch (dwRet)
-  {
-    case TIME_ZONE_ID_STANDARD:
-      {
-        iRescBiases   = tziNew.Bias + tziNew.StandardBias;
-        CLog::Log(LOGDEBUG, "-   Timezone ID: 1, Standart");
-      }
-      break;
-    case TIME_ZONE_ID_DAYLIGHT:
-      {
-        iRescBiases   = tziNew.Bias + tziNew.StandardBias + tziNew.DaylightBias;
-        CLog::Log(LOGDEBUG, "-   Timezone ID: 2, Daylight");
-      }
-      break;
-    case TIME_ZONE_ID_UNKNOWN:
-      {
-        iRescBiases   = tziNew.Bias + tziNew.StandardBias;
-        CLog::Log(LOGDEBUG, "-   Timezone ID: 0, Unknown");
-      }
-      break;
-    case TIME_ZONE_ID_INVALID:
-      {
-        iRescBiases   = tziNew.Bias + tziNew.StandardBias;
-        CLog::Log(LOGDEBUG, "-   Timezone ID: Invalid");
-      }
-      break;
-    default:
-      iRescBiases   = tziNew.Bias + tziNew.StandardBias;
-  }
-    CLog::Log(LOGDEBUG, "--------------- END ---------------");
-
-  // Calculation
-  iHourUTC = GMTZoneCalc(iRescBiases, iHour, iMinute, iMinuteNew);
-  iMinute = iMinuteNew;
-  if(iHourUTC <0)
-  {
-    iDay = iDay - 1;
-    iHourUTC =iHourUTC + 24;
-  }
-  if(iHourUTC >23)
-  {
-    iDay = iDay + 1;
-    iHourUTC =iHourUTC - 24;
-  }
-
-  // Set the New-,Detected Time Values to System Time!
-  NewTime.wYear     = (WORD)iYear;
-  NewTime.wMonth    = (WORD)iMonth;
-  NewTime.wDay      = (WORD)iDay;
-  NewTime.wHour     = (WORD)iHourUTC;
-  NewTime.wMinute   = (WORD)iMinute;
-
-  FILETIME stNewTime, stCurTime;
-  SystemTimeToFileTime(&NewTime, &stNewTime);
-  SystemTimeToFileTime(&CurTime, &stCurTime);
-  return false;
-}
-int CUtil::GMTZoneCalc(int iRescBiases, int iHour, int iMinute, int &iMinuteNew)
-{
-  int iHourUTC, iTemp;
-  iMinuteNew = iMinute;
-  iTemp = iRescBiases/60;
-
-  if (iRescBiases == 0 )return iHour;   // GMT Zone 0, no need calculate
-  if (iRescBiases > 0)
-    iHourUTC = iHour + abs(iTemp);
-  else
-    iHourUTC = iHour - abs(iTemp);
-
-  if ((iTemp*60) != iRescBiases)
-  {
-    if (iRescBiases > 0)
-      iMinuteNew = iMinute + abs(iTemp*60 - iRescBiases);
-    else
-      iMinuteNew = iMinute - abs(iTemp*60 - iRescBiases);
-
-    if (iMinuteNew >= 60)
-    {
-      iMinuteNew = iMinuteNew -60;
-      iHourUTC = iHourUTC + 1;
-    }
-    else if (iMinuteNew < 0)
-    {
-      iMinuteNew = iMinuteNew +60;
-      iHourUTC = iHourUTC - 1;
-    }
-  }
-  return iHourUTC;
-}
 
 void CUtil::GetRecursiveListing(const CStdString& strPath, CFileItemList& items, const CStdString& strMask, bool bUseFileDirectories)
 {
@@ -1702,7 +1509,7 @@ bool CUtil::MakeShortenPath(CStdString StrInput, CStdString& StrOutput, int iTex
   return true;
 }
 
-bool CUtil::SupportsFileOperations(const CStdString& strPath)
+bool CUtil::SupportsWriteFileOperations(const CStdString& strPath)
 {
   // currently only hd, smb, nfs and afp support delete and rename
   if (URIUtils::IsHD(strPath))
@@ -1710,7 +1517,7 @@ bool CUtil::SupportsFileOperations(const CStdString& strPath)
   if (URIUtils::IsSmb(strPath))
     return true;
   if (CUtil::IsTVRecording(strPath))
-    return CPVRDirectory::SupportsFileOperations(strPath);
+    return CPVRDirectory::SupportsWriteFileOperations(strPath);
   if (URIUtils::IsNfs(strPath))
     return true;
   if (URIUtils::IsAfp(strPath))
@@ -1722,14 +1529,22 @@ bool CUtil::SupportsFileOperations(const CStdString& strPath)
      * it hits the directory cache on the way through, which has the Live Channels and Guide
      * items cached.
      */
-    return CMythDirectory::SupportsFileOperations(strPath);
+    return CMythDirectory::SupportsWriteFileOperations(strPath);
   }
   if (URIUtils::IsStack(strPath))
-    return SupportsFileOperations(CStackDirectory::GetFirstStackedFile(strPath));
+    return SupportsWriteFileOperations(CStackDirectory::GetFirstStackedFile(strPath));
   if (URIUtils::IsMultiPath(strPath))
-    return CMultiPathDirectory::SupportsFileOperations(strPath);
+    return CMultiPathDirectory::SupportsWriteFileOperations(strPath);
 
   return false;
+}
+
+bool CUtil::SupportsReadFileOperations(const CStdString& strPath)
+{
+  if (URIUtils::IsVideoDb(strPath))
+    return false;
+
+  return true;
 }
 
 CStdString CUtil::GetDefaultFolderThumb(const CStdString &folderThumb)

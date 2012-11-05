@@ -20,6 +20,7 @@
 
 #include "VideoLibrary.h"
 #include "ApplicationMessenger.h"
+#include "TextureCache.h"
 #include "Util.h"
 #include "utils/URIUtils.h"
 #include "video/VideoDatabase.h"
@@ -507,6 +508,7 @@ JSONRPC_STATUS CVideoLibrary::SetMovieDetails(const CStdString &method, ITranspo
     videodatabase.SetPlayCount(CFileItem(infos), newPlaycount, infos.m_lastPlayed.IsValid() ? infos.m_lastPlayed : CDateTime::GetCurrentDateTime());
   }
 
+  CJSONRPCUtils::NotifyItemUpdated();
   return ACK;
 }
 
@@ -525,7 +527,7 @@ JSONRPC_STATUS CVideoLibrary::SetTVShowDetails(const CStdString &method, ITransp
   std::map<std::string, std::string> artwork;
   videodatabase.GetArtForItem(infos.m_iDbId, infos.m_type, artwork);
 
-  std::map<int, std::string> seasonArt;
+  std::map<int, std::map<std::string, std::string> > seasonArt;
   videodatabase.GetTvShowSeasonArt(infos.m_iDbId, seasonArt);
 
   int playcount = infos.m_playCount;
@@ -544,6 +546,7 @@ JSONRPC_STATUS CVideoLibrary::SetTVShowDetails(const CStdString &method, ITransp
     videodatabase.SetPlayCount(CFileItem(infos), newPlaycount, infos.m_lastPlayed.IsValid() ? infos.m_lastPlayed : CDateTime::GetCurrentDateTime());
   }
 
+  CJSONRPCUtils::NotifyItemUpdated();
   return ACK;
 }
 
@@ -589,6 +592,7 @@ JSONRPC_STATUS CVideoLibrary::SetEpisodeDetails(const CStdString &method, ITrans
     videodatabase.SetPlayCount(CFileItem(infos), newPlaycount, infos.m_lastPlayed.IsValid() ? infos.m_lastPlayed : CDateTime::GetCurrentDateTime());
   }
 
+  CJSONRPCUtils::NotifyItemUpdated();
   return ACK;
 }
 
@@ -627,6 +631,7 @@ JSONRPC_STATUS CVideoLibrary::SetMusicVideoDetails(const CStdString &method, ITr
     videodatabase.SetPlayCount(CFileItem(infos), newPlaycount, infos.m_lastPlayed.IsValid() ? infos.m_lastPlayed : CDateTime::GetCurrentDateTime());
   }
 
+  CJSONRPCUtils::NotifyItemUpdated();
   return ACK;
 }
 
@@ -694,7 +699,7 @@ bool CVideoLibrary::FillFileItem(const CStdString &strFilename, CFileItem &item)
   if (!videodatabase.LoadVideoInfo(strFilename, details))
     return false;
 
-  item = CFileItem(details);
+  item.SetFromVideoInfoTag(details);
   return true;
 }
 
@@ -860,6 +865,8 @@ JSONRPC_STATUS CVideoLibrary::RemoveVideo(const CVariant &parameterObject)
     videodatabase.DeleteEpisode((int)parameterObject["episodeid"].asInteger());
   else if (parameterObject.isMember("musicvideoid"))
     videodatabase.DeleteMusicVideo((int)parameterObject["musicvideoid"].asInteger());
+
+  CJSONRPCUtils::NotifyItemUpdated();
   return ACK;
 }
 
@@ -935,4 +942,13 @@ void CVideoLibrary::UpdateVideoTag(const CVariant &parameterObject, CVideoInfoTa
     artwork["fanart"] = parameterObject["fanart"].asString();
   if (ParameterNotNull(parameterObject, "tag"))
     CopyStringArray(parameterObject["tag"], details.m_tags);
+  if (ParameterNotNull(parameterObject, "art"))
+  {
+    CVariant art = parameterObject["art"];
+    for (CVariant::const_iterator_map artIt = art.begin_map(); artIt != art.end_map(); artIt++)
+    {
+      if (!artIt->second.asString().empty())
+        artwork[artIt->first] = CTextureCache::UnwrapImageURL(artIt->second.asString());
+    }
+  }
 }
