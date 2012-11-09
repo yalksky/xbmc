@@ -27,9 +27,6 @@
 #include "utils/MathUtils.h"
 #include "utils/log.h"
 #include "windowing/WindowingFactory.h"
-#include "utils/TimeUtils.h"
-
-#include "settings/AdvancedSettings.h"
 
 #include <math.h>
 
@@ -87,7 +84,7 @@ public:
     if (FT_New_Face( m_library, CSpecialProtocol::TranslatePath(filename).c_str(), 0, &face ))
       return NULL;
 
-    unsigned int ydpi = GetDPI();
+    unsigned int ydpi = 72; // 72 points to the inch is the freetype default
     unsigned int xdpi = (unsigned int)MathUtils::round_int(ydpi * aspect);
 
     // we set our screen res currently to 96dpi in both directions (windows default)
@@ -126,11 +123,6 @@ public:
     assert(stroker);
     FT_Stroker_Done(stroker);
   }
-
-  unsigned int GetDPI() const
-  {
-    return 72; // default dpi, matches what XPR fonts used to use for sizing
-  };
 
 private:
   FT_Library   m_library;
@@ -199,7 +191,7 @@ void CGUIFontTTFBase::ClearCharacterCache()
   m_maxChars = CHAR_CHUNK;
   // set the posX and posY so that our texture will be created on first character write.
   m_posX = m_textureWidth;
-  m_posY = -(int)m_cellHeight;
+  m_posY = -(int)GetTextureLineHeight();
   m_textureHeight = 0;
 }
 
@@ -228,7 +220,7 @@ void CGUIFontTTFBase::Clear()
   m_vertex_count = 0;
 }
 
-bool CGUIFontTTFBase::Load(const CStdString& strFilename, float height, float aspect, float lineSpacing, bool border, bool precache /* = false */)
+bool CGUIFontTTFBase::Load(const CStdString& strFilename, float height, float aspect, float lineSpacing, bool border)
 {
   // we now know that this object is unique - only the GUIFont objects are non-unique, so no need
   // for reference tracking these fonts
@@ -237,47 +229,53 @@ bool CGUIFontTTFBase::Load(const CStdString& strFilename, float height, float as
   if (!m_face)
     return false;
 
-  // grab the maximum cell height and width
-  unsigned int m_cellWidth = m_face->bbox.xMax - m_face->bbox.xMin;
-  m_cellHeight = std::max<unsigned int>(m_face->bbox.yMax - m_face->bbox.yMin, m_face->ascender - m_face->descender);
-  m_cellBaseLine = std::max<unsigned int>(m_face->bbox.yMax, m_face->ascender);
+  /*
+   the values used are described below
+
+      XBMC coords                                     Freetype coords
+
+                0  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _  bbox.yMax, ascender
+                        A                 \
+                       A A                |
+                      A   A               |
+                      AAAAA  pppp   cellAscender
+                      A   A  p   p        |
+                      A   A  p   p        |
+   m_cellBaseLine  _ _A_ _A_ pppp_ _ _ _ _/_ _ _ _ _  0, base line.
+                             p            \
+                             p      cellDescender
+     m_cellHeight  _ _ _ _ _ p _ _ _ _ _ _/_ _ _ _ _  bbox.yMin, descender
+
+   */
+  int cellDescender = std::min<int>(m_face->bbox.yMin, m_face->descender);
+  int cellAscender  = std::max<int>(m_face->bbox.yMax, m_face->ascender);
+
+  /*
+   add on the strength of any border - we do this in non-bordered cases
+   as bordered fonts are done by first rendering the border and then the
+   main font - thus m_cellBaseLine needs to align in both cases
+   */
+  FT_Pos strength = FT_MulFix( m_face->units_per_EM, m_face->size->metrics.y_scale) / 12;
+  if (strength < 128)
+    strength = 128;
+
+  cellDescender -= strength;
+  cellAscender  += strength;
 
   if (border)
   {
     m_stroker = g_freeTypeLibrary.GetStroker();
-
-    FT_Pos strength = FT_MulFix( m_face->units_per_EM, m_face->size->metrics.y_scale) / 12;
-    if (strength < 128)
-      strength = 128;
-    // I don't see why strength should make m_CellHeight more than double and it uses up valuable texture space and CPU so clamp to double for large values
-    else if (strength > 256 && strength > (int)m_cellHeight)
-      strength = m_cellHeight;
-    m_cellHeight += 2*strength;
-
     if (m_stroker)
       FT_Stroker_Set(m_stroker, strength, FT_STROKER_LINECAP_ROUND, FT_STROKER_LINEJOIN_ROUND, 0);
   }
 
+  // scale to pixel sizing, rounding so that maximal extent is obtained
+  float scaler  = height / m_face->units_per_EM;
+  cellDescender = MathUtils::round_int(cellDescender * scaler - 0.5f);   // round down
+  cellAscender  = MathUtils::round_int(cellAscender  * scaler + 0.5f);   // round up
 
-  unsigned int ydpi = g_freeTypeLibrary.GetDPI();
-  unsigned int xdpi = (unsigned int)MathUtils::round_int(ydpi * aspect);
-
-  m_cellWidth *= (unsigned int)(height * xdpi);
-  m_cellWidth /= (72 * m_face->units_per_EM);
-
-  m_cellHeight *= (unsigned int)(height * ydpi);
-  m_cellHeight /= (72 * m_face->units_per_EM);
-
-  m_cellBaseLine *= (unsigned int)(height * ydpi);
-  m_cellBaseLine /= (72 * m_face->units_per_EM);
-
-  // increment for good measure to give space in our texture
-  m_cellWidth++;
-  m_cellHeight+=2;
-  m_cellBaseLine++;
-
-//  CLog::Log(LOGDEBUG, "%s Scaled size of font %s (%f): width = %i, height = %i, lineheight = %li",
-//    __FUNCTION__, strFilename.c_str(), height, m_cellWidth, m_cellHeight, m_face->size->metrics.height / 64);
+  m_cellBaseLine = cellAscender;
+  m_cellHeight   = cellAscender - cellDescender;
 
   m_height = height;
 
@@ -301,68 +299,13 @@ bool CGUIFontTTFBase::Load(const CStdString& strFilename, float height, float as
 
   // set the posX and posY so that our texture will be created on first character write.
   m_posX = m_textureWidth;
-  m_posY = -(int)m_cellHeight;
+  m_posY = -(int)GetTextureLineHeight();
 
   // cache the ellipses width
   Character *ellipse = GetCharacter(L'.');
   if (ellipse) m_ellipsesWidth = ellipse->advance;
 
-  if (precache)
-  {
-     int64_t start = CurrentHostCounter();
-     CGUIFontTTFBase::PreCacheCharacters();
-     CLog::Log(LOGDEBUG, "CGUIFontTTFBase::Load finished pre-caching characters in %i ms (currently cached %i)", (int)((CurrentHostCounter() - start) * 1000 / CurrentHostFrequency()), m_numChars);
-  }
-
   return true;
-}
-
-bool CGUIFontTTFBase::PreCacheCharacters()
-
-{
-   int count = 0;
-   if ((int)g_advancedSettings.m_SubsTTFPreCacheCodes.size() > 0)
-   {
-      CLog::Log(LOGNOTICE, "CGUIFontTTFBase::PreCacheCharacters Pre-caching custom character codes in 4 styles");
-      for (int i = 0; i < (int)g_advancedSettings.m_SubsTTFPreCacheCodes.size(); i++)
-      {
-         if ((int)g_advancedSettings.m_SubsTTFPreCacheCodes[i] == 13)
-            continue; //line breaks don't get cached
-         for (uint32_t style = 0; style <= 3; style++)
-         {
-            if (! GetCharacter((character_t)(g_advancedSettings.m_SubsTTFPreCacheCodes[i] | ((style & 3) << 24))))
-            {
-               CLog::Log(LOGWARNING, "CGUIFontTTFBase::PreCacheCharacters failure to cache character, aborting pre-caching");
-               return false;
-            }
-            count++;
-         }
-      }
-   }
-   else
-   {
-      CLog::Log(LOGNOTICE, "CGUIFontTTFBase::PreCacheCharacters Pre-caching character codes 0-255 in 4 styles");
-      for (uint32_t i = 0; i < 256; i++)
-      {
-         if ((int)i == 13)
-            continue; //line breaks don't get cached
-         for (uint32_t style = 0; style <= 3; style++)
-         {
-            if (! GetCharacter((character_t)(i | ((style & 3) << 24))))
-            {
-               CLog::Log(LOGWARNING, "CGUIFontTTFBase::PreCacheCharacters failure to cache character, aborting pre-caching");
-               return false;
-            }
-            count++;
-         }
-      }
-   }
-   if (m_numChars < count)
-   {
-      //issue a warning that we may have missed some - due to problems along the way (eg max raster size exceeded)
-      CLog::Log(LOGWARNING, "CGUIFontTTFBase::PreCacheCharacters cached character count is less than the attempted pre-cache number - a problem may have occurred [attempts: %i, total cached: %i]", count, m_numChars);
-   }
-   return true;
 }
 
 void CGUIFontTTFBase::DrawTextInternal(float x, float y, const vecColors &colors, const vecText &text, uint32_t alignment, float maxPixelWidth, bool scrolling)
@@ -387,7 +330,7 @@ void CGUIFontTTFBase::DrawTextInternal(float x, float y, const vecColors &colors
 
   // calculate sizing information
   float startX = 0;
-  float startY = (alignment & XBFONT_CENTER_Y) ? -0.5f*(m_cellHeight-2) : 0;  // vertical centering
+  float startY = (alignment & XBFONT_CENTER_Y) ? -0.5f*m_cellHeight : 0;  // vertical centering
 
   if ( alignment & (XBFONT_RIGHT | XBFONT_CENTER_X) )
   {
@@ -494,7 +437,7 @@ float CGUIFontTTFBase::GetCharWidthInternal(character_t ch)
 
 float CGUIFontTTFBase::GetTextHeight(float lineSpacing, int numLines) const
 {
-  return (float)(numLines - 1) * GetLineHeight(lineSpacing) + (m_cellHeight - 2); // -2 as we increment this for space in our texture
+  return (float)(numLines - 1) * GetLineHeight(lineSpacing) + m_cellHeight;
 }
 
 float CGUIFontTTFBase::GetLineHeight(float lineSpacing) const
@@ -502,6 +445,13 @@ float CGUIFontTTFBase::GetLineHeight(float lineSpacing) const
   if (m_face)
     return lineSpacing * m_face->size->metrics.height / 64.0f;
   return 0.0f;
+}
+
+unsigned int CGUIFontTTFBase::spacing_between_characters_in_texture = 1;
+
+unsigned int CGUIFontTTFBase::GetTextureLineHeight() const
+{
+  return m_cellHeight + spacing_between_characters_in_texture;
 }
 
 CGUIFontTTFBase::Character* CGUIFontTTFBase::GetCharacter(character_t chr)
@@ -564,7 +514,7 @@ CGUIFontTTFBase::Character* CGUIFontTTFBase::GetCharacter(character_t chr)
   if (nestedBeginCount) End();
   if (!CacheCharacter(letter, style, m_char + low))
   { // unable to cache character - try clearing them all out and starting over
-    CLog::Log(LOGWARNING, "GUIFontTTF::GetCharacter: Unable to cache character.  Clearing character cache of %i characters", m_numChars);
+    CLog::Log(LOGDEBUG, "GUIFontTTF::GetCharacter: Unable to cache character.  Clearing character cache of %i characters", m_numChars);
     ClearCharacterCache();
     low = 0;
     if (!CacheCharacter(letter, style, m_char + low))
@@ -599,7 +549,7 @@ bool CGUIFontTTFBase::CacheCharacter(wchar_t letter, uint32_t style, Character *
   FT_Glyph glyph = NULL;
   if (FT_Load_Glyph( m_face, glyph_index, FT_LOAD_TARGET_LIGHT ))
   {
-    CLog::Log(LOGWARNING, "%s Failed to load glyph %x", __FUNCTION__, letter);
+    CLog::Log(LOGDEBUG, "%s Failed to load glyph %x", __FUNCTION__, letter);
     return false;
   }
   // make bold if applicable
@@ -611,7 +561,7 @@ bool CGUIFontTTFBase::CacheCharacter(wchar_t letter, uint32_t style, Character *
   // grab the glyph
   if (FT_Get_Glyph(m_face->glyph, &glyph))
   {
-    CLog::Log(LOGWARNING, "%s Failed to get glyph %x", __FUNCTION__, letter);
+    CLog::Log(LOGDEBUG, "%s Failed to get glyph %x", __FUNCTION__, letter);
     return false;
   }
   if (m_stroker)
@@ -619,7 +569,7 @@ bool CGUIFontTTFBase::CacheCharacter(wchar_t letter, uint32_t style, Character *
   // render the glyph
   if (FT_Glyph_To_Bitmap(&glyph, FT_RENDER_MODE_NORMAL, NULL, 1))
   {
-    CLog::Log(LOGWARNING, "%s Failed to render glyph %x to a bitmap", __FUNCTION__, letter);
+    CLog::Log(LOGDEBUG, "%s Failed to render glyph %x to a bitmap", __FUNCTION__, letter);
     return false;
   }
   FT_BitmapGlyph bitGlyph = (FT_BitmapGlyph)glyph;
@@ -631,18 +581,18 @@ bool CGUIFontTTFBase::CacheCharacter(wchar_t letter, uint32_t style, Character *
   if (m_posX + bitGlyph->left + bitmap.width > (int)m_textureWidth)
   { // no space - gotta drop to the next line (which means creating a new texture and copying it across)
     m_posX = 0;
-    m_posY += m_cellHeight;
+    m_posY += GetTextureLineHeight();
     if (bitGlyph->left < 0)
       m_posX += -bitGlyph->left;
 
-    if(m_posY + m_cellHeight >= m_textureHeight)
+    if(m_posY + GetTextureLineHeight() >= m_textureHeight)
     {
       // create the new larger texture
-      unsigned int newHeight = m_posY + m_cellHeight;
+      unsigned int newHeight = m_posY + GetTextureLineHeight();
       // check for max height
       if (newHeight > g_Windowing.GetMaxTextureSize())
       {
-        CLog::Log(LOGWARNING, "GUIFontTTF::CacheCharacter: New cache texture is too large (%u > %u pixels long)", newHeight, g_Windowing.GetMaxTextureSize());
+        CLog::Log(LOGDEBUG, "GUIFontTTF::CacheCharacter: New cache texture is too large (%u > %u pixels long)", newHeight, g_Windowing.GetMaxTextureSize());
         FT_Done_Glyph(glyph);
         return false;
       }
@@ -652,7 +602,7 @@ bool CGUIFontTTFBase::CacheCharacter(wchar_t letter, uint32_t style, Character *
       if(newTexture == NULL)
       {
         FT_Done_Glyph(glyph);
-        CLog::Log(LOGWARNING, "GUIFontTTF::CacheCharacter: Failed to allocate new texture of height %u", newHeight);
+        CLog::Log(LOGDEBUG, "GUIFontTTF::CacheCharacter: Failed to allocate new texture of height %u", newHeight);
         return false;
       }
       m_texture = newTexture;
@@ -668,7 +618,7 @@ bool CGUIFontTTFBase::CacheCharacter(wchar_t letter, uint32_t style, Character *
   // set the character in our table
   ch->letterAndStyle = (style << 16) | letter;
   ch->offsetX = (short)bitGlyph->left;
-  ch->offsetY = (short)max((short)m_cellBaseLine - bitGlyph->top, 0);
+  ch->offsetY = (short)m_cellBaseLine - bitGlyph->top;
   ch->left = (float)m_posX + ch->offsetX;
   ch->top = (float)m_posY + ch->offsetY;
   ch->right = ch->left + bitmap.width;
@@ -678,9 +628,14 @@ bool CGUIFontTTFBase::CacheCharacter(wchar_t letter, uint32_t style, Character *
   // we need only render if we actually have some pixels
   if (bitmap.width * bitmap.rows)
   {
-    CopyCharToTexture(bitGlyph, ch);
+    // ensure our rect will stay inside the texture (it *should* but we need to be certain)
+    unsigned int x1 = max(m_posX + ch->offsetX, 0);
+    unsigned int y1 = max(m_posY + ch->offsetY, 0);
+    unsigned int x2 = min(x1 + bitmap.width, m_textureWidth);
+    unsigned int y2 = min(y1 + bitmap.rows, m_textureHeight);
+    CopyCharToTexture(bitGlyph, x1, y1, x2, y2);
   }
-  m_posX += 1 + (unsigned short)max(ch->right - ch->left + ch->offsetX, ch->advance);
+  m_posX += spacing_between_characters_in_texture + (unsigned short)max(ch->right - ch->left + ch->offsetX, ch->advance);
   m_numChars++;
 
   m_textureScaleX = 1.0f / m_textureWidth;

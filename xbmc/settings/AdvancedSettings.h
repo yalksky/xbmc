@@ -243,12 +243,9 @@ class CAdvancedSettings
     CStdString m_videoItemSeparator;
     std::vector<CStdString> m_musicTagsFromFileFilters;
 
-    bool m_videoSubsTTFPreCache;
-    bool m_videoSubsTTFBorderFontDisable;
-    std::vector<unsigned int> m_SubsTTFPreCacheCodes;
-
     bool m_bVideoLibraryHideAllItems;
     bool m_bVideoLibraryAllItemsOnBottom;
+    int m_iVideoLibraryRecentlyAddedItems;
     bool m_bVideoLibraryHideEmptySeries;
     bool m_bVideoLibraryCleanOnUpdate;
     bool m_bVideoLibraryExportAutoThumbs;

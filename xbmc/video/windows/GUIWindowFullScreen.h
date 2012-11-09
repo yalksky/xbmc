@@ -46,8 +46,7 @@ protected:
   virtual EVENT_RESULT OnMouseEvent(const CPoint &point, const CMouseEvent &event);
 
 private:
-  void RenderTTFSubtitles(bool forcetest = false);
-  void SeekTV(bool bPlus, bool bLargeStep);
+  void RenderTTFSubtitles();
   void SeekChapter(int iChapter);
   void FillInTVGroups();
   void ToggleOSD();
