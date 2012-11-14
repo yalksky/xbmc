@@ -1505,7 +1505,8 @@ void CFileItem::SetFromSong(const CSong &song)
   m_lStartPartNumber = 1;
   SetProperty("item_start", song.iStartOffset);
   m_lEndOffset = song.iEndOffset;
-  SetArt("thumb", song.strThumb);
+  if (!song.strThumb.empty())
+    SetArt("thumb", song.strThumb);
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -2807,6 +2808,15 @@ CStdString CFileItem::GetMovieName(bool bUseFolderNames /* = false */) const
   if (IsLabelPreformated())
     return GetLabel();
 
+  if (m_pvrRecordingInfoTag)
+    return m_pvrRecordingInfoTag->m_strTitle;
+  else if (CUtil::IsTVRecording(m_strPath))
+  {
+    CStdString title = CPVRRecording::GetTitleFromURL(m_strPath);
+    if (!title.IsEmpty())
+      return title;
+  }
+
   CStdString strMovieName = GetBaseMoviePath(bUseFolderNames);
 
   if (URIUtils::IsStack(strMovieName))
@@ -3024,7 +3034,7 @@ bool CFileItemList::UpdateItem(const CFileItem *item)
     CFileItemPtr pItem = m_items[i];
     if (pItem->IsSamePath(item))
     {
-      *pItem = *item;
+      pItem->UpdateInfo(*item);
       return true;
     }
   }
