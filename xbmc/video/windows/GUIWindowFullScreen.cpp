@@ -169,51 +169,31 @@ bool CGUIWindowFullScreen::OnAction(const CAction &action)
     break;
 
   case ACTION_STEP_BACK:
-    if (!g_application.CurrentFileItem().HasPVRChannelInfoTag())
-    {
-      if (m_timeCodePosition > 0)
-        SeekToTimeCodeStamp(SEEK_RELATIVE, SEEK_BACKWARD);
-      else
-        g_application.m_pPlayer->Seek(false, false);
-    }
+    if (m_timeCodePosition > 0)
+      SeekToTimeCodeStamp(SEEK_RELATIVE, SEEK_BACKWARD);
     else
-      SeekTV(false, false);
+      g_application.m_pPlayer->Seek(false, false);
     return true;
 
   case ACTION_STEP_FORWARD:
-    if (!g_application.CurrentFileItem().HasPVRChannelInfoTag())
-    {
-      if (m_timeCodePosition > 0)
-        SeekToTimeCodeStamp(SEEK_RELATIVE, SEEK_FORWARD);
-      else
-        g_application.m_pPlayer->Seek(true, false);
-    }
+    if (m_timeCodePosition > 0)
+      SeekToTimeCodeStamp(SEEK_RELATIVE, SEEK_FORWARD);
     else
-      SeekTV(true, false);
+      g_application.m_pPlayer->Seek(true, false);
     return true;
 
   case ACTION_BIG_STEP_BACK:
-    if (!g_application.CurrentFileItem().HasPVRChannelInfoTag())
-    {
-      if (m_timeCodePosition > 0)
-        SeekToTimeCodeStamp(SEEK_RELATIVE, SEEK_BACKWARD);
-      else
-        g_application.m_pPlayer->Seek(false, true);
-    }
+    if (m_timeCodePosition > 0)
+      SeekToTimeCodeStamp(SEEK_RELATIVE, SEEK_BACKWARD);
     else
-      SeekTV(false, true);
+      g_application.m_pPlayer->Seek(false, true);
     return true;
 
   case ACTION_BIG_STEP_FORWARD:
-    if (!g_application.CurrentFileItem().HasPVRChannelInfoTag())
-    {
-      if (m_timeCodePosition > 0)
-        SeekToTimeCodeStamp(SEEK_RELATIVE, SEEK_FORWARD);
-      else
-        g_application.m_pPlayer->Seek(true, true);
-    }
+    if (m_timeCodePosition > 0)
+      SeekToTimeCodeStamp(SEEK_RELATIVE, SEEK_FORWARD);
     else
-      SeekTV(true, true);
+      g_application.m_pPlayer->Seek(true, true);
     return true;
 
   case ACTION_NEXT_SCENE:
@@ -636,6 +616,18 @@ bool CGUIWindowFullScreen::OnAction(const CAction &action)
 
       break;
     }
+  case ACTION_PREVIOUS_CHANNELGROUP:
+    {
+      if (g_application.CurrentFileItem().HasPVRChannelInfoTag())
+        ChangetheTVGroup(false);
+      return true;
+    }
+  case ACTION_NEXT_CHANNELGROUP:
+    {
+      if (g_application.CurrentFileItem().HasPVRChannelInfoTag())
+        ChangetheTVGroup(true);
+      return true;
+    }
   default:
       break;
   }
@@ -720,22 +712,12 @@ bool CGUIWindowFullScreen::OnMessage(CGUIMessage& message)
 
         // We scale based on PAL4x3 - this at least ensures all sizing is constant across resolutions.
         RESOLUTION_INFO pal(720, 576, 0);
-        bool precache = g_advancedSettings.m_videoSubsTTFPreCache;
-        CLog::Log(LOGDEBUG, "CGUIWindowFullScreen::OnMessage g_advancedSettings.m_videoSubsTTFPreCache: %i, g_advancedSettings.m_videoSubsTTFBorderFontDisable: %i", (int)g_advancedSettings.m_videoSubsTTFPreCache, (int)g_advancedSettings.m_videoSubsTTFBorderFontDisable);
-        CGUIFont *subFont = g_fontManager.LoadTTF("__subtitle__", fontPath, color[g_guiSettings.GetInt("subtitles.color")], 0, g_guiSettings.GetInt("subtitles.height"), g_guiSettings.GetInt("subtitles.style"), false, 1.0f, 1.0f, &pal, true, precache);
-        CGUIFont *borderFont = NULL;
-        bool borderfontenabled = !g_advancedSettings.m_videoSubsTTFBorderFontDisable;
-        if (borderfontenabled)
-          borderFont = g_fontManager.LoadTTF("__subtitleborder__", fontPath, 0xFF000000, 0, g_guiSettings.GetInt("subtitles.height"), g_guiSettings.GetInt("subtitles.style"), true, 1.0f, 1.0f, &pal, true, precache);
-
-        if (!subFont || (borderfontenabled && !borderFont))
-           CLog::Log(LOGERROR, "CGUIWindowFullScreen::OnMessage(WINDOW_INIT) - Unable to load subtitle font");
-         else
-          {
-           m_subsLayout = new CGUITextLayout(subFont, true, 0, borderFont);
-          //force some subtitles to render initially render to pre-initialise that area to avoid video render delays later
-          RenderTTFSubtitles(true);
-          }
+        CGUIFont *subFont = g_fontManager.LoadTTF("__subtitle__", fontPath, color[g_guiSettings.GetInt("subtitles.color")], 0, g_guiSettings.GetInt("subtitles.height"), g_guiSettings.GetInt("subtitles.style"), false, 1.0f, 1.0f, &pal, true);
+        CGUIFont *borderFont = g_fontManager.LoadTTF("__subtitleborder__", fontPath, 0xFF000000, 0, g_guiSettings.GetInt("subtitles.height"), g_guiSettings.GetInt("subtitles.style"), true, 1.0f, 1.0f, &pal, true);
+        if (!subFont || !borderFont)
+          CLog::Log(LOGERROR, "CGUIWindowFullScreen::OnMessage(WINDOW_INIT) - Unable to load subtitle font");
+        else
+          m_subsLayout = new CGUITextLayout(subFont, true, 0, borderFont);
       }
       else
         m_subsLayout = NULL;
@@ -1080,7 +1062,7 @@ void CGUIWindowFullScreen::Render()
   CGUIWindow::Render();
 }
 
-void CGUIWindowFullScreen::RenderTTFSubtitles(bool forcetest /* = false */)
+void CGUIWindowFullScreen::RenderTTFSubtitles()
 {
   if ((g_application.GetCurrentPlayer() == EPC_MPLAYER ||
 #if defined(HAS_AMLPLAYER)
@@ -1090,7 +1072,7 @@ void CGUIWindowFullScreen::RenderTTFSubtitles(bool forcetest /* = false */)
        g_application.GetCurrentPlayer() == EPC_OMXPLAYER ||
 #endif
        g_application.GetCurrentPlayer() == EPC_DVDPLAYER) &&
-      CUtil::IsUsingTTFSubtitles() && (forcetest || g_application.m_pPlayer->GetSubtitleVisible()))
+      CUtil::IsUsingTTFSubtitles() && (g_application.m_pPlayer->GetSubtitleVisible()))
   {
     CSingleLock lock (m_fontLock);
 
@@ -1098,11 +1080,8 @@ void CGUIWindowFullScreen::RenderTTFSubtitles(bool forcetest /* = false */)
       return;
 
     CStdString subtitleText = "How now brown cow";
-    if (forcetest || g_application.m_pPlayer->GetCurrentSubtitle(subtitleText))
-     {
-      if (forcetest)
-        subtitleText = "INVISIBLE SUBS FOR INIT";
-
+    if (g_application.m_pPlayer->GetCurrentSubtitle(subtitleText))
+    {
       // Remove HTML-like tags from the subtitles until
       subtitleText.Replace("\\r", "");
       subtitleText.Replace("\r", "");
@@ -1157,10 +1136,7 @@ void CGUIWindowFullScreen::RenderTTFSubtitles(bool forcetest /* = false */)
         y = std::min(y, g_settings.m_ResInfo[res].Overscan.bottom - textHeight);
       }
 
-      if (forcetest)
-         m_subsLayout->RenderOutline(x, y, 0x00FFFFFF, 0x00FFFFFF, XBFONT_CENTER_X, maxWidth); //00 alpha=transparent, FF red FF green FF blue (note 0x0 does not work)
-      else
-         m_subsLayout->RenderOutline(x, y, 0, 0xFF000000, XBFONT_CENTER_X, maxWidth);
+      m_subsLayout->RenderOutline(x, y, 0, 0xFF000000, XBFONT_CENTER_X, maxWidth);
 
       // reset rendering resolution
       g_graphicsContext.SetRenderingResolution(m_coordsRes, m_needsScaling);
@@ -1198,14 +1174,6 @@ void CGUIWindowFullScreen::SeekToTimeCodeStamp(SEEK_TYPE type, SEEK_DIRECTION di
 
   m_timeCodePosition = 0;
   m_timeCodeShow = false;
-}
-
-void CGUIWindowFullScreen::SeekTV(bool bPlus, bool bLargeStep)
-{
-  if (bLargeStep)
-    OnAction(CAction(bPlus ? ACTION_NEXT_ITEM : ACTION_PREV_ITEM));
-  else if (!bLargeStep)
-    ChangetheTVGroup(bPlus);
 }
 
 double CGUIWindowFullScreen::GetTimeCodeStamp()

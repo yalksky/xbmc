@@ -75,7 +75,7 @@ public:
 
   void Clear();
 
-  bool Load(const CStdString& strFilename, float height = 20.0f, float aspect = 1.0f, float lineSpacing = 1.0f, bool border = false, bool precache = false);
+  bool Load(const CStdString& strFilename, float height = 20.0f, float aspect = 1.0f, float lineSpacing = 1.0f, bool border = false);
 
   virtual void Begin() = 0;
   virtual void End() = 0;
@@ -96,6 +96,7 @@ protected:
   float GetTextWidthInternal(vecText::const_iterator start, vecText::const_iterator end);
   float GetCharWidthInternal(character_t ch);
   float GetTextHeight(float lineSpacing, int numLines) const;
+  float GetTextBaseLine() const { return (float)m_cellBaseLine; }
   float GetLineHeight(float lineSpacing) const;
   float GetFontHeight() const { return m_height; }
 
@@ -110,10 +111,9 @@ protected:
   bool CacheCharacter(wchar_t letter, uint32_t style, Character *ch);
   void RenderCharacter(float posX, float posY, const Character *ch, color_t color, bool roundX);
   void ClearCharacterCache();
-  bool PreCacheCharacters();
 
   virtual CBaseTexture* ReallocTexture(unsigned int& newHeight) = 0;
-  virtual bool CopyCharToTexture(FT_BitmapGlyph bitGlyph, Character *ch) = 0;
+  virtual bool CopyCharToTexture(FT_BitmapGlyph bitGlyph, unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2) = 0;
   virtual void DeleteHardwareTexture() = 0;
 
   // modifying glyphs
@@ -126,6 +126,12 @@ protected:
   unsigned int m_textureHeight;      // heigth of our texture
   int m_posX;                        // current position in the texture
   int m_posY;
+
+  /*! \brief the height of each line in the texture.
+   Accounts for spacing between lines to avoid characters overlapping.
+   */
+  unsigned int GetTextureLineHeight() const;
+  static unsigned int spacing_between_characters_in_texture;
 
   color_t m_color;
 

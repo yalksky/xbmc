@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: XBMC Main Translation Project (Frodo)\n"
 "Report-Msgid-Bugs-To: http://trac.xbmc.org/\n"
 "POT-Creation-Date: 2012-05-04 12:46+0000\n"
-"PO-Revision-Date: 2012-10-29 02:01+0000\n"
+"PO-Revision-Date: 2012-11-05 03:31+0000\n"
 "Last-Translator: XBMC Translation Team\n"
 "Language-Team: Korean (http://www.transifex.com/projects/p/XBMC-Main-Frodo/language/ko/)\n"
 "MIME-Version: 1.0\n"
@@ -548,7 +548,7 @@ msgstr "사용가능"
 
 msgctxt "#161"
 msgid "Unavailable"
-msgstr "사용불가"
+msgstr "정보 없음"
 
 msgctxt "#162"
 msgid "Tray open"
@@ -3104,7 +3104,7 @@ msgstr "AirPlay"
 
 msgctxt "#1275"
 msgid "Filter %s"
-msgstr "필터 %s"
+msgstr "%s 필터"
 
 msgctxt "#1300"
 msgid "Custom audio device"
@@ -3208,7 +3208,7 @@ msgstr "뇌우"
 
 msgctxt "#1419"
 msgid "Shallow"
-msgstr ""
+msgstr "얕은"
 
 msgctxt "#1420"
 msgid "Moderate"
@@ -3228,7 +3228,7 @@ msgstr "안개"
 
 msgctxt "#1424"
 msgid "Overcast"
-msgstr ""
+msgstr "흐림"
 
 msgctxt "#1425"
 msgid "Pellets"
@@ -3236,7 +3236,7 @@ msgstr ""
 
 msgctxt "#1426"
 msgid "Hail"
-msgstr ""
+msgstr "우박"
 
 msgctxt "#1427"
 msgid "Smoke"
@@ -3244,11 +3244,11 @@ msgstr ""
 
 msgctxt "#1428"
 msgid "Volcanic"
-msgstr ""
+msgstr "화산"
 
 msgctxt "#1429"
 msgid "Ash"
-msgstr ""
+msgstr "재"
 
 msgctxt "#1430"
 msgid "Widespread"
@@ -3300,11 +3300,11 @@ msgstr ""
 
 msgctxt "#1442"
 msgid "Chance"
-msgstr ""
+msgstr "어쩌면"
 
 msgctxt "#1443"
 msgid "of"
-msgstr ""
+msgstr " "
 
 msgctxt "#1444"
 msgid "Funnel"
@@ -3328,7 +3328,7 @@ msgstr "강수"
 
 msgctxt "#1449"
 msgid "Partial"
-msgstr ""
+msgstr "부분적인"
 
 msgctxt "#1450"
 msgid "Put display to sleep when idle"
@@ -3340,7 +3340,7 @@ msgstr "상영시간"
 
 msgctxt "#2080"
 msgid "Empty list"
-msgstr ""
+msgstr "빈 목록"
 
 msgctxt "#2081"
 msgid "Went back to parent list because the active list has been emptied"
@@ -4808,7 +4808,7 @@ msgstr "아트 선택"
 
 msgctxt "#13512"
 msgid "Current art"
-msgstr "현재 아트"
+msgstr "gu"
 
 msgctxt "#13513"
 msgid "Remote art"
@@ -6336,11 +6336,11 @@ msgstr "녹화 예약을 저장할 수 없음. 로그를 확인하세요"
 
 msgctxt "#19110"
 msgid "An unexpected error occurred. Try again later or check the log for details."
-msgstr "알 수 없는 오류. 다시 시도하거나 로그를 확인하세요."
+msgstr "알 수 없는 에러. 다시 시도하거나 로그를 확인하세요."
 
 msgctxt "#19111"
 msgid "PVR backend error. Check the log for details."
-msgstr "PVR 백엔드 오류. 로그를 확인하세요."
+msgstr "PVR 백엔드 에러. 로그를 확인하세요."
 
 msgctxt "#19114"
 msgid "Version"
@@ -6980,15 +6980,15 @@ msgstr "충돌 경고"
 
 msgctxt "#19276"
 msgid "Conflict error"
-msgstr "충돌 오류"
+msgstr "충돌 에러"
 
 msgctxt "#19277"
 msgid "Recording conflict"
-msgstr "녹화 충돌"
+msgstr "녹화 충동"
 
 msgctxt "#19278"
 msgid "Recording error"
-msgstr "녹화 오류"
+msgstr "녹화 에러"
 
 msgctxt "#19499"
 msgid "Other/Unknown"
@@ -8634,10 +8634,6 @@ msgctxt "#20434"
 msgid "Sets"
 msgstr "시리즈"
 
-msgctxt "#20435"
-msgid "Set movieset thumb"
-msgstr "시리즈 영화 미리보기 설정"
-
 msgctxt "#20436"
 msgid "Export actor thumbs?"
 msgstr "배우 미리보기 내보내기?"
@@ -8718,17 +8714,13 @@ msgctxt "#20455"
 msgid "Listeners"
 msgstr "청취자"
 
-msgctxt "#20456"
-msgid "Set movieset fanart"
-msgstr "시리즈 영화 팬아트 설정"
-
 msgctxt "#20457"
 msgid "Movie set"
 msgstr "시리즈 영화"
 
 msgctxt "#20458"
 msgid "Group movies in sets"
-msgstr "세트의 그룹 영화"
+msgstr "시리즈 영화 묶기"
 
 msgctxt "#20459"
 msgid "Tags"
@@ -9188,15 +9180,15 @@ msgstr "동영상 위"
 
 msgctxt "#21467"
 msgid "%.1f to %.1f"
-msgstr ""
+msgstr "%.1f 에서 %.1f"
 
 msgctxt "#21468"
 msgid "%d to %d"
-msgstr ""
+msgstr "%d 에서 %d"
 
 msgctxt "#21469"
 msgid "%s to %s"
-msgstr ""
+msgstr "%s 에서 %s"
 
 msgctxt "#21800"
 msgid "File name"

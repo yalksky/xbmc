@@ -64,7 +64,7 @@ static const translateField fields[] = {
   { "label",             FieldMusicLabel,              SortByNone,                     CSmartPlaylistRule::TEXT_FIELD,       21899 },
   { "title",             FieldTitle,                   SortByTitle,                    CSmartPlaylistRule::TEXT_FIELD,       556 },
   { "sorttitle",         FieldSortTitle,               SortBySortTitle,                CSmartPlaylistRule::TEXT_FIELD,       556 },
-  { "year",              FieldYear,                    SortByYear,                     CSmartPlaylistRule::BROWSEABLE_FIELD, 562 },
+  { "year",              FieldYear,                    SortByYear,                     CSmartPlaylistRule::BROWSEABLE_NUMERIC_FIELD, 562 },
   { "time",              FieldTime,                    SortByTime,                     CSmartPlaylistRule::SECONDS_FIELD,    180 },
   { "playcount",         FieldPlaycount,               SortByPlaycount,                CSmartPlaylistRule::NUMERIC_FIELD,    567 },
   { "lastplayed",        FieldLastPlayed,              SortByLastPlayed,               CSmartPlaylistRule::DATE_FIELD,       568 },
@@ -323,13 +323,6 @@ CStdString CSmartPlaylistRule::GetLocalizedField(Field field)
 {
   for (unsigned int i = 0; i < NUM_FIELDS; i++)
     if (field == fields[i].field) return g_localizeStrings.Get(fields[i].localizedString);
-  return g_localizeStrings.Get(16018);
-}
-
-CStdString CSmartPlaylistRule::GetLocalizedOrder(SortBy order)
-{
-  for (unsigned int i = 0; i < NUM_FIELDS; i++)
-    if (order == fields[i].sort) return g_localizeStrings.Get(fields[i].localizedString);
   return g_localizeStrings.Get(16018);
 }
 
