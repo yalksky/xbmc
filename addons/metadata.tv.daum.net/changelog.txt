@@ -1,3 +1,13 @@
+1.2.4
+
+Changes
+- allow search result item that year is not specified
+
+1.2.3
+
+Changes
+- <thumb>url</thumb> to <thumb aspect="poster">url</thumb>
+
 1.2.0
 
 Changes
