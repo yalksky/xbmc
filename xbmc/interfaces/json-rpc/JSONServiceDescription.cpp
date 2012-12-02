@@ -794,7 +794,6 @@ JSONRPC_STATUS JSONSchemaTypeDefinition::Check(const CVariant &value, CVariant &
         outputValue[propertiesIterator->second->name] = propertiesIterator->second->defaultValue;
       else
       {
-        CLog::Log(LOGDEBUG, "JSONRPC: Missing property \"%s\" in type %s", propertiesIterator->second->name.c_str(), name.c_str());
         errorData["property"]["name"] = propertiesIterator->second->name.c_str();
         errorData["property"]["type"] = SchemaValueTypeToString(propertiesIterator->second->type);
         errorData["message"] = "Missing property";
@@ -1639,7 +1638,7 @@ bool CJSONServiceDescription::AddEnum(const std::string &name, const std::vector
   return AddEnum(name, enums, CVariant::VariantTypeInteger);
 }
 
-int CJSONServiceDescription::GetVersion()
+const char* CJSONServiceDescription::GetVersion()
 {
   return JSONRPC_SERVICE_VERSION;
 }

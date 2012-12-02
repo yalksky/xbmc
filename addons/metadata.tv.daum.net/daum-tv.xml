@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
-<scraper framework="1.1" date="2011-02-24" language="ko">
+<scraper framework="1.1" date="2012-11-30" language="ko">
 	<NfoUrl dest="3">
 		<RegExp input="$$1" output="&lt;url&gt;http://movie.daum.net/tv/detail/main.do?tvProgramId=\1&lt;/url&gt;" dest="3">
 			<expression>movie\.daum\.net[^\?]*\?tvProgramId=(\d+)</expression>
@@ -20,6 +20,9 @@
 			<RegExp input="$$1" output="&lt;entity&gt;&lt;title&gt;\2 (\3)&lt;/title&gt;&lt;url&gt;http://movie.daum.net/tv/detail/main.do?tvProgramId=\1&lt;/url&gt;&lt;id&gt;\1&lt;/id&gt;&lt;/entity&gt;" dest="4">
 				<expression repeat="yes">class="fl srch"&gt;&lt;a href="http://movie.daum.net/tv/detail/main.do\?tvProgramId=(\d+)"[^&gt;]*&gt;([^"]*)&lt;/a&gt;\s*\((\d*)\)&lt;/span&gt;[^\(]*"fs13"&gt;([^"]*)&lt;/span</expression>
 			</RegExp>
+			<RegExp input="$$1" output="&lt;entity&gt;&lt;title&gt;\2 (\3)&lt;/title&gt;&lt;url&gt;http://movie.daum.net/tv/detail/main.do?tvProgramId=\1&lt;/url&gt;&lt;id&gt;\1&lt;/id&gt;&lt;/entity&gt;" dest="4+">
+				<expression repeat="yes">class="fl srch"&gt;&lt;a href="http://movie.daum.net/tv/detail/main.do\?tvProgramId=(\d+)"[^&gt;]*&gt;([^"]*)&lt;/a&gt;\s*&lt;/span&gt;[^\(]*"fs13"&gt;([^"]*)&lt;/span</expression>
+			</RegExp>
 			<expression noclean="1"/>
 		</RegExp>
 	</GetSearchResults>
@@ -31,8 +34,11 @@
 			<RegExp input="$$2" output="&lt;id&gt;\1&lt;/id&gt;" dest="4">
 				<expression/>
 			</RegExp>
+			<RegExp input="$$1" output="&lt;title&gt;\1&lt;/title&gt;" dest="4+">
+				<expression trim="1">class=&quot;title_kor&quot;\s*&gt;([^&lt;]+)&lt;/strong&gt; &lt;em</expression>
+			</RegExp>
 			<RegExp input="$$1" output="&lt;title&gt;\1&lt;/title&gt;&lt;year&gt;\2&lt;/year&gt;" dest="4+">
-				<expression trim="1">class="title_kor"\s*&gt;([^&lt;]+)&lt;/strong&gt;[^\(]*\((\d*)\).*?"title_AKA"\s*&gt;\s*&lt;/em&gt;</expression>
+				<expression trim="1">class=&quot;title_kor&quot;\s*&gt;([^&lt;]+)&lt;/strong&gt;[^\(]*\((\d*)\).*?&quot;title_AKA&quot;\s*&gt;\s*&lt;/em&gt;</expression>
 			</RegExp>
 			<RegExp input="$$1" output="&lt;title&gt;\1 (\3)&lt;/title&gt;&lt;year&gt;\2&lt;/year&gt;" dest="4+">
 				<expression trim="1,3">class="title_kor"\s*&gt;([^&lt;]+)&lt;/strong&gt;[^\(]*\((\d*)\).*?"title_AKA"\s*&gt;([^&lt;]+)&lt;/em&gt;</expression>
@@ -61,7 +67,7 @@
 				</RegExp>
 				<expression>(\S.*\S)</expression>	<!-- trim doesn't remove [\t\n] -->
 			</RegExp>
-			<RegExp input="$$1" output="&lt;thumb&gt;\1&lt;/thumb&gt;" dest="4+">
+			<RegExp input="$$1" output="&lt;thumb aspect=&quot;poster&quot;&gt;\1&lt;/thumb&gt;" dest="4+">
 				<expression>&lt;p class="poster"&gt;&lt;a [^&lt;]*&lt;img src="([^"]*)"</expression>
 			</RegExp>
 			<RegExp input="$$5" output="&lt;premiered&gt;\1&lt;/premiered&gt;" dest="4+">

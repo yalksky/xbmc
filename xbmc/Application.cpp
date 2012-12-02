@@ -295,11 +295,11 @@
 #endif
 
 #ifdef TARGET_DARWIN_OSX
-#include "CocoaInterface.h"
-#include "XBMCHelper.h"
+#include "osx/CocoaInterface.h"
+#include "osx/XBMCHelper.h"
 #endif
 #ifdef TARGET_DARWIN
-#include "DarwinUtils.h"
+#include "osx/DarwinUtils.h"
 #endif
 
 
@@ -2195,7 +2195,7 @@ float CApplication::GetDimScreenSaverLevel() const
   if (!m_bScreenSave || !m_screenSaver ||
       (m_screenSaver->ID() != "screensaver.xbmc.builtin.dim" &&
        m_screenSaver->ID() != "screensaver.xbmc.builtin.black" &&
-       m_screenSaver->ID() != "screensaver.xbmc.builtin.slideshow"))
+       !m_screenSaver->ID().empty()))
     return 0;
 
   if (!m_screenSaver->GetSetting("level").IsEmpty())
@@ -2523,23 +2523,7 @@ bool CApplication::OnKey(const CKey& key)
   if (!key.IsAnalogButton())
     CLog::Log(LOGDEBUG, "%s: %s pressed, action is %s", __FUNCTION__, g_Keyboard.GetKeyName((int) key.GetButtonCode()).c_str(), action.GetName().c_str());
 
-  bool bResult = false;
-
-  // play sound before the action unless the button is held,
-  // where we execute after the action as held actions aren't fired every time.
-  if(action.GetHoldTime())
-  {
-    bResult = OnAction(action);
-    if(bResult)
-      g_audioManager.PlayActionSound(action);
-  }
-  else
-  {
-    g_audioManager.PlayActionSound(action);
-    bResult = OnAction(action);
-  }
-
-  return bResult;
+  return ExecuteInputAction(action);
 }
 
 // OnAppCommand is called in response to a XBMC_APPCOMMAND event.
@@ -3007,10 +2991,9 @@ bool CApplication::ProcessGamepad(float frameTime)
     if (CButtonTranslator::GetInstance().TranslateJoystickString(iWin, g_Joystick.GetJoystick().c_str(), bid, JACTIVE_BUTTON, actionID, actionName, fullrange))
     {
       CAction action(actionID, 1.0f, 0.0f, actionName);
-      g_audioManager.PlayActionSound(action);
       g_Joystick.Reset();
       g_Mouse.SetActive(false);
-      return OnAction(action);
+      return ExecuteInputAction(action);
     }
     else
     {
@@ -3036,10 +3019,9 @@ bool CApplication::ProcessGamepad(float frameTime)
       }
 
       CAction action(actionID, fullrange ? (g_Joystick.GetAmount() + 1.0f)/2.0f : fabs(g_Joystick.GetAmount()), 0.0f, actionName);
-      g_audioManager.PlayActionSound(action);
       g_Joystick.Reset();
       g_Mouse.SetActive(false);
-      return OnAction(action);
+      return ExecuteInputAction(action);
     }
     else
     {
@@ -3068,10 +3050,9 @@ bool CApplication::ProcessGamepad(float frameTime)
     if (bid && CButtonTranslator::GetInstance().TranslateJoystickString(iWin, g_Joystick.GetJoystick().c_str(), bid, JACTIVE_HAT, actionID, actionName, fullrange))
     {
       CAction action(actionID, 1.0f, 0.0f, actionName);
-      g_audioManager.PlayActionSound(action);
       g_Joystick.Reset();
       g_Mouse.SetActive(false);
-      return OnAction(action);
+      return ExecuteInputAction(action);
     }
   }
 #endif
@@ -3118,12 +3099,8 @@ bool CApplication::ProcessMouse()
     return true;
 
   // Retrieve the corresponding action
-  int iWin;
+  int iWin = GetActiveWindowID();
   CKey key(mousecommand | KEY_MOUSE, (unsigned int) 0);
-  if (g_windowManager.HasModalDialog())
-    iWin = g_windowManager.GetTopMostModalDialogID() & WINDOW_ID_MASK;
-  else
-    iWin = g_windowManager.GetActiveWindow() & WINDOW_ID_MASK;
   CAction mouseaction = CButtonTranslator::GetInstance().GetAction(iWin, key);
 
   // If we couldn't find an action return false to indicate we have not
@@ -3273,33 +3250,32 @@ bool CApplication::ProcessJoystickEvent(const std::string& joystickName, int wKe
 
    // Translate using regular joystick translator.
    if (CButtonTranslator::GetInstance().TranslateJoystickString(iWin, joystickName.c_str(), wKeyID, isAxis ? JACTIVE_AXIS : JACTIVE_BUTTON, actionID, actionName, fullRange))
-   {
-     CAction action(actionID, fAmount, 0.0f, actionName, holdTime);
-     bool bResult = false;
-
-     // play sound before the action unless the button is held,
-     // where we execute after the action as held actions aren't fired every time.
-     if(action.GetHoldTime())
-     {
-       bResult = OnAction(action);
-       if(bResult)
-         g_audioManager.PlayActionSound(action);
-     }
-     else
-     {
-       g_audioManager.PlayActionSound(action);
-       bResult = OnAction(action);
-     }
-
-     return bResult;
-   }
+     return ExecuteInputAction( CAction(actionID, fAmount, 0.0f, actionName, holdTime) );
    else
-   {
      CLog::Log(LOGDEBUG, "ERROR mapping joystick action. Joystick: %s %i",joystickName.c_str(), wKeyID);
-   }
 #endif
 
    return false;
+}
+
+bool CApplication::ExecuteInputAction(CAction action)
+{
+  bool bResult = false;
+
+  // play sound before the action unless the button is held,
+  // where we execute after the action as held actions aren't fired every time.
+  if(action.GetHoldTime())
+  {
+    bResult = OnAction(action);
+    if(bResult)
+      g_audioManager.PlayActionSound(action);
+  }
+  else
+  {
+    g_audioManager.PlayActionSound(action);
+    bResult = OnAction(action);
+  }
+  return bResult;
 }
 
 int CApplication::GetActiveWindowID(void)
@@ -3311,9 +3287,16 @@ int CApplication::GetActiveWindowID(void)
   if (g_windowManager.HasModalDialog())
     iWin = g_windowManager.GetTopMostModalDialogID() & WINDOW_ID_MASK;
 
-  // If the window is FullScreenVideo check if we're in a DVD menu
-  if (iWin == WINDOW_FULLSCREEN_VIDEO && g_application.m_pPlayer && g_application.m_pPlayer->IsInMenu())
-    iWin = WINDOW_VIDEO_MENU;
+  // If the window is FullScreenVideo check for special cases
+  if (iWin == WINDOW_FULLSCREEN_VIDEO)
+  {
+    // check if we're in a DVD menu
+    if(g_application.m_pPlayer && g_application.m_pPlayer->IsInMenu())
+      iWin = WINDOW_VIDEO_MENU;
+    // check for LiveTV and switch to it's virtual window
+    else if (g_PVRManager.IsStarted() && g_application.CurrentFileItem().HasPVRChannelInfoTag())
+      iWin = WINDOW_FULLSCREEN_LIVETV;
+  }
 
   // Return the window id
   return iWin;
@@ -4535,6 +4518,7 @@ bool CApplication::ToggleDPMS(bool manual)
 
 bool CApplication::WakeUpScreenSaverAndDPMS(bool bPowerOffKeyPressed /* = false */)
 {
+  bool result;
 
 #ifdef HAS_LCD
     // turn on lcd backlight
@@ -4551,10 +4535,19 @@ bool CApplication::WakeUpScreenSaverAndDPMS(bool bPowerOffKeyPressed /* = false 
     // (DPMS came first), activate screensaver now.
     ToggleDPMS(false);
     ResetScreenSaverTimer();
-    return !m_bScreenSave || WakeUpScreenSaver(bPowerOffKeyPressed);
+    result = !m_bScreenSave || WakeUpScreenSaver(bPowerOffKeyPressed);
   }
   else
-    return WakeUpScreenSaver(bPowerOffKeyPressed);
+    result = WakeUpScreenSaver(bPowerOffKeyPressed);
+
+  if(result)
+  {
+    // allow listeners to ignore the deactivation if it preceeds a powerdown/suspend etc
+    CVariant data(bPowerOffKeyPressed);
+    CAnnouncementManager::Announce(GUI, "xbmc", "OnScreensaverDeactivated", data);
+  }
+
+  return result;
 }
 
 bool CApplication::WakeUpScreenSaver(bool bPowerOffKeyPressed /* = false */)
@@ -4569,7 +4562,7 @@ bool CApplication::WakeUpScreenSaver(bool bPowerOffKeyPressed /* = false */)
       if (g_settings.GetMasterProfile().getLockMode() != LOCK_MODE_EVERYONE &&
           (g_settings.UsingLoginScreen() || g_guiSettings.GetBool("masterlock.startuplock")) &&
           g_settings.GetCurrentProfile().getLockMode() != LOCK_MODE_EVERYONE &&
-          m_screenSaver->ID() != "screensaver.xbmc.builtin.dim" && m_screenSaver->ID() != "screensaver.xbmc.builtin.black" && m_screenSaver->ID() != "visualization")
+          m_screenSaver->ID() != "screensaver.xbmc.builtin.dim" && m_screenSaver->ID() != "screensaver.xbmc.builtin.black" && !m_screenSaver->ID().empty() && m_screenSaver->ID() != "visualization")
       {
         m_iScreenSaveLock = 2;
         CGUIMessage msg(GUI_MSG_CHECK_LOCK,0,0);
@@ -4589,16 +4582,12 @@ bool CApplication::WakeUpScreenSaver(bool bPowerOffKeyPressed /* = false */)
     m_iScreenSaveLock = 0;
     ResetScreenSaverTimer();
 
-    // allow listeners to ignore the deactivation if it preceeds a powerdown/suspend etc
-    CVariant data(bPowerOffKeyPressed);
-    CAnnouncementManager::Announce(GUI, "xbmc", "OnScreensaverDeactivated", data);
-
     if (m_screenSaver->ID() == "visualization")
     {
       // we can just continue as usual from vis mode
       return false;
     }
-    else if (m_screenSaver->ID() == "screensaver.xbmc.builtin.dim" || m_screenSaver->ID() == "screensaver.xbmc.builtin.black")
+    else if (m_screenSaver->ID() == "screensaver.xbmc.builtin.dim" || m_screenSaver->ID() == "screensaver.xbmc.builtin.black" || m_screenSaver->ID().empty())
       return true;
     else if (!m_screenSaver->ID().IsEmpty())
     { // we're in screensaver window
@@ -4705,22 +4694,7 @@ void CApplication::ActivateScreenSaver(bool forceType /*= false */)
       return;
     }
   }
-  // Picture slideshow
-  if (m_screenSaver->ID() == "screensaver.xbmc.builtin.slideshow")
-  {
-    // reset our codec info - don't want that on screen
-    g_infoManager.SetShowCodec(false);
-    CStdString type = m_screenSaver->GetSetting("type");
-    CStdString path = m_screenSaver->GetSetting("path");
-    if (type == "2" && path.IsEmpty())
-      type = "0";
-    if (type == "0")
-      path = "special://profile/Thumbnails/Video/Fanart";
-    if (type == "1")
-      path = "special://profile/Thumbnails/Music/Fanart";
-    CApplicationMessenger::Get().PictureSlideShow(path, true, type != "2");
-  }
-  else if (m_screenSaver->ID() == "screensaver.xbmc.builtin.dim")
+  if (m_screenSaver->ID() == "screensaver.xbmc.builtin.dim" || m_screenSaver->ID().empty())
     return;
   else if (m_screenSaver->ID() == "screensaver.xbmc.builtin.black")
     return;
@@ -4872,19 +4846,24 @@ bool CApplication::OnMessage(CGUIMessage& message)
         if (m_pPlayer) m_pPlayer->OnNothingToQueueNotify();
         return true; // nothing to do
       }
+
       // ok, grab the next song
-      CFileItemPtr item = playlist[iNext];
+      CFileItem file(*playlist[iNext]);
+      // handle plugin://
+      CURL url(file.GetPath());
+      if (url.GetProtocol() == "plugin")
+        XFILE::CPluginDirectory::GetPluginResult(url.Get(), file);
 
 #ifdef HAS_UPNP
-      if (URIUtils::IsUPnP(item->GetPath()))
+      if (URIUtils::IsUPnP(file.GetPath()))
       {
-        if (!XFILE::CUPnPDirectory::GetResource(item->GetPath(), *item))
+        if (!XFILE::CUPnPDirectory::GetResource(file.GetPath(), file))
           return true;
       }
 #endif
 
       // ok - send the file to the player if it wants it
-      if (m_pPlayer && m_pPlayer->QueueNextFile(*item))
+      if (m_pPlayer && m_pPlayer->QueueNextFile(file))
       { // player wants the next file
         m_nextPlaylistItem = iNext;
       }

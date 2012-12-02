@@ -234,7 +234,7 @@ JSONRPC_STATUS CVideoLibrary::GetSeasons(const CStdString &method, ITransportLay
   CStdString strPath;
   strPath.Format("videodb://2/2/%i/", tvshowID);
   CFileItemList items;
-  if (!videodatabase.GetSeasonsNav(strPath, items, -1, -1, -1, -1, tvshowID))
+  if (!videodatabase.GetSeasonsNav(strPath, items, -1, -1, -1, -1, tvshowID, false))
     return InternalError;
 
   HandleFileItemList(NULL, false, "seasons", items, parameterObject, result);
@@ -260,14 +260,13 @@ JSONRPC_STATUS CVideoLibrary::GetEpisodes(const CStdString &method, ITransportLa
 
   CVideoDbUrl videoUrl;
   videoUrl.FromString(strPath);
-  int genreID = -1, year = -1;
   const CVariant &filter = parameterObject["filter"];
   if (filter.isMember("genreid"))
-    genreID = (int)filter["genreid"].asInteger();
+    videoUrl.AddOption("genreid", (int)filter["genreid"].asInteger());
   else if (filter.isMember("genre"))
     videoUrl.AddOption("genre", filter["genre"].asString());
   else if (filter.isMember("year"))
-    year = (int)filter["year"].asInteger();
+    videoUrl.AddOption("year", (int)filter["year"].asInteger());
   else if (filter.isMember("actor"))
     videoUrl.AddOption("actor", filter["actor"].asString());
   else if (filter.isMember("director"))
@@ -281,11 +280,18 @@ JSONRPC_STATUS CVideoLibrary::GetEpisodes(const CStdString &method, ITransportLa
     videoUrl.AddOption("xsp", xsp);
   }
 
-  if (tvshowID <= 0 && (genreID > 0 || filter.isMember("actor")))
+  if (tvshowID <= 0 && (season > 0 || videoUrl.HasOption("genreid") || videoUrl.HasOption("genre") || videoUrl.HasOption("actor")))
     return InvalidParams;
 
+  if (tvshowID > 0)
+  {
+    videoUrl.AddOption("tvshowid", tvshowID);
+    if (season >= 0)
+      videoUrl.AddOption("season", season);
+  }
+
   CFileItemList items;
-  if (!videodatabase.GetEpisodesNav(videoUrl.ToString(), items, genreID, year, -1, -1, tvshowID, season, sorting))
+  if (!videodatabase.GetEpisodesByWhere(videoUrl.ToString(), CDatabase::Filter(), items, false, sorting))
     return InvalidParams;
 
   return GetAdditionalEpisodeDetails(parameterObject, items, result, videodatabase, false);
@@ -701,7 +707,7 @@ JSONRPC_STATUS CVideoLibrary::Clean(const CStdString &method, ITransportLayer *t
   return ACK;
 }
 
-bool CVideoLibrary::FillFileItem(const CStdString &strFilename, CFileItem &item)
+bool CVideoLibrary::FillFileItem(const CStdString &strFilename, CFileItemPtr &item, const CVariant &parameterObject /* = CVariant(CVariant::VariantTypeArray) */)
 {
   CVideoDatabase videodatabase;
   if (strFilename.empty() || !videodatabase.Open())
@@ -711,7 +717,7 @@ bool CVideoLibrary::FillFileItem(const CStdString &strFilename, CFileItem &item)
   if (!videodatabase.LoadVideoInfo(strFilename, details))
     return false;
 
-  item.SetFromVideoInfoTag(details);
+  item->SetFromVideoInfoTag(details);
   return true;
 }
 
@@ -727,11 +733,11 @@ bool CVideoLibrary::FillFileItemList(const CVariant &parameterObject, CFileItemL
   int musicVideoID = (int)parameterObject["musicvideoid"].asInteger(-1);
 
   bool success = false;
-  CFileItem fileItem;
+  CFileItemPtr fileItem(new CFileItem());
   if (FillFileItem(file, fileItem))
   {
     success = true;
-    list.Add(CFileItemPtr(new CFileItem(fileItem)));
+    list.Add(fileItem);
   }
 
   if (movieID > 0)
@@ -889,7 +895,7 @@ void CVideoLibrary::UpdateVideoTag(const CVariant &parameterObject, CVideoInfoTa
   if (ParameterNotNull(parameterObject, "playcount"))
     details.m_playCount = (int)parameterObject["playcount"].asInteger();
   if (ParameterNotNull(parameterObject, "runtime"))
-    details.m_strRuntime = parameterObject["runtime"].asString();
+    details.m_duration = (int)parameterObject["runtime"].asInteger();
   if (ParameterNotNull(parameterObject, "director"))
     CopyStringArray(parameterObject["director"], details.m_director);
   if (ParameterNotNull(parameterObject, "studio"))
