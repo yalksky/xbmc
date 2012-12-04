@@ -712,12 +712,22 @@ bool CGUIWindowFullScreen::OnMessage(CGUIMessage& message)
 
         // We scale based on PAL4x3 - this at least ensures all sizing is constant across resolutions.
         RESOLUTION_INFO pal(720, 576, 0);
-        CGUIFont *subFont = g_fontManager.LoadTTF("__subtitle__", fontPath, color[g_guiSettings.GetInt("subtitles.color")], 0, g_guiSettings.GetInt("subtitles.height"), g_guiSettings.GetInt("subtitles.style"), false, 1.0f, 1.0f, &pal, true);
-        CGUIFont *borderFont = g_fontManager.LoadTTF("__subtitleborder__", fontPath, 0xFF000000, 0, g_guiSettings.GetInt("subtitles.height"), g_guiSettings.GetInt("subtitles.style"), true, 1.0f, 1.0f, &pal, true);
-        if (!subFont || !borderFont)
-          CLog::Log(LOGERROR, "CGUIWindowFullScreen::OnMessage(WINDOW_INIT) - Unable to load subtitle font");
-        else
-          m_subsLayout = new CGUITextLayout(subFont, true, 0, borderFont);
+        bool precache = g_advancedSettings.m_videoSubsTTFPreCache;
+        CLog::Log(LOGDEBUG, "CGUIWindowFullScreen::OnMessage g_advancedSettings.m_videoSubsTTFPreCache: %i, g_advancedSettings.m_videoSubsTTFBorderFontDisable: %i", (int)g_advancedSettings.m_videoSubsTTFPreCache, (int)g_advancedSettings.m_videoSubsTTFBorderFontDisable);
+        CGUIFont *subFont = g_fontManager.LoadTTF("__subtitle__", fontPath, color[g_guiSettings.GetInt("subtitles.color")], 0, g_guiSettings.GetInt("subtitles.height"), g_guiSettings.GetInt("subtitles.style"), false, 1.0f, 1.0f, &pal, true, precache);
+        CGUIFont *borderFont = NULL;
+        bool borderfontenabled = !g_advancedSettings.m_videoSubsTTFBorderFontDisable;
+        if (borderfontenabled)
+          borderFont = g_fontManager.LoadTTF("__subtitleborder__", fontPath, 0xFF000000, 0, g_guiSettings.GetInt("subtitles.height"), g_guiSettings.GetInt("subtitles.style"), true, 1.0f, 1.0f, &pal, true, precache);
+
+        if (!subFont || (borderfontenabled && !borderFont))
+           CLog::Log(LOGERROR, "CGUIWindowFullScreen::OnMessage(WINDOW_INIT) - Unable to load subtitle font");
+         else
+          {
+           m_subsLayout = new CGUITextLayout(subFont, true, 0, borderFont);
+          //force some subtitles to render initially render to pre-initialise that area to avoid video render delays later
+          RenderTTFSubtitles(true);
+          }
       }
       else
         m_subsLayout = NULL;
@@ -1062,7 +1072,7 @@ void CGUIWindowFullScreen::Render()
   CGUIWindow::Render();
 }
 
-void CGUIWindowFullScreen::RenderTTFSubtitles()
+void CGUIWindowFullScreen::RenderTTFSubtitles(bool forcetest /* = false */)
 {
   if ((g_application.GetCurrentPlayer() == EPC_MPLAYER ||
 #if defined(HAS_AMLPLAYER)
@@ -1072,7 +1082,7 @@ void CGUIWindowFullScreen::RenderTTFSubtitles()
        g_application.GetCurrentPlayer() == EPC_OMXPLAYER ||
 #endif
        g_application.GetCurrentPlayer() == EPC_DVDPLAYER) &&
-      CUtil::IsUsingTTFSubtitles() && (g_application.m_pPlayer->GetSubtitleVisible()))
+      CUtil::IsUsingTTFSubtitles() && (forcetest || g_application.m_pPlayer->GetSubtitleVisible()))
   {
     CSingleLock lock (m_fontLock);
 
@@ -1080,8 +1090,11 @@ void CGUIWindowFullScreen::RenderTTFSubtitles()
       return;
 
     CStdString subtitleText = "How now brown cow";
-    if (g_application.m_pPlayer->GetCurrentSubtitle(subtitleText))
-    {
+    if (forcetest || g_application.m_pPlayer->GetCurrentSubtitle(subtitleText))
+     {
+      if (forcetest)
+        subtitleText = "INVISIBLE SUBS FOR INIT";
+
       // Remove HTML-like tags from the subtitles until
       subtitleText.Replace("\\r", "");
       subtitleText.Replace("\r", "");
@@ -1136,7 +1149,10 @@ void CGUIWindowFullScreen::RenderTTFSubtitles()
         y = std::min(y, g_settings.m_ResInfo[res].Overscan.bottom - textHeight);
       }
 
-      m_subsLayout->RenderOutline(x, y, 0, 0xFF000000, XBFONT_CENTER_X, maxWidth);
+      if (forcetest)
+         m_subsLayout->RenderOutline(x, y, 0x00FFFFFF, 0x00FFFFFF, XBFONT_CENTER_X, maxWidth); //00 alpha=transparent, FF red FF green FF blue (note 0x0 does not work)
+      else
+         m_subsLayout->RenderOutline(x, y, 0, 0xFF000000, XBFONT_CENTER_X, maxWidth);
 
       // reset rendering resolution
       g_graphicsContext.SetRenderingResolution(m_coordsRes, m_needsScaling);
