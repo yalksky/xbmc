@@ -22,7 +22,7 @@ SET comp=vs2010
 SET target=dx
 SET buildmode=ask
 SET promptlevel=prompt
-SET buildmingwlibs=true
+SET buildmingwlibs=false
 SET exitcode=0
 FOR %%b in (%1, %2, %3, %4, %5) DO (
 	IF %%b==vs2010 SET comp=vs2010
