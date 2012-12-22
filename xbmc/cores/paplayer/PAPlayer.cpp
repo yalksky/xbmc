@@ -463,13 +463,6 @@ void PAPlayer::Process()
 
     double delay  = 100.0;
     double buffer = 100.0;
-    
-    if (IsPaused())
-    {
-      CThread::Sleep(10);
-      continue;
-    }
-    
     ProcessStreams(delay, buffer);
 
     double watermark = buffer * 0.5;
@@ -839,6 +832,29 @@ bool PAPlayer::CanSeek()
 
 void PAPlayer::Seek(bool bPlus, bool bLargeStep)
 {
+  if (!CanSeek()) return;
+
+  __int64 seek;
+  if (g_advancedSettings.m_musicUseTimeSeeking && GetTotalTime() > 2 * g_advancedSettings.m_musicTimeSeekForwardBig)
+  {
+    if (bLargeStep)
+      seek = bPlus ? g_advancedSettings.m_musicTimeSeekForwardBig : g_advancedSettings.m_musicTimeSeekBackwardBig;
+    else
+      seek = bPlus ? g_advancedSettings.m_musicTimeSeekForward : g_advancedSettings.m_musicTimeSeekBackward;
+    seek *= 1000;
+    seek += GetTime();
+  }
+  else
+  {
+    float percent;
+    if (bLargeStep)
+      percent = bPlus ? (float)g_advancedSettings.m_musicPercentSeekForwardBig : (float)g_advancedSettings.m_musicPercentSeekBackwardBig;
+    else
+      percent = bPlus ? (float)g_advancedSettings.m_musicPercentSeekForward : (float)g_advancedSettings.m_musicPercentSeekBackward;
+    seek = (__int64)(GetTotalTime64() * (GetPercentage() + percent) / 100);
+  }
+
+  SeekTime(seek);
 }
 
 void PAPlayer::SeekTime(int64_t iTime /*=0*/)
