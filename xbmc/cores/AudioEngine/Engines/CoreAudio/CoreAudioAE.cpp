@@ -24,6 +24,7 @@
 
 #include "CoreAudioAEStream.h"
 #include "CoreAudioAESound.h"
+#include "CoreAudioHardware.h"
 #include "cores/AudioEngine/Utils/AEUtil.h"
 #include "settings/GUISettings.h"
 #include "settings/Settings.h"
@@ -33,6 +34,7 @@
 #include "utils/log.h"
 #include "utils/TimeUtils.h"
 #include "utils/MathUtils.h"
+#include "threads/SystemClock.h"
 
 #define DELAY_FRAME_TIME  20
 #define BUFFERSIZE        16416
@@ -50,7 +52,10 @@ CCoreAudioAE::CCoreAudioAE() :
   m_muted              (false         ),
   m_soundMode          (AE_SOUND_OFF  ),
   m_streamsPlaying     (false         ),
-  m_isSuspended        (false         )
+  m_isSuspended        (false         ),
+  m_softSuspend        (false         ),
+  m_softSuspendTimer   (0             ),
+  m_currentAudioDevice (0             )
 {
   HAL = new CCoreAudioAEHAL;
 }
@@ -269,6 +274,13 @@ bool CCoreAudioAE::OpenCoreAudio(unsigned int sampleRate, bool forceRaw,
       (*itt)->Initialize();
     streamLock.Leave();
   }
+  
+#if defined(TARGET_DARWIN_OSX)
+  if (m_Initialized)
+  {
+    m_currentAudioDevice = CCoreAudioHardware::FindAudioDevice(m_outputDevice);
+  }
+#endif
 
   return m_Initialized;
 }
@@ -426,9 +438,10 @@ CCoreAudioAEHAL* CCoreAudioAE::GetHAL()
 IAEStream* CCoreAudioAE::MakeStream(enum AEDataFormat dataFormat,
   unsigned int sampleRate, unsigned int encodedSamplerate, CAEChannelInfo channelLayout, unsigned int options)
 {
+  bool defaultDeviceChanged = false;
   // if we are suspended we don't
   // want anyone to mess with us
-  if (m_isSuspended)
+  if (m_isSuspended && !m_softSuspend)
     return NULL;
 
   CAEChannelInfo channelInfo(channelLayout);
@@ -440,6 +453,20 @@ IAEStream* CCoreAudioAE::MakeStream(enum AEDataFormat dataFormat,
   m_streams.push_back(stream);
   streamLock.Leave();
 
+#if defined(TARGET_DARWIN_OSX)
+  // check if default device has changed - in that case we need to reinit
+  // TODO hook into osx callbacks for getting notifiaction on device
+  // changes and then queue a change of the default device
+  // to a point where engine is idle.
+  std::string outputDevice = g_guiSettings.GetString("audiooutput.audiodevice");
+  if (outputDevice.compare("CoreAudio:default") == 0)
+  {
+    AudioDeviceID currentId = CCoreAudioHardware::FindAudioDevice("default");
+    if (currentId != m_currentAudioDevice)
+      defaultDeviceChanged = true;
+  }
+#endif
+
   if ((options & AESTREAM_PAUSED) == 0)
     Stop();
 
@@ -447,7 +474,8 @@ IAEStream* CCoreAudioAE::MakeStream(enum AEDataFormat dataFormat,
   if (m_Initialized && ( m_lastStreamFormat != dataFormat ||
                          m_lastChLayoutCount != channelLayout.Count() ||
                          m_lastSampleRate != sampleRate ||
-                         COREAUDIO_IS_RAW(dataFormat)))
+                         COREAUDIO_IS_RAW(dataFormat) ||
+                         defaultDeviceChanged))
   {
     CSingleLock engineLock(m_engineLock);
     Stop();
@@ -510,7 +538,7 @@ IAEStream* CCoreAudioAE::FreeStream(IAEStream *stream)
 
 void CCoreAudioAE::PlaySound(IAESound *sound)
 {
-  if (m_soundMode == AE_SOUND_OFF || (m_soundMode == AE_SOUND_IDLE && m_streamsPlaying) || m_isSuspended)
+  if (m_soundMode == AE_SOUND_OFF || (m_soundMode == AE_SOUND_IDLE && m_streamsPlaying) || (m_isSuspended && !m_softSuspend))
     return;
 
   float *samples = ((CCoreAudioAESound*)sound)->GetSamples();
@@ -632,11 +660,40 @@ void CCoreAudioAE::MixSounds(float *buffer, unsigned int samples)
 
 void CCoreAudioAE::GarbageCollect()
 {
+  if (g_advancedSettings.m_streamSilence)
+    return;
+  
+  if (!m_streamsPlaying && m_playing_sounds.empty())
+  {
+    if (!m_softSuspend)
+    {
+      m_softSuspend = true;
+      m_softSuspendTimer = XbmcThreads::SystemClockMillis() + 10000; //10.0 second delay for softSuspend
+    }
+  }
+  else
+  {
+    if (m_isSuspended)
+    {
+      CSingleLock engineLock(m_engineLock);
+      CLog::Log(LOGDEBUG, "CCoreAudioAE::GarbageCollect - Acquire CA HAL.");
+      Start();
+      m_isSuspended = false;
+    }
+    m_softSuspend = false;
+  }
+  
+  unsigned int curSystemClock = XbmcThreads::SystemClockMillis();
+  if (!m_isSuspended && m_softSuspend && curSystemClock > m_softSuspendTimer)
+  {
+    Suspend();// locks m_engineLock internally
+    CLog::Log(LOGDEBUG, "CCoreAudioAE::GarbageCollect - Release CA HAL.");
+  }
 }
 
 void CCoreAudioAE::EnumerateOutputDevices(AEDeviceList &devices, bool passthrough)
 {
-  if (m_isSuspended)
+  if (m_isSuspended && !m_softSuspend)
     return;
 
   HAL->EnumerateOutputDevices(devices, passthrough);
@@ -660,6 +717,7 @@ void CCoreAudioAE::Stop()
 
 bool CCoreAudioAE::Suspend()
 {
+  CSingleLock engineLock(m_engineLock);
   CLog::Log(LOGDEBUG, "CCoreAudioAE::Suspend - Suspending AE processing");
   m_isSuspended = true;
   // stop all gui sounds

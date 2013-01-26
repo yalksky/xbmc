@@ -460,6 +460,7 @@ bool COMXPlayer::OpenFile(const CFileItem &file, const CPlayerOptions &options)
     m_UpdateApplication = 0;
     m_offset_pts        = 0;
     m_current_volume    = 0;
+    m_current_mute      = false;
     m_change_volume     = true;
 
     m_item              = file;
@@ -1262,7 +1263,7 @@ void COMXPlayer::Process()
 
     if(m_change_volume)
     {
-      m_player_audio.SetCurrentVolume(m_current_volume);
+      m_player_audio.SetCurrentVolume(m_current_mute ? VOLUME_MINIMUM : m_current_volume);
       m_change_volume = false;
     }
 
@@ -2957,8 +2958,10 @@ bool COMXPlayer::OpenVideoStream(int iStream, int source, bool reset)
     m_player_video.SendMessage(new CDVDMsg(CDVDMsg::GENERAL_RESET));
 
   unsigned flags = 0;
-  if(m_filename.find("3DSBS") != string::npos) 
+  if(m_filename.find("3DSBS") != string::npos || m_filename.find("HSBS") != string::npos)
     flags = CONF_FLAGS_FORMAT_SBS;
+  else if(m_filename.find("3DTAB") != string::npos || m_filename.find("HTAB") != string::npos)
+    flags = CONF_FLAGS_FORMAT_TB;
   m_player_video.SetFlags(flags);
 
   /* store information about stream */
@@ -4132,6 +4135,12 @@ bool COMXPlayer::CachePVRStream(void) const
 void COMXPlayer::GetVideoRect(CRect& SrcRect, CRect& DestRect)
 {
   g_renderManager.GetVideoRect(SrcRect, DestRect);
+}
+
+void COMXPlayer::SetMute(bool bOnOff)
+{
+  m_current_mute = bOnOff;
+  m_change_volume = true;
 }
 
 void COMXPlayer::SetVolume(float fVolume)
