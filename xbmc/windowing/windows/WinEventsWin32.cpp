@@ -513,6 +513,8 @@ LRESULT CALLBACK CWinEventsWin32::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, L
           else
             wParam = VK_LMENU;
           break;
+       case VK_PROCESS:
+           return(0);
       }
       XBMC_keysym keysym;
       TranslateKey(wParam, HIWORD(lParam), &keysym, 1);
@@ -561,6 +563,31 @@ LRESULT CALLBACK CWinEventsWin32::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, L
         newEvent.type = XBMC_KEYUP;
       newEvent.key.keysym = keysym;
       m_pEventFunc(newEvent);
+    }
+    return(0);
+    case WM_CHAR:
+    {
+      if( wParam >= 0x80 )
+   {
+    static uint8_t MutiChar[2];
+    if( !MutiChar[0] ) 
+    {
+    MutiChar[0] = (uint8_t)wParam; 
+    return 0;
+    } 
+    MutiChar[1]= (uint8_t)wParam;
+    uint8_t wcUnicode[2];
+    MultiByteToWideChar(CP_ACP, 0, (LPCSTR)MutiChar, 2, (LPWSTR)wcUnicode, 4);
+    XBMC_keysym keysym;
+    keysym.mod = XBMCKMOD_NONE;
+    keysym.scancode = 0;
+    keysym.unicode = wcUnicode[1]*256 + wcUnicode[0];
+    keysym.sym = XBMCK_UNKNOWN;
+    newEvent.type = XBMC_KEYDOWN;
+    newEvent.key.keysym = keysym;
+    m_pEventFunc(newEvent);
+    MutiChar[0] = 0;
+   }
     }
     return(0);
     case WM_APPCOMMAND: // MULTIMEDIA keys are mapped to APPCOMMANDS

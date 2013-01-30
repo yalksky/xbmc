@@ -267,4 +267,8 @@ typedef enum {
 #define VK_OEM_102	0xE2
 #endif
 
+#ifndef VK_PROCESS
+#define VK_PROCESS 0xE5
+#endif
+
 #endif // XBMC_vkeys_h
