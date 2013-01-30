@@ -47,8 +47,8 @@
   !define MUI_WELCOMEFINISHPAGE_BITMAP "xbmc-left.bmp"
   !define MUI_COMPONENTSPAGE_SMALLDESC
   ;!define MUI_FINISHPAGE_SHOWREADME "$INSTDIR\webapps\ROOT\RELEASE-NOTES.txt"
-  !define MUI_FINISHPAGE_LINK "Please visit http://xbmc.org for more information."
-  !define MUI_FINISHPAGE_LINK_LOCATION "http://xbmc.org"
+  !define MUI_FINISHPAGE_LINK "Please visit http://xbmc-korea.com for more information."
+  !define MUI_FINISHPAGE_LINK_LOCATION "http://xbmc-korea.com"
   !define MUI_FINISHPAGE_RUN "$INSTDIR\XBMC.exe"
   ;!define MUI_FINISHPAGE_RUN_PARAMETERS $RunArgs
   !define MUI_FINISHPAGE_RUN_NOTCHECKED
@@ -79,7 +79,7 @@
 ;--------------------------------
 ;Languages
 
-  !insertmacro MUI_LANGUAGE "English"
+  !insertmacro MUI_LANGUAGE "Korean"
 
 ;--------------------------------
 ;Installer Sections
@@ -149,6 +149,7 @@ Section "XBMC" SecXBMC
     "" "Uninstall XBMC."
   
   WriteINIStr "$SMPROGRAMS\$StartMenuFolder\Visit XBMC Online.url" "InternetShortcut" "URL" "http://xbmc.org"
+  WriteINIStr "$SMPROGRAMS\$StartMenuFolder\Visit XBMC-Korea.url" "InternetShortcut" "URL" "http://xbmc-korea.com"
   !insertmacro MUI_STARTMENU_WRITE_END  
   
   ;add entry to add/remove programs
