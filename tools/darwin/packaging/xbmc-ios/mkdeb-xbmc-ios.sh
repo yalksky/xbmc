@@ -43,7 +43,7 @@ if [ -f "/Users/Shared/xbmc-depends/toolchain/bin/dpkg-deb" ]; then
   export PATH=${bin_path}:${PATH}
 fi
 
-PACKAGE=org.xbmc.xbmc-ios
+PACKAGE=com.xbmc-korea.xbmc-ios
 
 VERSION=12.0
 REVISION=0
@@ -58,7 +58,7 @@ mkdir -p $DIRNAME/$PACKAGE/DEBIAN
 echo "Package: $PACKAGE"                          >  $DIRNAME/$PACKAGE/DEBIAN/control
 echo "Priority: Extra"                            >> $DIRNAME/$PACKAGE/DEBIAN/control
 echo "Name: XBMC-iOS"                             >> $DIRNAME/$PACKAGE/DEBIAN/control
-echo "Depends: firmware (>= 4.1), curl, org.xbmc.xbmc-iconpack" >> $DIRNAME/$PACKAGE/DEBIAN/control
+echo "Depends: firmware (>= 4.1), curl"           >> $DIRNAME/$PACKAGE/DEBIAN/control
 echo "Version: $VERSION-$REVISION"                >> $DIRNAME/$PACKAGE/DEBIAN/control
 echo "Architecture: iphoneos-arm"                 >> $DIRNAME/$PACKAGE/DEBIAN/control
 echo "Description: XBMC Multimedia Center for 4.x iOS" >> $DIRNAME/$PACKAGE/DEBIAN/control

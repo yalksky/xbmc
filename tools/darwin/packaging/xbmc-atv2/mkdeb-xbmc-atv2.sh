@@ -42,7 +42,7 @@ if [ -f "/Users/Shared/xbmc-depends/toolchain/bin/dpkg-deb" ]; then
   export PATH=${bin_path}:${PATH}
 fi
 
-PACKAGE=org.xbmc.xbmc-atv2
+PACKAGE=com.xbmc-korea.xbmc-atv2
 
 VERSION=12.0
 REVISION=0
