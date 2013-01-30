@@ -12,14 +12,14 @@
   <regions>
     <region name="Korea (12h)" locale="KR">
       <dateshort>YYYY-MM-DD</dateshort>
-      <datelong>YYYY'년' M'월' D'일' DDDD</datelong>
+      <datelong>YYYY'년' M'월' D'일' DDDD'요일'</datelong>
       <time symbolAM="오전" symbolPM="오후">xx h:mm:ss</time>
       <tempunit>C</tempunit>
       <speedunit>kmh</speedunit>
     </region>
     <region name="Korea (24h)" locale="KR">
       <dateshort>YYYY-MM-DD</dateshort>
-      <datelong>YYYY'년' M'월' D'일' DDDD</datelong>
+      <datelong>YYYY'년' M'월' D'일' DDDD'요일'</datelong>
       <time symbolAM="" symbolPM="">H:mm:ss</time>
       <tempunit>C</tempunit>
       <speedunit>kmh</speedunit>
