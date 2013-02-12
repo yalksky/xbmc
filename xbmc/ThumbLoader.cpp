@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2005-2012 Team XBMC
+ *      Copyright (C) 2005-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -90,6 +90,9 @@ bool CProgramThumbLoader::FillThumb(CFileItem &item)
 
 CStdString CProgramThumbLoader::GetLocalThumb(const CFileItem &item)
 {
+  if (item.IsAddonsPath())
+    return "";
+
   // look for the thumb
   if (item.m_bIsFolder)
   {

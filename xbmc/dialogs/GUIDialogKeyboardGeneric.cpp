@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2012 Team XBMC
+ *      Copyright (C) 2012-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -639,6 +639,12 @@ void CGUIDialogKeyboardGeneric::SetHeading(const std::string &heading)
 int CGUIDialogKeyboardGeneric::GetWindowId() const
 {
   return GetID();
+}
+
+void CGUIDialogKeyboardGeneric::Cancel()
+{
+  m_bIsConfirmed = false;
+  Close();
 }
 
 bool CGUIDialogKeyboardGeneric::ShowAndGetInput(char_callback_t pCallback, const std::string &initialString, std::string &typedString, const std::string &heading, bool bHiddenInput)

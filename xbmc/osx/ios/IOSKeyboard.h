@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2012 Team XBMC
+ *      Copyright (C) 2012-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -24,10 +24,13 @@
 class CIOSKeyboard : public CGUIKeyboard
 {
   public:
+    CIOSKeyboard():m_pCharCallback(NULL),m_bCanceled(false){}
     virtual bool ShowAndGetInput(char_callback_t pCallback, const std::string &initialString, std::string &typedString, const std::string &heading, bool bHiddenInput);
+    virtual void Cancel();
     void fireCallback(const std::string &str);
     void invalidateCallback(){m_pCharCallback = NULL;}
 
   private:
     char_callback_t m_pCharCallback;
+    bool m_bCanceled;
 };
