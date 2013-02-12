@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2005-2012 Team XBMC
+ *      Copyright (C) 2005-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -490,39 +490,6 @@ bool StringUtils::IsInteger(const CStdString& str)
   while (i < str.size() && isspace((unsigned char) str[i]))
     i++;
   return i == str.size() && n > 0;
-}
-
-bool StringUtils::Test()
-{
-  bool ret = true;
-
-  ret |= IsNaturalNumber("10");
-  ret |= IsNaturalNumber(" 10");
-  ret |= IsNaturalNumber("0");
-  ret |= !IsNaturalNumber(" 1 0");
-  ret |= !IsNaturalNumber("1.0");
-  ret |= !IsNaturalNumber("1.1");
-  ret |= !IsNaturalNumber("0x1");
-  ret |= !IsNaturalNumber("blah");
-  ret |= !IsNaturalNumber("120 h");
-  ret |= !IsNaturalNumber(" ");
-  ret |= !IsNaturalNumber("");
-  ret |= !IsNaturalNumber("ייטט");
-
-  ret |= IsInteger("10");
-  ret |= IsInteger(" -10");
-  ret |= IsInteger("0");
-  ret |= !IsInteger(" 1 0");
-  ret |= !IsInteger("1.0");
-  ret |= !IsInteger("1.1");
-  ret |= !IsInteger("0x1");
-  ret |= !IsInteger("blah");
-  ret |= !IsInteger("120 h");
-  ret |= !IsInteger(" ");
-  ret |= !IsInteger("");
-  ret |= !IsInteger("ייטט");
-
-  return ret;
 }
 
 void StringUtils::RemoveCRLF(CStdString& strLine)

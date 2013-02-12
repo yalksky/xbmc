@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2012 Team XBMC
+ *      Copyright (C) 2012-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -33,6 +33,7 @@ class CGUIDialogKeyboardGeneric : public CGUIDialog, public CGUIKeyboard
 
     //CGUIKeyboard Interface
     virtual bool ShowAndGetInput(char_callback_t pCallback, const std::string &initialString, std::string &typedString, const std::string &heading, bool bHiddenInput);
+    virtual void Cancel();
     virtual int GetWindowId() const;
 
     //CGUIDialog Interface
