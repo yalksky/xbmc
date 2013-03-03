@@ -1559,7 +1559,6 @@ void CApplication::StopWebServer()
       CLog::Log(LOGNOTICE, "Webserver: Stopped...");
       CZeroconf::GetInstance()->RemoveService("servers.webserver");
       CZeroconf::GetInstance()->RemoveService("servers.jsonrpc-http");
-      CZeroconf::GetInstance()->RemoveService("servers.webapi");
     } else
       CLog::Log(LOGWARNING, "Webserver: Failed to stop.");
   }
@@ -1590,7 +1589,7 @@ bool CApplication::StartAirplayServer()
         txt.push_back(std::make_pair("deviceid", "FF:FF:FF:FF:FF:F2"));
       }
       txt.push_back(std::make_pair("features", "0x77"));
-      txt.push_back(std::make_pair("model", "AppleTV2,1"));
+      txt.push_back(std::make_pair("model", "Xbmc,1"));
       txt.push_back(std::make_pair("srcvers", AIRPLAY_SERVER_VERSION_STR));
       CZeroconf::GetInstance()->PublishService("servers.airplay", "_airplay._tcp", g_infoManager.GetLabel(SYSTEM_FRIENDLY_NAME), listenPort, txt);
       ret = true;
@@ -2834,7 +2833,7 @@ bool CApplication::OnAction(const CAction &action)
       if(core != EPC_NONE)
       {
         g_application.m_eForcedNextPlayer = core;
-        item.m_lStartOffset = GetTime() * 75;
+        item.m_lStartOffset = (int)(GetTime() * 75);
         PlayFile(item, true);
       }
     }
@@ -5381,7 +5380,7 @@ int CApplication::GetSubtitleDelay() const
 
 int CApplication::GetAudioDelay() const
 {
-  // converts subtitle delay to a percentage
+  // converts audio delay to a percentage
   return int(((float)(g_settings.m_currentVideoSettings.m_AudioDelay + g_advancedSettings.m_videoAudioDelayRange)) / (2 * g_advancedSettings.m_videoAudioDelayRange)*100.0f + 0.5f);
 }
 
