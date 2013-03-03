@@ -339,8 +339,12 @@ ao_device* CAirTunesServer::AudioOutputFunctions::ao_open_live(int driver_id, ao
   header.durationMs = 0;
 
   if (device->pipe->Write(&header, sizeof(header)) == 0)
+  {
+    delete device->pipe;
+    delete device;
     return 0;
-
+  }
+  
   ThreadMessage tMsg = { TMSG_MEDIA_STOP };
   CApplicationMessenger::Get().SendMessage(tMsg, true);
 
@@ -520,6 +524,7 @@ bool CAirTunesServer::StartServer(int port, bool nonlocal, bool usePassword, con
     txt.push_back(std::make_pair("da",  "true"));
     txt.push_back(std::make_pair("vs",  "130.14"));
     txt.push_back(std::make_pair("md",  "0,1,2"));
+    txt.push_back(std::make_pair("am",  "Xbmc,1"));
 
     CZeroconf::GetInstance()->PublishService("servers.airtunes", "_raop._tcp", appName, port, txt);
   }
