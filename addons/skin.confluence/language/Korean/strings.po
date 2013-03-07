@@ -540,3 +540,43 @@ msgstr "날씨 정보를 가져오는 중..."
 msgctxt "#31910"
 msgid "Map & Alerts"
 msgstr "지도와 경보"
+
+msgctxt "#31950"
+msgid "WEATHER"
+msgstr "날씨"
+
+msgctxt "#31951"
+msgid "PICTURES"
+msgstr "사진"
+
+msgctxt "#31952"
+msgid "LIVE TV"
+msgstr "TV 시청"
+
+msgctxt "#31953"
+msgid "VIDEOS"
+msgstr "비디오"
+
+msgctxt "#31954"
+msgid "MOVIES"
+msgstr "영화"
+
+msgctxt "#31955"
+msgid "TV SHOWS"
+msgstr "TV 쇼"
+
+msgctxt "#31956"
+msgid "MUSIC"
+msgstr "음악"
+
+msgctxt "#31957"
+msgid "PROGRAMS"
+msgstr "프로그램"
+
+msgctxt "#31958"
+msgid "PLAY DISC"
+msgstr "디스크 재생"
+
+msgctxt "#31959"
+msgid "SYSTEM"
+msgstr "시스템"
