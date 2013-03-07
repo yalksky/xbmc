@@ -1,3 +1,8 @@
+1.1.2
+
+Changes
+- preserve line break in biography
+
 1.1.0
 
 Changes
