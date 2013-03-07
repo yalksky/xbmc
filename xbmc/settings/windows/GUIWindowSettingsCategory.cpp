@@ -38,8 +38,6 @@
 #include "PlayListPlayer.h"
 #include "addons/Skin.h"
 #include "guilib/GUIAudioManager.h"
-#include "network/libscrobbler/lastfmscrobbler.h"
-#include "network/libscrobbler/librefmscrobbler.h"
 #include "GUIPassword.h"
 #include "GUIInfoManager.h"
 #include "dialogs/GUIDialogGamepad.h"
@@ -87,8 +85,8 @@
 #include "WIN32Util.h"
 #endif
 #include <map>
-#include "Settings.h"
-#include "AdvancedSettings.h"
+#include "settings/Settings.h"
+#include "settings/AdvancedSettings.h"
 #include "input/MouseStat.h"
 #if defined(TARGET_WINDOWS)
 #include "input/windows/WINJoystick.h"
@@ -889,16 +887,6 @@ void CGUIWindowSettingsCategory::UpdateSettings()
       pControl->SetEnabled(geteuid() == 0);
     }
 #endif
-    else if (strSetting.Equals("scrobbler.lastfmusername") || strSetting.Equals("scrobbler.lastfmpass"))
-    {
-      CGUIButtonControl *pControl = (CGUIButtonControl *)GetControl(pSettingControl->GetID());
-      if (pControl) pControl->SetEnabled(g_guiSettings.GetBool("scrobbler.lastfmsubmit"));
-    }
-    else if (strSetting.Equals("scrobbler.librefmusername") || strSetting.Equals("scrobbler.librefmpass"))
-    {
-      CGUIButtonControl *pControl = (CGUIButtonControl *)GetControl(pSettingControl->GetID());
-      if (pControl) pControl->SetEnabled(g_guiSettings.GetBool("scrobbler.librefmsubmit"));
-    }
     else if (strSetting.Equals("subtitles.color") || strSetting.Equals("subtitles.style") || strSetting.Equals("subtitles.charset"))
     {
       CGUIControl *pControl = (CGUIControl *)GetControl(GetSetting(strSetting)->GetID());
@@ -1210,34 +1198,6 @@ void CGUIWindowSettingsCategory::OnSettingChanged(BaseSettingControlPtr pSetting
       musicdatabase.Open();
       musicdatabase.ImportKaraokeInfo(path);
       musicdatabase.Close();
-    }
-  }
-  else if (strSetting.Equals("scrobbler.lastfmsubmit") || strSetting.Equals("scrobbler.lastfmusername") || strSetting.Equals("scrobbler.lastfmpass"))
-  {
-    CStdString strPassword=g_guiSettings.GetString("scrobbler.lastfmpass");
-    CStdString strUserName=g_guiSettings.GetString("scrobbler.lastfmusername");
-    if (g_guiSettings.GetBool("scrobbler.lastfmsubmit") &&
-         !strUserName.IsEmpty() && !strPassword.IsEmpty())
-    {
-      CLastfmScrobbler::GetInstance()->Init();
-    }
-    else
-    {
-      CLastfmScrobbler::GetInstance()->Term();
-    }
-  }
-  else if (strSetting.Equals("scrobbler.librefmsubmit") || strSetting.Equals("scrobbler.librefmusername") || strSetting.Equals("scrobbler.librefmpass"))
-  {
-    CStdString strPassword=g_guiSettings.GetString("scrobbler.librefmpass");
-    CStdString strUserName=g_guiSettings.GetString("scrobbler.librefmusername");
-    if (g_guiSettings.GetBool("scrobbler.librefmsubmit") &&
-         !strUserName.IsEmpty() && !strPassword.IsEmpty())
-    {
-      CLibrefmScrobbler::GetInstance()->Init();
-    }
-    else
-    {
-      CLibrefmScrobbler::GetInstance()->Term();
     }
   }
   else if (strSetting.Left(22).Equals("MusicPlayer.ReplayGain"))
@@ -2034,7 +1994,7 @@ CGUIControl* CGUIWindowSettingsCategory::AddSetting(CSetting *pSetting, float wi
     if (!pControl) return NULL;
     ((CGUIRadioButtonControl *)pControl)->SetLabel(g_localizeStrings.Get(pSetting->GetLabel()));
     pControl->SetWidth(width);
-    pSettingControl.reset(new CRadioButtonSettingControl((CGUIRadioButtonControl *)pControl, iControlID, pSetting));
+    pSettingControl.reset(new CGUIRadioButtonSettingControl((CGUIRadioButtonControl *)pControl, iControlID, pSetting));
   }
   else if (pSetting->GetControlType() == SPIN_CONTROL_FLOAT || pSetting->GetControlType() == SPIN_CONTROL_INT_PLUS || pSetting->GetControlType() == SPIN_CONTROL_TEXT || pSetting->GetControlType() == SPIN_CONTROL_INT)
   {
@@ -2042,14 +2002,14 @@ CGUIControl* CGUIWindowSettingsCategory::AddSetting(CSetting *pSetting, float wi
     if (!pControl) return NULL;
     pControl->SetWidth(width);
     ((CGUISpinControlEx *)pControl)->SetText(g_localizeStrings.Get(pSetting->GetLabel()));
-    pSettingControl.reset(new CSpinExSettingControl((CGUISpinControlEx *)pControl, iControlID, pSetting));
+    pSettingControl.reset(new CGUISpinExSettingControl((CGUISpinControlEx *)pControl, iControlID, pSetting));
   }
   else if (pSetting->GetControlType() == SEPARATOR_CONTROL && m_pOriginalImage)
   {
     pControl = new CGUIImage(*m_pOriginalImage);
     if (!pControl) return NULL;
     pControl->SetWidth(width);
-    pSettingControl.reset(new CSeparatorSettingControl((CGUIImage *)pControl, iControlID, pSetting));
+    pSettingControl.reset(new CGUISeparatorSettingControl((CGUIImage *)pControl, iControlID, pSetting));
   }
   else if (pSetting->GetControlType() == EDIT_CONTROL_INPUT ||
            pSetting->GetControlType() == EDIT_CONTROL_HIDDEN_INPUT ||
@@ -2062,7 +2022,7 @@ CGUIControl* CGUIWindowSettingsCategory::AddSetting(CSetting *pSetting, float wi
     if (!pControl) return NULL;
     ((CGUIEditControl *)pControl)->SetLabel(g_localizeStrings.Get(pSetting->GetLabel()));
     pControl->SetWidth(width);
-    pSettingControl.reset(new CEditSettingControl((CGUIEditControl *)pControl, iControlID, pSetting));
+    pSettingControl.reset(new CGUIEditSettingControl((CGUIEditControl *)pControl, iControlID, pSetting));
   }
   else if (pSetting->GetControlType() != SEPARATOR_CONTROL) // button control
   {
@@ -2070,7 +2030,7 @@ CGUIControl* CGUIWindowSettingsCategory::AddSetting(CSetting *pSetting, float wi
     if (!pControl) return NULL;
     ((CGUIButtonControl *)pControl)->SetLabel(g_localizeStrings.Get(pSetting->GetLabel()));
     pControl->SetWidth(width);
-    pSettingControl.reset(new CButtonSettingControl((CGUIButtonControl *)pControl, iControlID, pSetting));
+    pSettingControl.reset(new CGUIButtonSettingControl((CGUIButtonControl *)pControl, iControlID, pSetting));
   }
   if (!pControl)
   {

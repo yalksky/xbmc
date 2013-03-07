@@ -1,6 +1,7 @@
 #pragma once
+
 /*
- *      Copyright (C) 2005-2013 Team XBMC
+ *      Copyright (C) 2005-2012 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -19,18 +20,11 @@
  *
  */
 
-#include "CurlFile.h"
-#include "utils/RingBuffer.h"
-
-namespace XFILE
+class IRenderingCallback
 {
-
-  class CLastFMFile : public CCurlFile
-  {
-  public:
-    CLastFMFile();
-    virtual ~CLastFMFile();
-  protected:
-  };
-
-}
+public:
+  virtual bool Create(int x, int y, int w, int h, void *device) = 0;
+  virtual void Render() = 0;
+  virtual void Stop() = 0;
+  virtual bool IsDirty() { return true; }
+};
