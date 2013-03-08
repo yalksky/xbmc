@@ -1,6 +1,6 @@
 #pragma once
 /*
- *      Copyright (C) 2005-2012 Team XBMC
+ *      Copyright (C) 2005-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -20,7 +20,8 @@
  */
 
 #include "GUIControl.h"
-#include "addons/IAddon.h"
+
+class IRenderingCallback;
 
 class CGUIRenderingControl : public CGUIControl
 {
@@ -35,9 +36,9 @@ public:
   virtual void FreeResources(bool immediately = false);
   virtual bool CanFocus() const { return false; }
   virtual bool CanFocusFromPoint(const CPoint &point) const;
-  void LoadAddon(const ADDON::AddonPtr &addon);
+  bool InitCallback(IRenderingCallback *callback);
 
 protected:
   CCriticalSection m_rendering;
-  ADDON::VizPtr m_addon;
+  IRenderingCallback *m_callback;
 };

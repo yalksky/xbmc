@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2005-2012 Team XBMC
+ *      Copyright (C) 2005-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -156,6 +156,9 @@ bool CGUIWindowManager::SendMessage(CGUIMessage& message)
 
 bool CGUIWindowManager::SendMessage(CGUIMessage& message, int window)
 {
+  if (window == 0)
+    // send to no specified windows.
+    return SendMessage(message);
   CGUIWindow* pWindow = GetWindow(window);
   if(pWindow)
     return pWindow->OnMessage(message);
@@ -769,15 +772,7 @@ int CGUIWindowManager::GetTopMostModalDialogID(bool ignoreClosing /*= false*/) c
   return WINDOW_INVALID;
 }
 
-void CGUIWindowManager::SendThreadMessage(CGUIMessage& message)
-{
-  CSingleLock lock(m_critSection);
-
-  CGUIMessage* msg = new CGUIMessage(message);
-  m_vecThreadMessages.push_back( pair<CGUIMessage*,int>(msg,0) );
-}
-
-void CGUIWindowManager::SendThreadMessage(CGUIMessage& message, int window)
+void CGUIWindowManager::SendThreadMessage(CGUIMessage& message, int window /*= 0*/)
 {
   CSingleLock lock(m_critSection);
 

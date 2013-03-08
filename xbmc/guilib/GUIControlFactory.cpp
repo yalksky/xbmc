@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2005-2012 Team XBMC
+ *      Copyright (C) 2005-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -1322,6 +1322,10 @@ CGUIControl* CGUIControlFactory::Create(int parentID, const CRect &rect, TiXmlEl
   else if (type == CGUIControl::GUICONTROL_VISUALISATION)
   {
     control = new CGUIVisualisationControl(parentID, id, posX, posY, width, height);
+  }
+  else if (type == CGUIControl::GUICONTROL_RENDERADDON)
+  {
+    control = new CGUIRenderingControl(parentID, id, posX, posY, width, height);
   }
 
   // things that apply to all controls

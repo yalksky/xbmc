@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2005-2012 Team XBMC
+ *      Copyright (C) 2005-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -1002,7 +1002,7 @@ void CGUIWindowFileManager::OnPopupMenu(int list, int item, bool bContextDriven 
 
   // determine available players
   VECPLAYERCORES vecCores;
-  CPlayerCoreFactory::GetPlayers(*pItem, vecCores);
+  CPlayerCoreFactory::Get().GetPlayers(*pItem, vecCores);
 
   // add the needed buttons
   CContextButtons choices;
@@ -1046,8 +1046,8 @@ void CGUIWindowFileManager::OnPopupMenu(int list, int item, bool bContextDriven 
   if (btnid == 3)
   {
     VECPLAYERCORES vecCores;
-    CPlayerCoreFactory::GetPlayers(*pItem, vecCores);
-    g_application.m_eForcedNextPlayer = CPlayerCoreFactory::SelectPlayerDialog(vecCores);
+    CPlayerCoreFactory::Get().GetPlayers(*pItem, vecCores);
+    g_application.m_eForcedNextPlayer = CPlayerCoreFactory::Get().SelectPlayerDialog(vecCores);
     if (g_application.m_eForcedNextPlayer != EPC_NONE)
       OnStart(pItem.get());
   }
@@ -1178,8 +1178,7 @@ void CGUIWindowFileManager::OnJobComplete(unsigned int jobID, bool success, CJob
     CApplicationMessenger::Get().SendGUIMessage(msg, GetID(), false);
   }
 
-  if (success)
-    CJobQueue::OnJobComplete(jobID, success, job);
+  CJobQueue::OnJobComplete(jobID, success, job);
 }
 
 void CGUIWindowFileManager::ShowShareErrorMessage(CFileItem* pItem)

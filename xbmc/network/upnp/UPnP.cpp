@@ -25,6 +25,7 @@
 #include "UPnPInternal.h"
 #include "UPnPRenderer.h"
 #include "UPnPServer.h"
+#include "UPnPSettings.h"
 #include "utils/URIUtils.h"
 #include "Application.h"
 #include "ApplicationMessenger.h"
@@ -192,10 +193,77 @@ public:
 
 
 /*----------------------------------------------------------------------
+|   CMediaController class
++---------------------------------------------------------------------*/
+class CMediaController
+  : public PLT_MediaControllerDelegate
+  , public PLT_MediaController
+{
+public:
+  CMediaController(PLT_CtrlPointReference& ctrl_point)
+    : PLT_MediaController(ctrl_point)
+  {
+    PLT_MediaController::SetDelegate(this);
+  }
+
+  ~CMediaController()
+  {
+  }
+
+  virtual void OnStopResult(NPT_Result res, PLT_DeviceDataReference& device, void* userdata)
+  { static_cast<PLT_MediaControllerDelegate*>(userdata)->OnStopResult(res, device, userdata); }
+
+  virtual void OnSetPlayModeResult(NPT_Result res, PLT_DeviceDataReference& device, void* userdata)
+  { static_cast<PLT_MediaControllerDelegate*>(userdata)->OnSetPlayModeResult(res, device, userdata); }
+
+  virtual void OnSetAVTransportURIResult(NPT_Result res, PLT_DeviceDataReference& device, void* userdata)
+  { static_cast<PLT_MediaControllerDelegate*>(userdata)->OnSetAVTransportURIResult(res, device, userdata); }
+
+  virtual void OnSeekResult(NPT_Result res, PLT_DeviceDataReference& device, void* userdata)
+  { static_cast<PLT_MediaControllerDelegate*>(userdata)->OnSeekResult(res, device, userdata); }
+
+  virtual void OnPreviousResult(NPT_Result res, PLT_DeviceDataReference& device, void* userdata)
+  { static_cast<PLT_MediaControllerDelegate*>(userdata)->OnPreviousResult(res, device, userdata); }
+
+  virtual void OnPlayResult(NPT_Result res, PLT_DeviceDataReference& device, void* userdata)
+  { static_cast<PLT_MediaControllerDelegate*>(userdata)->OnPlayResult(res, device, userdata); }
+
+  virtual void OnPauseResult(NPT_Result res, PLT_DeviceDataReference& device, void* userdata)
+  { static_cast<PLT_MediaControllerDelegate*>(userdata)->OnPauseResult(res, device, userdata); }
+
+  virtual void OnNextResult(NPT_Result res, PLT_DeviceDataReference& device, void* userdata)
+  { static_cast<PLT_MediaControllerDelegate*>(userdata)->OnNextResult(res, device, userdata); }
+
+  virtual void OnGetMediaInfoResult(NPT_Result res, PLT_DeviceDataReference& device, PLT_MediaInfo* info, void* userdata)
+  { static_cast<PLT_MediaControllerDelegate*>(userdata)->OnGetMediaInfoResult(res, device, info, userdata); }
+
+  virtual void OnGetPositionInfoResult(NPT_Result res, PLT_DeviceDataReference& device, PLT_PositionInfo* info, void* userdata)
+  { static_cast<PLT_MediaControllerDelegate*>(userdata)->OnGetPositionInfoResult(res, device, info, userdata); }
+
+  virtual void OnGetTransportInfoResult(NPT_Result res, PLT_DeviceDataReference& device, PLT_TransportInfo* info, void* userdata)
+  { static_cast<PLT_MediaControllerDelegate*>(userdata)->OnGetTransportInfoResult(res, device, info, userdata); }
+
+
+  virtual bool OnMRAdded(PLT_DeviceDataReference& device )
+  {
+    CPlayerCoreFactory::Get().OnPlayerDiscovered((const char*)device->GetUUID()
+                                          ,(const char*)device->GetFriendlyName()
+                                          , EPC_UPNPPLAYER);
+    return true;
+  }
+
+  virtual void OnMRRemoved(PLT_DeviceDataReference& device )
+  {
+    CPlayerCoreFactory::Get().OnPlayerRemoved((const char*)device->GetUUID());
+  }
+};
+
+/*----------------------------------------------------------------------
 |   CUPnP::CUPnP
 +---------------------------------------------------------------------*/
 CUPnP::CUPnP() :
     m_MediaBrowser(NULL),
+    m_MediaController(NULL),
     m_ServerHolder(new CDeviceHostReferenceHolder()),
     m_RendererHolder(new CRendererReferenceHolder()),
     m_CtrlPointHolder(new CCtrlPointReferenceHolder())
@@ -268,6 +336,16 @@ CUPnP::ReleaseInstance(bool bWait)
 }
 
 /*----------------------------------------------------------------------
+|   CUPnP::StartServer
++---------------------------------------------------------------------*/
+CUPnPServer* CUPnP::GetServer()
+{
+  if(upnp)
+    return (CUPnPServer*)upnp->m_ServerHolder->m_Device.AsPointer();
+  return NULL;
+}
+
+/*----------------------------------------------------------------------
 |   CUPnP::StartClient
 +---------------------------------------------------------------------*/
 void
@@ -283,6 +361,11 @@ CUPnP::StartClient()
 
     // start browser
     m_MediaBrowser = new CMediaBrowser(m_CtrlPointHolder->m_CtrlPoint);
+
+    // start controller
+    if (g_guiSettings.GetBool("services.upnpcontroller")) {
+        m_MediaController = new CMediaController(m_CtrlPointHolder->m_CtrlPoint);
+    }
 }
 
 /*----------------------------------------------------------------------
@@ -298,6 +381,8 @@ CUPnP::StopClient()
 
     delete m_MediaBrowser;
     m_MediaBrowser = NULL;
+    delete m_MediaController;
+    m_MediaController = NULL;
 }
 
 /*----------------------------------------------------------------------
@@ -308,7 +393,7 @@ CUPnP::CreateServer(int port /* = 0 */)
 {
     CUPnPServer* device =
         new CUPnPServer(g_infoManager.GetLabel(SYSTEM_FRIENDLY_NAME),
-                        g_settings.m_UPnPUUIDServer.length()?g_settings.m_UPnPUUIDServer.c_str():NULL,
+                        CUPnPSettings::Get().GetServerUUID().length() ? CUPnPSettings::Get().GetServerUUID().c_str() : NULL,
                         port);
 
     // trying to set optional upnp values for XP UPnP UI Icons to detect us
@@ -340,37 +425,37 @@ CUPnP::StartServer()
     // load upnpserver.xml so that g_settings.m_vecUPnPMusiCMediaSources, etc.. are loaded
     CStdString filename;
     URIUtils::AddFileToFolder(g_settings.GetUserDataFolder(), "upnpserver.xml", filename);
-    g_settings.LoadUPnPXml(filename);
+    CUPnPSettings::Get().Load(filename);
 
     // create the server with a XBox compatible friendlyname and UUID from upnpserver.xml if found
-    m_ServerHolder->m_Device = CreateServer(g_settings.m_UPnPPortServer);
+    m_ServerHolder->m_Device = CreateServer(CUPnPSettings::Get().GetServerPort());
 
     // start server
     NPT_Result res = m_UPnP->AddDevice(m_ServerHolder->m_Device);
     if (NPT_FAILED(res)) {
         // if the upnp device port was not 0, it could have failed because
         // of port being in used, so restart with a random port
-        if (g_settings.m_UPnPPortServer > 0) m_ServerHolder->m_Device = CreateServer(0);
+        if (CUPnPSettings::Get().GetServerPort() > 0) m_ServerHolder->m_Device = CreateServer(0);
 
         res = m_UPnP->AddDevice(m_ServerHolder->m_Device);
     }
 
     // save port but don't overwrite saved settings if port was random
     if (NPT_SUCCEEDED(res)) {
-        if (g_settings.m_UPnPPortServer == 0) {
-            g_settings.m_UPnPPortServer = m_ServerHolder->m_Device->GetPort();
+        if (CUPnPSettings::Get().GetServerPort() == 0) {
+            CUPnPSettings::Get().SetServerPort(m_ServerHolder->m_Device->GetPort());
         }
         CUPnPServer::m_MaxReturnedItems = UPNP_DEFAULT_MAX_RETURNED_ITEMS;
-        if (g_settings.m_UPnPMaxReturnedItems > 0) {
+        if (CUPnPSettings::Get().GetMaximumReturnedItems() > 0) {
             // must be > UPNP_DEFAULT_MIN_RETURNED_ITEMS
-            CUPnPServer::m_MaxReturnedItems = max(UPNP_DEFAULT_MIN_RETURNED_ITEMS, g_settings.m_UPnPMaxReturnedItems);
+            CUPnPServer::m_MaxReturnedItems = max(UPNP_DEFAULT_MIN_RETURNED_ITEMS, CUPnPSettings::Get().GetMaximumReturnedItems());
         }
-        g_settings.m_UPnPMaxReturnedItems = CUPnPServer::m_MaxReturnedItems;
+        CUPnPSettings::Get().SetMaximumReturnedItems(CUPnPServer::m_MaxReturnedItems);
     }
 
     // save UUID
-    g_settings.m_UPnPUUIDServer = m_ServerHolder->m_Device->GetUUID();
-    g_settings.SaveUPnPXml(filename);
+    CUPnPSettings::Get().SetServerUUID(m_ServerHolder->m_Device->GetUUID().GetChars());
+    CUPnPSettings::Get().Save(filename);
 }
 
 /*----------------------------------------------------------------------
@@ -394,7 +479,7 @@ CUPnP::CreateRenderer(int port /* = 0 */)
     CUPnPRenderer* device =
         new CUPnPRenderer(g_infoManager.GetLabel(SYSTEM_FRIENDLY_NAME),
                           false,
-                          (g_settings.m_UPnPUUIDRenderer.length() ? g_settings.m_UPnPUUIDRenderer.c_str() : NULL),
+                          (CUPnPSettings::Get().GetRendererUUID().length() ? CUPnPSettings::Get().GetRendererUUID().c_str() : NULL),
                           port);
 
     device->m_PresentationURL =
@@ -420,27 +505,27 @@ void CUPnP::StartRenderer()
 
     CStdString filename;
     URIUtils::AddFileToFolder(g_settings.GetUserDataFolder(), "upnpserver.xml", filename);
-    g_settings.LoadUPnPXml(filename);
+    CUPnPSettings::Get().Load(filename);
 
-    m_RendererHolder->m_Device = CreateRenderer(g_settings.m_UPnPPortRenderer);
+    m_RendererHolder->m_Device = CreateRenderer(CUPnPSettings::Get().GetRendererPort());
 
     NPT_Result res = m_UPnP->AddDevice(m_RendererHolder->m_Device);
 
     // failed most likely because port is in use, try again with random port now
-    if (NPT_FAILED(res) && g_settings.m_UPnPPortRenderer != 0) {
+    if (NPT_FAILED(res) && CUPnPSettings::Get().GetRendererPort() != 0) {
         m_RendererHolder->m_Device = CreateRenderer(0);
 
         res = m_UPnP->AddDevice(m_RendererHolder->m_Device);
     }
 
     // save port but don't overwrite saved settings if random
-    if (NPT_SUCCEEDED(res) && g_settings.m_UPnPPortRenderer == 0) {
-        g_settings.m_UPnPPortRenderer = m_RendererHolder->m_Device->GetPort();
+    if (NPT_SUCCEEDED(res) && CUPnPSettings::Get().GetRendererPort() == 0) {
+        CUPnPSettings::Get().SetRendererPort(m_RendererHolder->m_Device->GetPort());
     }
 
     // save UUID
-    g_settings.m_UPnPUUIDRenderer = m_RendererHolder->m_Device->GetUUID();
-    g_settings.SaveUPnPXml(filename);
+    CUPnPSettings::Get().SetRendererUUID(m_RendererHolder->m_Device->GetUUID().GetChars());
+    CUPnPSettings::Get().Save(filename);
 }
 
 /*----------------------------------------------------------------------

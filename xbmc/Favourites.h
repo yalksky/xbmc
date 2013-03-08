@@ -1,7 +1,7 @@
 #pragma once
 
 /*
- *      Copyright (C) 2005-2012 Team XBMC
+ *      Copyright (C) 2005-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -33,11 +33,6 @@ public:
   static bool AddOrRemove(CFileItem *item, int contextWindow);
   static bool Save(const CFileItemList& items);
   static bool IsFavourite(CFileItem *item, int contextWindow);
-
-#ifdef UNIT_TESTING
-  static bool TestParamify();
-#endif
-
 private:
   static CStdString GetExecutePath(const CFileItem *item, int contextWindow);
 };

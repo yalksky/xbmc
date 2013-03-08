@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2012 Team XBMC
+ *      Copyright (C) 2012-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -82,6 +82,14 @@ DLLEXPORT void XBMC_queue_notification(void *hdl, void* cb, const queue_msg_t ty
     return;
 
   ((CB_AddOnLib*)cb)->QueueNotification(((AddonCB*)hdl)->addonData, type, msg);
+}
+
+DLLEXPORT bool XBMC_wake_on_lan(void* hdl, void* cb, char* mac)
+{
+  if (cb == NULL)
+    return false;
+
+  return ((CB_AddOnLib*)cb)->WakeOnLan(mac);
 }
 
 DLLEXPORT char* XBMC_unknown_to_utf8(void *hdl, void* cb, const char* str)

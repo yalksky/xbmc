@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2005-2012 Team XBMC
+ *      Copyright (C) 2005-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -142,6 +142,7 @@ static const ActionMapping actions[] =
         {"rewind"            , ACTION_PLAYER_REWIND},
         {"play"              , ACTION_PLAYER_PLAY},
         {"playpause"         , ACTION_PLAYER_PLAYPAUSE},
+        {"switchplayer"      , ACTION_SWITCH_PLAYER},
         {"delete"            , ACTION_DELETE_ITEM},
         {"copy"              , ACTION_COPY_ITEM},
         {"move"              , ACTION_MOVE_ITEM},
@@ -351,7 +352,8 @@ static const ActionMapping windows[] =
         {"peripherals"              , WINDOW_DIALOG_PERIPHERAL_MANAGER},
         {"peripheralsettings"       , WINDOW_DIALOG_PERIPHERAL_SETTINGS},
         {"extendedprogressdialog"   , WINDOW_DIALOG_EXT_PROGRESS},
-        {"mediafilter"              , WINDOW_DIALOG_MEDIA_FILTER}};
+        {"mediafilter"              , WINDOW_DIALOG_MEDIA_FILTER},
+        {"addon"                    , WINDOW_ADDON_START}};
 
 static const ActionMapping mousecommands[] =
 {
@@ -565,6 +567,11 @@ bool CButtonTranslator::LoadKeymap(const CStdString &keymapPath)
     return false;
   }
   TiXmlElement* pRoot = xmlDoc.RootElement();
+  if (!pRoot)
+  {
+    CLog::Log(LOGERROR, "Error getting keymap root: %s", keymapPath.c_str());
+    return false;
+  }
   CStdString strValue = pRoot->Value();
   if ( strValue != "keymap")
   {
@@ -902,6 +909,11 @@ int CButtonTranslator::GetFallbackWindow(int windowID)
     if (fallbackWindows[index].origin == windowID)
       return fallbackWindows[index].target;
   }
+  // for addon windows use WINDOW_ADDON_START
+  // because id is dynamic
+  if (windowID >= WINDOW_ADDON_START && windowID <= WINDOW_ADDON_END)
+    return WINDOW_ADDON_START;
+
   return -1;
 }
 
@@ -912,7 +924,14 @@ CAction CButtonTranslator::GetAction(int window, const CKey &key, bool fallback)
   int actionID = GetActionCode(window, key, strAction);
   // if it's invalid, try to get it from the global map
   if (actionID == 0 && fallback)
-    actionID = GetActionCode( -1, key, strAction);
+  {
+    int fallbackWindow = GetFallbackWindow(window);
+    if (fallbackWindow > -1)
+      actionID = GetActionCode(fallbackWindow, key, strAction);
+    // still no valid action? use global map
+    if (actionID == 0)
+      actionID = GetActionCode( -1, key, strAction);
+  }
   // Now fill our action structure
   CAction action(actionID, strAction, key);
   return action;
@@ -1268,9 +1287,17 @@ uint32_t CButtonTranslator::TranslateKeyboardButton(TiXmlElement *pButton)
   CStdString strKey = szButton;
   if (strKey.Equals("key"))
   {
-    int id = 0;
-    if (pButton->QueryIntAttribute("id", &id) == TIXML_SUCCESS)
-      button_id = (uint32_t)id;
+    std::string strID;
+    if (pButton->QueryValueAttribute("id", &strID) == TIXML_SUCCESS)
+    {
+      const char *str = strID.c_str();
+      char *endptr;
+      long int id = strtol(str, &endptr, 0);
+      if (endptr - str != strlen(str) || id <= 0 || id > 0x00FFFFFF)
+        CLog::Log(LOGDEBUG, "%s - invalid key id %s", __FUNCTION__, strID.c_str());
+      else
+        button_id = (uint32_t) id;
+    }
     else
       CLog::Log(LOGERROR, "Keyboard Translator: `key' button has no id");
   }

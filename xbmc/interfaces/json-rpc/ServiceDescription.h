@@ -1,6 +1,6 @@
 #pragma once
 /*
- *      Copyright (C) 2005-2012 Team XBMC
+ *      Copyright (C) 2005-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
 namespace JSONRPC
 {
   const char* const JSONRPC_SERVICE_ID          = "http://www.xbmc.org/jsonrpc/ServiceDescription.json";
-  const char* const JSONRPC_SERVICE_VERSION     = "6.0.0";
+  const char* const JSONRPC_SERVICE_VERSION     = "6.1.0";
   const char* const JSONRPC_SERVICE_DESCRIPTION = "JSON-RPC API of XBMC";
 
   const char* const JSONRPC_SERVICE_TYPES[] = {  
@@ -413,7 +413,7 @@ namespace JSONRPC
         "\"enum\": [ \"instrument\", \"style\", \"mood\", \"born\", \"formed\","
                   "\"description\", \"genre\", \"died\", \"disbanded\","
                   "\"yearsactive\", \"musicbrainzartistid\", \"fanart\","
-                  "\"thumbnail\" ]"
+                  "\"compilationartist\", \"thumbnail\" ]"
       "}"
     "}",
     "\"Audio.Fields.Album\": {"
@@ -474,6 +474,7 @@ namespace JSONRPC
         "\"died\": { \"type\": \"string\" },"
         "\"disbanded\": { \"type\": \"string\" },"
         "\"yearsactive\": { \"$ref\": \"Array.String\" },"
+        "\"compilationartist\": { \"type\": \"boolean\" },"
         "\"musicbrainzartistid\": { \"type\": \"string\" }"
       "}"
     "}",
@@ -1134,7 +1135,8 @@ namespace JSONRPC
                 "\"xbmc.metadata.scraper.musicvideos\", \"xbmc.metadata.scraper.tvshows\", \"xbmc.ui.screensaver\","
                 "\"xbmc.player.musicviz\", \"xbmc.python.pluginsource\", \"xbmc.python.script\", \"xbmc.python.weather\","
                 "\"xbmc.python.subtitles\", \"xbmc.python.lyrics\", \"xbmc.gui.skin\", \"xbmc.gui.webinterface\","
-                "\"xbmc.addon.video\", \"xbmc.addon.audio\", \"xbmc.addon.image\", \"xbmc.addon.executable\", \"xbmc.service\" ],"
+                "\"xbmc.pvrclient\", \"xbmc.addon.video\", \"xbmc.addon.audio\", \"xbmc.addon.image\", \"xbmc.addon.executable\","
+                "\"xbmc.service\" ],"
       "\"default\": \"unknown\""
     "}",
     "\"Addon.Content\": {"
@@ -1793,7 +1795,8 @@ namespace JSONRPC
         "{ \"name\": \"directory\", \"type\": \"string\", \"required\": true },"
         "{ \"name\": \"media\", \"$ref\": \"Files.Media\", \"default\": \"files\" },"
         "{ \"name\": \"properties\", \"$ref\": \"List.Fields.Files\" },"
-        "{ \"name\": \"sort\", \"$ref\": \"List.Sort\" }"
+        "{ \"name\": \"sort\", \"$ref\": \"List.Sort\" },"
+        "{ \"name\": \"limits\", \"$ref\": \"List.Limits\", \"description\": \"Limits are applied after getting the directory content thus retrieval is not faster when they are applied.\" }"
       "],"
       "\"returns\": {"
         "\"type\": \"object\","

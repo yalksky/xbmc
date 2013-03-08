@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2005-2012 Team XBMC
+ *      Copyright (C) 2005-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -44,9 +44,9 @@ public:
     virtual void Reset(int64_t pos) ;
 
 protected:
-    uint64_t          m_beg;       /**< index in file (not buffer) of beginning of valid data */
-    uint64_t          m_end;       /**< index in file (not buffer) of end of valid data */
-    uint64_t          m_cur;       /**< current reading index in file */
+    int64_t           m_beg;       /**< index in file (not buffer) of beginning of valid data */
+    int64_t           m_end;       /**< index in file (not buffer) of end of valid data */
+    int64_t           m_cur;       /**< current reading index in file */
     uint8_t          *m_buf;       /**< buffer holding data */
     size_t            m_size;      /**< size of data buffer used (m_buf) */
     size_t            m_size_back; /**< guaranteed size of back buffer (actual size can be smaller, or larger if front buffer doesn't need it) */

@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2011-2012 Team XBMC
+ *      Copyright (C) 2011-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -398,7 +398,7 @@ void CAddonInstaller::PrunePackageCache()
 {
   std::map<CStdString,CFileItemList*> packs;
   int64_t size = EnumeratePackageFolder(packs);
-  int64_t limit = g_advancedSettings.m_addonPackageFolderSize*1024*1024;
+  int64_t limit = (int64_t)g_advancedSettings.m_addonPackageFolderSize*1024*1024;
   if (size < limit)
     return;
 

@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2012 Team XBMC
+ *      Copyright (C) 2012-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -99,7 +99,7 @@ CPVRChannel::CPVRChannel(const PVR_CHANNEL &channel, unsigned int iClientId)
   m_strFileNameAndPath      = StringUtils::EmptyString;
   m_bIsVirtual              = false;
   m_iLastWatched            = 0;
-  m_bEPGEnabled             = true;
+  m_bEPGEnabled             = !channel.bIsHidden;
   m_strEPGScraper           = "client";
   m_iEpgId                  = -1;
   m_bEPGCreated             = false;
@@ -268,6 +268,7 @@ bool CPVRChannel::SetHidden(bool bIsHidden)
   {
     /* update the hidden flag */
     m_bIsHidden = bIsHidden;
+	m_bEPGEnabled = !bIsHidden;
     SetChanged();
     m_bChanged = true;
 

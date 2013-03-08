@@ -1,6 +1,6 @@
 #pragma once
 /*
- *      Copyright (C) 2011-2012 Team XBMC
+ *      Copyright (C) 2011-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -122,7 +122,7 @@ public:
   WebSocketState GetState() { return m_state; }
 
   virtual bool Handshake(const char* data, size_t length, std::string &response) = 0;
-  virtual const CWebSocketMessage* Handle(const char *buffer, size_t length, bool &send);
+  virtual const CWebSocketMessage* Handle(const char* &buffer, size_t &length, bool &send);
   virtual const CWebSocketMessage* Send(WebSocketFrameOpcode opcode, const char* data = NULL, uint32_t length = 0);
   virtual const CWebSocketFrame* Ping(const char* data = NULL) const = 0;
   virtual const CWebSocketFrame* Pong(const char* data = NULL) const = 0;

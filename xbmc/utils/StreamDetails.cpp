@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2005-2012 Team XBMC
+ *      Copyright (C) 2005-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -22,6 +22,8 @@
 #include "StreamDetails.h"
 #include "StreamUtils.h"
 #include "Variant.h"
+
+const float VIDEOASPECT_EPSILON = 0.025f;
 
 void CStreamDetail::Archive(CArchive &ar)
 {
@@ -184,6 +186,49 @@ CStreamDetails& CStreamDetails::operator=(const CStreamDetails &that)
   }  /* if this != that */
 
   return *this;
+}
+
+bool CStreamDetails::operator ==(const CStreamDetails &right) const
+{
+  if (this == &right) return true;
+
+  if (GetVideoStreamCount()    != right.GetVideoStreamCount() ||
+      GetAudioStreamCount()    != right.GetAudioStreamCount() ||
+      GetSubtitleStreamCount() != right.GetSubtitleStreamCount())
+    return false;
+
+  for (int iStream=1; iStream<=GetVideoStreamCount(); iStream++)
+  {
+    if (GetVideoCodec(iStream)    != right.GetVideoCodec(iStream)    ||
+        GetVideoWidth(iStream)    != right.GetVideoWidth(iStream)    ||
+        GetVideoHeight(iStream)   != right.GetVideoHeight(iStream)   ||
+        GetVideoDuration(iStream) != right.GetVideoDuration(iStream) ||
+        fabs(GetVideoAspect(iStream) - right.GetVideoAspect(iStream)) > VIDEOASPECT_EPSILON)
+      return false;
+  }
+
+  for (int iStream=1; iStream<=GetAudioStreamCount(); iStream++)
+  {
+    if (GetAudioCodec(iStream)    != right.GetAudioCodec(iStream)    ||
+        GetAudioLanguage(iStream) != right.GetAudioLanguage(iStream) ||
+        GetAudioChannels(iStream) != right.GetAudioChannels(iStream) )
+      return false;
+  }
+
+  for (int iStream=1; iStream<=GetSubtitleStreamCount(); iStream++)
+  {
+    if (GetSubtitleLanguage(iStream) != right.GetSubtitleLanguage(iStream) )
+      return false;
+  }
+
+  return true;
+}
+
+bool CStreamDetails::operator !=(const CStreamDetails &right) const
+{
+  if (this == &right) return false;
+
+  return !(*this == right);
 }
 
 CStreamDetail *CStreamDetails::NewStream(CStreamDetail::StreamType type)
@@ -465,8 +510,6 @@ void CStreamDetails::DetermineBestStreams(void)
       *champion = *iter;
   }  /* for each */
 }
-
-const float VIDEOASPECT_EPSILON = 0.025f;
 
 CStdString CStreamDetails::VideoDimsToResolutionDescription(int iWidth, int iHeight)
 {

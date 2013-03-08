@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2005-2012 Team XBMC
+ *      Copyright (C) 2005-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -298,4 +298,12 @@ extern "C" void ADDON_FreeSettings()
 extern "C" ADDON_STATUS ADDON_SetSetting(const char *strSetting, const void* value)
 {
   return ADDON_STATUS_OK;
+}
+
+//-- Announce -----------------------------------------------------------------
+// Receive announcements from XBMC
+// !!! Add-on master function !!!
+//-----------------------------------------------------------------------------
+extern "C" void ADDON_Announce(const char *flag, const char *sender, const char *message, const void *data)
+{
 }

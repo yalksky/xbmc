@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2010-2012 Team XBMC
+ *      Copyright (C) 2010-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -58,7 +58,18 @@
 - (void) stopAnimation;
 - (bool) changeScreen: (unsigned int)screenIdx withMode:(UIScreenMode *)mode;
 - (void) activateScreen: (UIScreen *)screen;
-
+- (id) glView;
+- (void) setGlView:(id)view;
+- (BOOL) ATVClientEventFromBREvent:(id)event Repeatable:(bool *)isRepeatable ButtonState:(bool *)isPressed Result:(int *)xbmc_ir_key;
+- (void) setUserEvent:(int) eventId withHoldTime:(unsigned int) holdTime;
+- (void) startKeyPressTimer:(int) keyId;
+- (void) stopKeyPressTimer;
+- (void) setSystemSleepTimeout:(id) timeout;
+- (id) systemSleepTimeout;
+- (void) setKeyTimer:(id) timer;
+- (id) keyTimer;
+- (void) setSystemScreenSaverTimeout:(id) timeout;
+- (id) systemScreenSaverTimeout;
 
 @end
 

@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2005-2012 Team XBMC
+ *      Copyright (C) 2005-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -490,7 +490,9 @@ void CPlayList::UpdateItem(const CFileItem *item)
     CFileItemPtr playlistItem = *it;
     if (playlistItem->IsSamePath(item))
     {
+      CStdString temp = playlistItem->GetPath(); // save path, it may have been altered
       *playlistItem = *item;
+      playlistItem->SetPath(temp);
       break;
     }
   }

@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2005-2012 Team XBMC
+ *      Copyright (C) 2005-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -28,7 +28,7 @@
 #endif
 #include "pictures/Picture.h"
 #include "dialogs/GUIDialogContextMenu.h"
-#include "ViewState.h"
+#include "view/ViewState.h"
 #include "settings/Settings.h"
 #include "settings/AdvancedSettings.h"
 #include "FileItem.h"
@@ -244,7 +244,7 @@ void CGUIDialogVideoBookmarks::AddBookmark(CVideoInfoTag* tag)
   else
     bookmark.playerState.Empty();
 
-  bookmark.player = CPlayerCoreFactory::GetPlayerName(g_application.GetCurrentPlayer());
+  bookmark.player = CPlayerCoreFactory::Get().GetPlayerName(g_application.GetCurrentPlayer());
 
   // create the thumbnail image
 #ifdef HAS_VIDEO_PLAYBACK

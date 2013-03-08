@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2005-2012 Team XBMC
+ *      Copyright (C) 2005-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -66,6 +66,9 @@ void CURL::Reset()
   m_strFileName.clear();
   m_strProtocol.clear();
   m_strFileType.clear();
+  m_strOptions.clear();
+  m_strProtocolOptions.clear();
+  m_options.Clear();
   m_iPort = 0;
 }
 
@@ -309,7 +312,6 @@ void CURL::Parse(const CStdString& strURL1)
     || m_strProtocol.CompareNoCase("musicdb") == 0
     || m_strProtocol.CompareNoCase("videodb") == 0
     || m_strProtocol.CompareNoCase("sources") == 0
-    || m_strProtocol.CompareNoCase("lastfm") == 0
     || m_strProtocol.CompareNoCase("pvr") == 0
     || m_strProtocol.Left(3).CompareNoCase("mem") == 0)
   {
@@ -752,7 +754,6 @@ CStdString CURL::TranslateProtocol(const CStdString& prot)
    || prot == "daap"
    || prot == "dav"
    || prot == "tuxbox"
-   || prot == "lastfm"
    || prot == "rss")
    return "http";
 

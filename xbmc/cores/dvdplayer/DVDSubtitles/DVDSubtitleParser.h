@@ -1,7 +1,7 @@
 #pragma once
 
 /*
- *      Copyright (C) 2005-2012 Team XBMC
+ *      Copyright (C) 2005-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -47,7 +47,13 @@ public:
     m_filename = strFile;
   }
   virtual ~CDVDSubtitleParserCollection() { }
-  virtual CDVDOverlay* Parse(double iPts) { return m_collection.Get(iPts); }
+  virtual CDVDOverlay* Parse(double iPts)
+  {
+    CDVDOverlay* o = m_collection.Get(iPts);
+    if(o == NULL)
+      return o;
+    return o->Clone();
+  }
   virtual void         Reset()            { m_collection.Reset(); }
   virtual void         Dispose()          { m_collection.Clear(); }
 

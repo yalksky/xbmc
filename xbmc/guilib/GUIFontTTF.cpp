@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2005-2012 Team XBMC
+ *      Copyright (C) 2005-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -27,6 +27,7 @@
 #include "utils/MathUtils.h"
 #include "utils/log.h"
 #include "windowing/WindowingFactory.h"
+#include "settings/GUISettings.h"
 #include "utils/TimeUtils.h"
 
 #include "settings/AdvancedSettings.h"
@@ -795,12 +796,24 @@ void CGUIFontTTFBase::RenderCharacter(float posX, float posY, const Character *c
   m_color = color;
   SVertex* v = m_vertex + m_vertex_count;
 
+  unsigned char r = GET_R(color)
+              , g = GET_G(color)
+              , b = GET_B(color)
+              , a = GET_A(color);
+
+  if(g_Windowing.UseLimitedColor())
+  {
+    r = (235 - 16) * r / 255;
+    g = (235 - 16) * g / 255;
+    b = (235 - 16) * b / 255;
+  }
+
   for(int i = 0; i < 4; i++)
   {
-    v[i].r = GET_R(color);
-    v[i].g = GET_G(color);
-    v[i].b = GET_B(color);
-    v[i].a = GET_A(color);
+    v[i].r = r;
+    v[i].g = g;
+    v[i].b = b;
+    v[i].a = a;
   }
 
 #if defined(HAS_GL) || defined(HAS_DX)

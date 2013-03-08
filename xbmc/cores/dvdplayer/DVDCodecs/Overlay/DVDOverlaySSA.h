@@ -1,7 +1,7 @@
 #pragma once
 
 /*
- *      Copyright (C) 2005-2012 Team XBMC
+ *      Copyright (C) 2005-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -37,10 +37,21 @@ public:
     libass->Acquire();
   }
 
+  CDVDOverlaySSA(CDVDOverlaySSA& src)
+    : CDVDOverlay(src)
+    , m_libass(src.m_libass)
+  {
+    m_libass->Acquire();
+  }
+
   ~CDVDOverlaySSA()
   {
     if(m_libass)
       SAFE_RELEASE(m_libass);
   }
 
+  virtual CDVDOverlaySSA* Clone()
+  {
+    return new CDVDOverlaySSA(*this);
+  }
 };

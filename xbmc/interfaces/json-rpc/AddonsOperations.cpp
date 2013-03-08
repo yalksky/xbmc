@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2011 Team XBMC
+ *      Copyright (C) 2011-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -27,6 +27,7 @@
 #include "ApplicationMessenger.h"
 #include "TextureCache.h"
 #include "filesystem/File.h"
+#include "utils/StringUtils.h"
 
 using namespace std;
 using namespace JSONRPC;
@@ -187,7 +188,7 @@ JSONRPC_STATUS CAddonsOperations::ExecuteAddon(const CStdString &method, ITransp
     {
       if (it != params.begin_array())
         argv += ",";
-      argv += it->asString();
+      argv += StringUtils::Paramify(it->asString());
     }
   }
   

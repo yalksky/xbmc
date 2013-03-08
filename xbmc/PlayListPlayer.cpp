@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2005-2012 Team XBMC
+ *      Copyright (C) 2005-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -68,7 +68,7 @@ bool CPlayListPlayer::OnMessage(CGUIMessage &message)
     if (message.GetParam1() == GUI_MSG_UPDATE_ITEM && message.GetItem())
     {
       // update the items in our playlist(s) if necessary
-      for (int i = PLAYLIST_MUSIC; i != PLAYLIST_VIDEO; i++)
+      for (int i = PLAYLIST_MUSIC; i <= PLAYLIST_VIDEO; i++)
       {
         CPlayList &playlist = GetPlaylist(i);
         CFileItemPtr item = boost::static_pointer_cast<CFileItem>(message.GetItem());

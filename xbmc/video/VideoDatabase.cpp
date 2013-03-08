@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2005-2012 Team XBMC
+ *      Copyright (C) 2005-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -3098,6 +3098,19 @@ CVideoInfoTag CVideoDatabase::GetDetailsByTypeAndId(VIDEODB_CONTENT_TYPE type, i
   return details;
 }
 
+bool CVideoDatabase::GetStreamDetails(CFileItem& item)
+{
+  if (!item.HasVideoInfoTag())
+    return false;
+
+  CVideoInfoTag *tag = item.GetVideoInfoTag();
+  if (tag->m_iFileId < 0)
+    tag->m_iFileId = GetFileId(item);
+
+  return GetStreamDetails(*tag);
+}
+
+
 bool CVideoDatabase::GetStreamDetails(CVideoInfoTag& tag) const
 {
   if (tag.m_iFileId < 0)
@@ -3714,6 +3727,33 @@ bool CVideoDatabase::GetTvShowSeasonArt(int showId, map<int, map<string, string>
   catch (...)
   {
     CLog::Log(LOGERROR, "%s(%d) failed", __FUNCTION__, showId);
+  }
+  return false;
+}
+
+bool CVideoDatabase::GetArtTypes(const std::string &mediaType, std::vector<std::string> &artTypes)
+{
+  try
+  {
+    if (NULL == m_pDB.get()) return false;
+    if (NULL == m_pDS.get()) return false;
+
+    CStdString sql = PrepareSQL("SELECT DISTINCT type FROM art WHERE media_type='%s'", mediaType.c_str());
+    int numRows = RunQuery(sql);
+    if (numRows <= 0)
+      return numRows == 0;
+
+    while (!m_pDS->eof())
+    {
+      artTypes.push_back(m_pDS->fv(0).get_asString());
+      m_pDS->next();
+    }
+    m_pDS->close();
+    return true;
+  }
+  catch (...)
+  {
+    CLog::Log(LOGERROR, "%s(%s) failed", __FUNCTION__, mediaType.c_str());
   }
   return false;
 }
@@ -7214,17 +7254,12 @@ bool CVideoDatabase::GetRandomMusicVideo(CFileItem* item, int& idSong, const CSt
   {
     idSong = -1;
 
-    int iCount = GetMusicVideoCount(strWhere);
-    if (iCount <= 0)
-      return false;
-    int iRandom = rand() % iCount;
-
     if (NULL == m_pDB.get()) return false;
     if (NULL == m_pDS.get()) return false;
 
     // We don't use PrepareSQL here, as the WHERE clause is already formatted.
     CStdString strSQL;
-    strSQL.Format("select * from musicvideoview where %s order by idMVideo limit 1 offset %i",strWhere.c_str(),iRandom);
+    strSQL.Format("select * from musicvideoview where %s order by RANDOM() limit 1",strWhere.c_str());
     CLog::Log(LOGDEBUG, "%s query = %s", __FUNCTION__, strSQL.c_str());
     // run query
     if (!m_pDS->query(strSQL.c_str()))

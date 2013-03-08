@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2005-2012 Team XBMC
+ *      Copyright (C) 2005-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -28,8 +28,8 @@
 #include "HDFile.h"
 #include "CurlFile.h"
 #include "HTTPFile.h"
+#include "DAVFile.h"
 #include "ShoutcastFile.h"
-#include "LastFMFile.h"
 #include "FileReaderFile.h"
 #ifdef HAS_FILESYSTEM_SMB
 #ifdef _WIN32
@@ -146,17 +146,15 @@ IFile* CFileFactory::CreateLoader(const CURL& url)
 
   if( g_application.getNetwork().IsAvailable() )
   {
-    if (strProtocol == "dav"
-    ||  strProtocol == "davs"
-    ||  strProtocol == "ftp"
+    if (strProtocol == "ftp"
     ||  strProtocol == "ftps"
     ||  strProtocol == "rss") return new CCurlFile();
     else if (strProtocol == "http" ||  strProtocol == "https") return new CHTTPFile();
+    else if (strProtocol == "dav" || strProtocol == "davs") return new CDAVFile();
 #ifdef HAS_FILESYSTEM_SFTP
     else if (strProtocol == "sftp" || strProtocol == "ssh") return new CSFTPFile();
 #endif
     else if (strProtocol == "shout") return new CShoutcastFile();
-    else if (strProtocol == "lastfm") return new CLastFMFile();
     else if (strProtocol == "tuxbox") return new CTuxBoxFile();
     else if (strProtocol == "hdhomerun") return new CHomeRunFile();
     else if (strProtocol == "sling") return new CSlingboxFile();

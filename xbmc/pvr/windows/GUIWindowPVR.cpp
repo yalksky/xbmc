@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2012 Team XBMC
+ *      Copyright (C) 2012-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -68,7 +68,7 @@ void CGUIWindowPVR::SetActiveView(CGUIWindowPVRCommon *window)
   CSingleLock lock(m_critSection);
 
   if ((!window && m_currentSubwindow) || (window && !m_currentSubwindow) ||
-      (window->GetWindowId() != m_currentSubwindow->GetWindowId()))
+      (window && m_currentSubwindow && window->GetWindowId() != m_currentSubwindow->GetWindowId()))
   {
     // switched views, save current history
     if (m_currentSubwindow)

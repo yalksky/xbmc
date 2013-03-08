@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2005-2012 Team XBMC
+ *      Copyright (C) 2005-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -22,8 +22,6 @@
 #include "Network.h"
 #include "Application.h"
 #include "ApplicationMessenger.h"
-#include "libscrobbler/lastfmscrobbler.h"
-#include "libscrobbler/librefmscrobbler.h"
 #include "utils/RssReader.h"
 #include "utils/log.h"
 #include "guilib/LocalizeStrings.h"
@@ -281,9 +279,6 @@ bool CNetwork::WakeOnLan(const char* mac)
 
 void CNetwork::StartServices()
 {
-#ifdef HAS_TIME_SERVER
-  g_application.StartTimeServer();
-#endif
 #ifdef HAS_WEB_SERVER
   if (!g_application.StartWebServer())
     CGUIDialogKaiToast::QueueNotification("DefaultIconWarning.png", g_localizeStrings.Get(33101), g_localizeStrings.Get(33100));
@@ -305,8 +300,6 @@ void CNetwork::StartServices()
 #ifdef HAS_AIRPLAY
   g_application.StartAirplayServer();
 #endif
-  CLastfmScrobbler::GetInstance()->Init();
-  CLibrefmScrobbler::GetInstance()->Init();
   g_rssManager.Start();
 }
 
@@ -314,9 +307,6 @@ void CNetwork::StopServices(bool bWait)
 {
   if (bWait)
   {
-#ifdef HAS_TIME_SERVER
-    g_application.StopTimeServer();
-#endif
 #ifdef HAS_UPNP
     g_application.StopUPnP(bWait);
 #endif
@@ -326,8 +316,6 @@ void CNetwork::StopServices(bool bWait)
 #ifdef HAS_WEB_SERVER
     g_application.StopWebServer();
 #endif    
-    CLastfmScrobbler::GetInstance()->Term();
-    CLibrefmScrobbler::GetInstance()->Term();
     // smb.Deinit(); if any file is open over samba this will break.
 
     g_rssManager.Stop();

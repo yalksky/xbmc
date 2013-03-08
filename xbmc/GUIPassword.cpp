@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2005-2012 Team XBMC
+ *      Copyright (C) 2005-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -25,8 +25,8 @@
 #include "guilib/GUIKeyboardFactory.h"
 #include "dialogs/GUIDialogNumeric.h"
 #include "dialogs/GUIDialogOK.h"
-#include "settings/GUIDialogLockSettings.h"
-#include "settings/GUIDialogProfileSettings.h"
+#include "settings/dialogs/GUIDialogLockSettings.h"
+#include "settings/dialogs/GUIDialogProfileSettings.h"
 #include "Util.h"
 #include "settings/Settings.h"
 #include "settings/GUISettings.h"

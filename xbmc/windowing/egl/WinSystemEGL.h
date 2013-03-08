@@ -4,7 +4,7 @@
 #pragma once
 
 /*
- *      Copyright (C) 2011-2012 Team XBMC
+ *      Copyright (C) 2011-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -75,7 +75,6 @@ protected:
   EGLConfig             m_config;
 
   CEGLWrapper           *m_egl;
-  bool                  m_iVSyncMode;
   std::string           m_extensions;
 };
 

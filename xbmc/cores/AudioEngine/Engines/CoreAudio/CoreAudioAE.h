@@ -1,6 +1,6 @@
 #pragma once
 /*
- *      Copyright (C) 2011-2012 Team XBMC
+ *      Copyright (C) 2011-2013 Team XBMC
  *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -33,7 +33,6 @@
 
 #if defined(TARGET_DARWIN_IOS)
 #include "CoreAudioAEHALIOS.h"
-#define AudioDeviceID unsigned
 #else
 #include "CoreAudioAEHALOSX.h"
 #endif
@@ -121,6 +120,8 @@ public:
   virtual OSStatus  Render(AudioUnitRenderActionFlags* actionFlags,
     const AudioTimeStamp* pTimeStamp, UInt32 busNumber,
     UInt32 frameCount, AudioBufferList* pBufList);
+    
+  void AudioDevicesChanged();
 
 
 private:
@@ -175,5 +176,4 @@ private:
   bool              m_isSuspended;
   bool              m_softSuspend;
   unsigned int      m_softSuspendTimer;
-  AudioDeviceID     m_currentAudioDevice;
 };

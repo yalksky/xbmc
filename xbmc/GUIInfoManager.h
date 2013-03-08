@@ -7,7 +7,7 @@
 #define GUIINFOMANAGER_H_
 
 /*
- *      Copyright (C) 2005-2012 Team XBMC
+ *      Copyright (C) 2005-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -162,21 +162,6 @@ namespace INFO
 #define SYSTEM_HDD_LOCKSTATE        157
 #define SYSTEM_HDD_LOCKKEY          158
 #define SYSTEM_INTERNET_STATE       159
-#define LCD_PLAY_ICON               160
-#define LCD_PROGRESS_BAR            161
-#define LCD_CPU_TEMPERATURE         162
-#define LCD_GPU_TEMPERATURE         163
-#define LCD_HDD_TEMPERATURE         164
-#define LCD_FAN_SPEED               165
-#define LCD_DATE                    166
-#define LCD_TIME_21                 172 // Small bigfont
-#define LCD_TIME_22                 173
-#define LCD_TIME_W21                174 // Medum bigfont
-#define LCD_TIME_W22                175
-#define LCD_TIME_41                 176 // Big bigfont
-#define LCD_TIME_42                 177
-#define LCD_TIME_43                 178
-#define LCD_TIME_44                 179
 #define SYSTEM_ALARM_LESS_OR_EQUAL  180
 #define SYSTEM_PROFILECOUNT         181
 #define SYSTEM_ISFULLSCREEN         182
@@ -283,15 +268,6 @@ namespace INFO
 #define VIDEOPLAYER_CHANNEL_GROUP     306
 #define VIDEOPLAYER_PARENTAL_RATING   307
 #define VIDEOPLAYER_HAS_EPG           308
-
-#define AUDIOSCROBBLER_ENABLED      325
-#define AUDIOSCROBBLER_CONN_STATE   326
-#define AUDIOSCROBBLER_SUBMIT_INT   327
-#define AUDIOSCROBBLER_FILES_CACHED 328
-#define AUDIOSCROBBLER_SUBMIT_STATE 329
-#define LASTFM_RADIOPLAYING         330
-#define LASTFM_CANLOVE              331
-#define LASTFM_CANBAN               332
 
 #define CONTAINER_CAN_FILTER         342
 #define CONTAINER_CAN_FILTERADVANCED 343
@@ -502,9 +478,9 @@ namespace INFO
 #define CONTROL_GROUP_HAS_FOCUS     29999
 #define CONTROL_HAS_FOCUS           30000
 
-#define VERSION_MAJOR 12
+#define VERSION_MAJOR 13
 #define VERSION_MINOR 0
-#define VERSION_TAG "-RC3"
+#define VERSION_TAG "-ALPHA1"
 
 #define LISTITEM_START              35000
 #define LISTITEM_THUMB              (LISTITEM_START)
@@ -726,7 +702,6 @@ public:
   CStdString GetImage(int info, int contextWindow, CStdString *fallback = NULL);
 
   CStdString GetTime(TIME_FORMAT format = TIME_FORMAT_GUESS) const;
-  CStdString GetLcdTime( int _eInfo ) const;
   CStdString GetDate(bool bNumbersOnly = false);
   CStdString GetDuration(TIME_FORMAT format = TIME_FORMAT_GUESS) const;
 
@@ -862,8 +837,6 @@ protected:
   int ConditionalStringParameter(const CStdString &strParameter, bool caseSensitive = false);
   int AddMultiInfo(const GUIInfo &info);
   int AddListItemProp(const CStdString &str, int offset=0);
-
-  CStdString GetAudioScrobblerLabel(int item);
 
   /*!
    * @brief Get the EPG tag that is currently active

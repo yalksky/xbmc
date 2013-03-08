@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2010-2012 Team XBMC
+ *      Copyright (C) 2010-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -28,4 +28,10 @@
   XBMCTopShelfController *_topShelfController;
 }
 @property(nonatomic, readonly, retain) id topShelfController;
+
+- (id) initWithApplianceInfo:(id) applianceInfo;
+- (void) setTopShelfController:(id) topShelfControl;
+- (void) setApplianceCategories:(id) applianceCategories;
+- (void) XBMCfixUIDevice;
+- (id) init;
 @end

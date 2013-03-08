@@ -1,6 +1,6 @@
 #pragma once
 /*
- *      Copyright (C) 2012 Team XBMC
+ *      Copyright (C) 2012-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -25,7 +25,7 @@
 #include "DbUrl.h"
 #include "dbwrappers/Database.h"
 #include "playlists/SmartPlayList.h"
-#include "settings/GUIDialogSettings.h"
+#include "settings/dialogs/GUIDialogSettings.h"
 #include "threads/Timer.h"
 #include "utils/DatabaseUtils.h"
 #include "utils/StdString.h"

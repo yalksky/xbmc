@@ -1,5 +1,6 @@
 SRCS=Application.cpp \
      ApplicationMessenger.cpp \
+     AppParamParser.cpp \
      Autorun.cpp \
      AutoSwitch.cpp \
      BackgroundInfoLoader.cpp \
@@ -13,8 +14,6 @@ SRCS=Application.cpp \
      GUIInfoManager.cpp \
      GUILargeTextureManager.cpp \
      GUIPassword.cpp \
-     GUIViewControl.cpp \
-     GUIViewState.cpp \
      MediaSource.cpp \
      NfoFile.cpp \
      PasswordManager.cpp \
@@ -30,7 +29,6 @@ SRCS=Application.cpp \
      ThumbnailCache.cpp \
      URL.cpp \
      Util.cpp \
-     ViewDatabase.cpp \
      XBApplicationEx.cpp \
      XBDateTime.cpp \
      xbmc.cpp \

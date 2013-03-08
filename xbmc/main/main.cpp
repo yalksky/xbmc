@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2005-2012 Team XBMC
+ *      Copyright (C) 2005-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -19,7 +19,7 @@
  */
 
 #include "system.h"
-#include "settings/AppParamParser.h"
+#include "AppParamParser.h"
 #include "settings/AdvancedSettings.h"
 #include "FileItem.h"
 #include "Application.h"

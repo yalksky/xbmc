@@ -1,7 +1,7 @@
 #pragma once
 
 /*
- *      Copyright (C) 2006-2012 Team XBMC
+ *      Copyright (C) 2006-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -102,6 +102,12 @@ public:
   }
 
   bool IsOverlayType(DVDOverlayType type) { return (m_type == type); }
+
+  /**
+   * return a copy to DVDPlayerSubtitle in order to have hw resources cleared
+   * after rendering
+   */
+  virtual CDVDOverlay* Clone() { return Acquire(); }
 
   double iPTSStartTime;
   double iPTSStopTime;

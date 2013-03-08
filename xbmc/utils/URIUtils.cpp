@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2005-2012 Team XBMC
+ *      Copyright (C) 2005-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -698,6 +698,17 @@ bool URIUtils::IsFTP(const CStdString& strFile)
          strFile2.Left(5).Equals("ftps:");
 }
 
+bool URIUtils::IsDAV(const CStdString& strFile)
+{
+  CStdString strFile2(strFile);
+
+  if (IsStack(strFile))
+    strFile2 = CStackDirectory::GetFirstStackedFile(strFile);
+
+  return strFile2.Left(4).Equals("dav:")  ||
+         strFile2.Left(5).Equals("davs:");
+}
+
 bool URIUtils::IsInternetStream(const CURL& url, bool bStrictCheck /* = false */)
 {
   CStdString strProtocol = url.GetProtocol();
@@ -827,11 +838,6 @@ bool URIUtils::IsAfp(const CStdString& strFile)
 bool URIUtils::IsVideoDb(const CStdString& strFile)
 {
   return strFile.Left(8).Equals("videodb:");
-}
-
-bool URIUtils::IsLastFM(const CStdString& strFile)
-{
-  return strFile.Left(7).Equals("lastfm:");
 }
 
 bool URIUtils::IsBluray(const CStdString& strFile)

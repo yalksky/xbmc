@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2005-2012 Team XBMC
+ *      Copyright (C) 2005-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -1649,7 +1649,8 @@ bool CGUIWindowVideoNav::ApplyWatchedFilter(CFileItemList &items)
     filterWatched = true;
   if (!items.IsVideoDb())
     filterWatched = true;
-  if (items.IsSmartPlayList() && items.GetContent() == "tvshows")
+  if (items.GetContent() == "tvshows" &&
+     (items.IsSmartPlayList() || (items.HasProperty("library.filter") && items.GetProperty("library.filter").asBoolean())))
     node = NODE_TYPE_TITLE_TVSHOWS; // so that the check below works
 
   int watchMode = g_settings.GetWatchMode(m_vecItems->GetContent());

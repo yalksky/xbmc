@@ -1,6 +1,6 @@
 #pragma once
 /*
- *      Copyright (C) 2012 Team XBMC
+ *      Copyright (C) 2012-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -38,6 +38,7 @@ public:
   static void AddOnLog(void *addonData, const addon_log_t addonLogLevel, const char *strMessage);
   static bool GetAddonSetting(void *addonData, const char *strSettingName, void *settingValue);
   static void QueueNotification(void *addonData, const queue_msg_t type, const char *strMessage);
+  static bool WakeOnLan(const char *mac);
   static char* UnknownToUTF8(const char *strSource);
   static char* GetLocalizedString(const void* addonData, long dwCode);
   static char* GetDVDMenuLanguage(const void* addonData);

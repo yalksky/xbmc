@@ -1,9 +1,0 @@
-1.0.1
-
-Changes
-- Trailer supported
-
-1.0.0
-
-Changes
-- Initial addon version

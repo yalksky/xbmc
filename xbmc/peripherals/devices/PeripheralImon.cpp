@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2012 Team XBMC
+ *      Copyright (C) 2012-2013 Team XBMC
  *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -37,8 +37,8 @@ using namespace std;
 volatile long CPeripheralImon::m_lCountOfImonsConflictWithDInput = 0;
 
 
-CPeripheralImon::CPeripheralImon(const PeripheralType type, const PeripheralBusType busType, const CStdString &strLocation, const CStdString &strDeviceName, int iVendorId, int iProductId) :
-  CPeripheralHID(type, busType, strLocation, strDeviceName.IsEmpty() ? g_localizeStrings.Get(35001) : strDeviceName, iVendorId, iProductId)
+CPeripheralImon::CPeripheralImon(const PeripheralScanResult& scanResult) :
+  CPeripheralHID(scanResult)
 {
   m_features.push_back(FEATURE_IMON);
   m_bImonConflictsWithDInput = false;

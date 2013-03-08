@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2005-2012 Team XBMC
+ *      Copyright (C) 2005-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -230,7 +230,14 @@ JSONRPC_STATUS CPlayerOperations::PlayPause(const CStdString &method, ITransport
         CBuiltins::Execute("playercontrol(play)");
       else
       {
-        if (parameterObject["play"].asBoolean() == g_application.IsPaused())
+        if (parameterObject["play"].asBoolean())
+        {
+          if (g_application.IsPaused())
+            CApplicationMessenger::Get().MediaPause();
+          else if (g_application.GetPlaySpeed() != 1)
+            g_application.SetPlaySpeed(1);
+        }
+        else if (!g_application.IsPaused())
           CApplicationMessenger::Get().MediaPause();
       }
       result["speed"] = g_application.IsPaused() ? 0 : g_application.GetPlaySpeed();
@@ -261,7 +268,7 @@ JSONRPC_STATUS CPlayerOperations::Stop(const CStdString &method, ITransportLayer
   {
     case Video:
     case Audio:
-      CApplicationMessenger::Get().MediaStop(true, parameterObject["playerid"].asInteger());
+      CApplicationMessenger::Get().MediaStop(true, (int)parameterObject["playerid"].asInteger());
       return ACK;
 
     case Picture:
@@ -1354,17 +1361,16 @@ JSONRPC_STATUS CPlayerOperations::GetPropertyValue(PlayerType player, const CStd
           int index = g_application.m_pPlayer->GetAudioStream();
           if (index >= 0)
           {
+            SPlayerAudioStreamInfo info;
+            g_application.m_pPlayer->GetAudioStreamInfo(index, info);
+
             result["index"] = index;
-            CStdString value;
-            g_application.m_pPlayer->GetAudioStreamName(index, value);
-            result["name"] = value;
-            value.Empty();
-            g_application.m_pPlayer->GetAudioStreamLanguage(index, value);
-            result["language"] = value;
+            result["name"] = info.name;
+            result["language"] = info.language;
+            result["codec"] = info.audioCodecName;
+            result["bitrate"] = info.bitrate;
+            result["channels"] = info.channels;
           }
-          result["codec"] = g_application.m_pPlayer->GetAudioCodecName();
-          result["bitrate"] = g_application.m_pPlayer->GetAudioBitrate();
-          result["channels"] = g_application.m_pPlayer->GetChannels();
         }
         else
           result = CVariant(CVariant::VariantTypeNull);
@@ -1386,14 +1392,13 @@ JSONRPC_STATUS CPlayerOperations::GetPropertyValue(PlayerType player, const CStd
         {
           for (int index = 0; index < g_application.m_pPlayer->GetAudioStreamCount(); index++)
           {
+            SPlayerAudioStreamInfo info;
+            g_application.m_pPlayer->GetAudioStreamInfo(index, info);
+
             CVariant audioStream(CVariant::VariantTypeObject);
             audioStream["index"] = index;
-            CStdString value;
-            g_application.m_pPlayer->GetAudioStreamName(index, value);
-            audioStream["name"] = value;
-            value.Empty();
-            g_application.m_pPlayer->GetAudioStreamLanguage(index, value);
-            audioStream["language"] = value;
+            audioStream["name"] = info.name;
+            audioStream["language"] = info.language;
 
             result.append(audioStream);
           }
@@ -1433,13 +1438,12 @@ JSONRPC_STATUS CPlayerOperations::GetPropertyValue(PlayerType player, const CStd
           int index = g_application.m_pPlayer->GetSubtitle();
           if (index >= 0)
           {
+            SPlayerSubtitleStreamInfo info;
+            g_application.m_pPlayer->GetSubtitleStreamInfo(index, info);
+
             result["index"] = index;
-            CStdString value;
-            g_application.m_pPlayer->GetSubtitleName(index, value);
-            result["name"] = value;
-            value.Empty();
-            g_application.m_pPlayer->GetSubtitleLanguage(index, value);
-            result["language"] = value;
+            result["name"] = info.name;
+            result["language"] = info.language;
           }
         }
         else
@@ -1463,14 +1467,13 @@ JSONRPC_STATUS CPlayerOperations::GetPropertyValue(PlayerType player, const CStd
         {
           for (int index = 0; index < g_application.m_pPlayer->GetSubtitleCount(); index++)
           {
+            SPlayerSubtitleStreamInfo info;
+            g_application.m_pPlayer->GetSubtitleStreamInfo(index, info);
+
             CVariant subtitle(CVariant::VariantTypeObject);
             subtitle["index"] = index;
-            CStdString value;
-            g_application.m_pPlayer->GetSubtitleName(index, value);
-            subtitle["name"] = value;
-            value.Empty();
-            g_application.m_pPlayer->GetSubtitleLanguage(index, value);
-            subtitle["language"] = value;
+            subtitle["name"] = info.name;
+            subtitle["language"] = info.language;
 
             result.append(subtitle);
           }

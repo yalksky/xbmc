@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2005-2012 Team XBMC
+ *      Copyright (C) 2005-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -64,7 +64,7 @@ bool CSourcesDirectory::GetDirectory(const VECSOURCES &sources, CFileItemList &i
   {
     const CMediaSource& share = sources[i];
     CFileItemPtr pItem(new CFileItem(share));
-    if (pItem->IsLastFM() || (pItem->GetPath().Left(14).Equals("musicsearch://")))
+    if (pItem->GetPath().Left(14).Equals("musicsearch://"))
       pItem->SetCanQueue(false);
     
     CStdString strIcon;
@@ -79,8 +79,7 @@ bool CSourcesDirectory::GetDirectory(const VECSOURCES &sources, CFileItemList &i
     }
     else if (pItem->GetPath().Left(9) == "addons://")
       strIcon = "DefaultHardDisk.png";
-    else if (pItem->IsLastFM()
-             || pItem->IsVideoDb()
+    else if (   pItem->IsVideoDb()
              || pItem->IsMusicDb()
              || pItem->IsPlugin()
              || pItem->GetPath() == "special://musicplaylists/"

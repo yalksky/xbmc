@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2005-2012 Team XBMC
+ *      Copyright (C) 2005-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -842,7 +842,6 @@ bool CFileItem::IsAudio() const
   if (HasVideoInfoTag()) return false;
   if (HasPictureInfoTag()) return false;
   if (IsCDDA()) return true;
-  if (!m_bIsFolder && IsLastFM()) return true;
 
   CStdString extension;
   if( m_mimetype.Left(12).Equals("application/") )
@@ -866,7 +865,7 @@ bool CFileItem::IsAudio() const
 
 bool CFileItem::IsKaraoke() const
 {
-  if ( !IsAudio() || IsLastFM())
+  if ( !IsAudio())
     return false;
 
   return CKaraokeLyricsFactory::HasLyrics( m_strPath );
@@ -892,11 +891,6 @@ bool CFileItem::IsLyrics() const
 bool CFileItem::IsCUESheet() const
 {
   return URIUtils::GetExtension(m_strPath).Equals(".cue", false);
-}
-
-bool CFileItem::IsLastFM() const
-{
-  return URIUtils::IsLastFM(m_strPath);
 }
 
 bool CFileItem::IsInternetStream(const bool bStrictCheck /* = false */) const
@@ -1721,7 +1715,7 @@ void CFileItemList::Assign(const CFileItemList& itemlist, bool append)
   m_cacheToDisc = itemlist.m_cacheToDisc;
 }
 
-bool CFileItemList::Copy(const CFileItemList& items)
+bool CFileItemList::Copy(const CFileItemList& items, bool copyItems /* = true */)
 {
   // assign all CFileItem parts
   *(CFileItem*)this = *(CFileItem*)&items;
@@ -1736,11 +1730,14 @@ bool CFileItemList::Copy(const CFileItemList& items)
   m_sortOrder      = items.m_sortOrder;
   m_sortIgnoreFolders = items.m_sortIgnoreFolders;
 
-  // make a copy of each item
-  for (int i = 0; i < items.Size(); i++)
+  if (copyItems)
   {
-    CFileItemPtr newItem(new CFileItem(*items[i]));
-    Add(newItem);
+    // make a copy of each item
+    for (int i = 0; i < items.Size(); i++)
+    {
+      CFileItemPtr newItem(new CFileItem(*items[i]));
+      Add(newItem);
+    }
   }
 
   return true;

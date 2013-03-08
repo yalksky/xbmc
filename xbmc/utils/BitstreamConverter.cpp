@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2010-2012 Team XBMC
+ *      Copyright (C) 2010-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -609,10 +609,9 @@ bool CBitstreamConverter::Convert(uint8_t *pData, int iSize)
           }
           else
           {
-            Close();
             m_inputBuffer = pData;
             m_inputSize   = iSize;
-            CLog::Log(LOGERROR, "CBitstreamConverter::Convert error converting. disable converter\n");
+            CLog::Log(LOGERROR, "CBitstreamConverter::Convert error converting.\n");
           }
         }
         else

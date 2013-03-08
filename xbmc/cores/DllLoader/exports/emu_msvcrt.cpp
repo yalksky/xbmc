@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2005-2012 Team XBMC
+ *      Copyright (C) 2005-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -208,7 +208,8 @@ extern "C" void __stdcall update_emu_environ()
   // Use a proxy, if the GUI was configured as such
   if (g_guiSettings.GetBool("network.usehttpproxy")
       && !g_guiSettings.GetString("network.httpproxyserver").empty()
-      && !g_guiSettings.GetString("network.httpproxyport").empty())
+      && !g_guiSettings.GetString("network.httpproxyport").empty()
+      && g_guiSettings.GetInt("network.httpproxytype") == 0)
   {
     CStdString strProxy;
     if (g_guiSettings.GetString("network.httpproxyusername") &&
@@ -970,7 +971,7 @@ extern "C"
 
     // locate next free directory
     int iDirSlot=0;
-    while ((vecDirsOpen[iDirSlot].curr_index != -1) && (iDirSlot<MAX_OPEN_DIRS)) iDirSlot++;
+    while ((iDirSlot<MAX_OPEN_DIRS) && (vecDirsOpen[iDirSlot].curr_index != -1)) iDirSlot++;
     if (iDirSlot >= MAX_OPEN_DIRS)
     {
       CLog::Log(LOGDEBUG, "Dll: Max open dirs reached");

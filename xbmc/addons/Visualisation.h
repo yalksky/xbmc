@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2005-2012 Team XBMC
+ *      Copyright (C) 2005-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -23,6 +23,7 @@
 #include "AddonDll.h"
 #include "cores/IAudioCallback.h"
 #include "include/xbmc_vis_types.h"
+#include "guilib/IRenderingCallback.h"
 
 #include <map>
 #include <list>
@@ -52,13 +53,14 @@ namespace ADDON
 {
   class CVisualisation : public CAddonDll<DllVisualisation, Visualisation, VIS_PROPS>
                        , public IAudioCallback
+                       , public IRenderingCallback
   {
   public:
     CVisualisation(const ADDON::AddonProps &props) : CAddonDll<DllVisualisation, Visualisation, VIS_PROPS>(props) {}
     CVisualisation(const cp_extension_t *ext) : CAddonDll<DllVisualisation, Visualisation, VIS_PROPS>(ext) {}
     virtual void OnInitialize(int iChannels, int iSamplesPerSec, int iBitsPerSample);
     virtual void OnAudioData(const float* pAudioData, int iAudioDataLength);
-    bool Create(int x, int y, int w, int h);
+    bool Create(int x, int y, int w, int h, void *device);
     void Start(int iChannels, int iSamplesPerSec, int iBitsPerSample, const CStdString strSongName);
     void AudioData(const float *pAudioData, int iAudioDataLength, float *pFreqData, int iFreqDataLength);
     void Render();
