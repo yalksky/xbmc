@@ -436,6 +436,7 @@
 		DF98D98C1434F47D00A6EBE1 /* SkinVariable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DF98D98A1434F47D00A6EBE1 /* SkinVariable.cpp */; };
 		DF9A71EE1639C8F6005ECB2E /* HTTPFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DF9A71EC1639C8F6005ECB2E /* HTTPFile.cpp */; };
 		DFAB049813F8376700B70BFB /* InertialScrollingHandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DFAB049613F8376700B70BFB /* InertialScrollingHandler.cpp */; };
+		DFAF6A4F16EBAE3800D6AE12 /* RssManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DFAF6A4D16EBAE3800D6AE12 /* RssManager.cpp */; };
 		DFB02DEA16629DBA00F37752 /* PyContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DFB02DE816629DBA00F37752 /* PyContext.cpp */; };
 		DFB0F472161B747500D744F4 /* AddonsOperations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DFB0F470161B747500D744F4 /* AddonsOperations.cpp */; };
 		DFB15B2215F8FB8100CDF0DE /* SDLMain.mm in Sources */ = {isa = PBXBuildFile; fileRef = DFB15B2115F8FB8100CDF0DE /* SDLMain.mm */; };
@@ -955,13 +956,11 @@
 		F56352BE16E5403400D21BAD /* GUIWindowSettingsScreenCalibration.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F56352B616E5403400D21BAD /* GUIWindowSettingsScreenCalibration.cpp */; };
 		F56352BF16E5403400D21BAD /* GUIWindowTestPattern.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F56352B816E5403400D21BAD /* GUIWindowTestPattern.cpp */; };
 		F56352C816E5436900D21BAD /* AppParamParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F56352C616E5436900D21BAD /* AppParamParser.cpp */; };
+		F56353BF16E9BB3500D21BAD /* BitstreamConverter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F56353BD16E9BB3500D21BAD /* BitstreamConverter.cpp */; };
 		F56579AF13060D1E0085ED7F /* RenderCapture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F56579AD13060D1E0085ED7F /* RenderCapture.cpp */; };
 		F56A084B0F4A18FB003F9F87 /* karaokewindowbackground.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F56A084A0F4A18FB003F9F87 /* karaokewindowbackground.cpp */; };
 		F56C8CE7131F5DC6000AD0F6 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = F56C8CE6131F5DC6000AD0F6 /* libz.dylib */; };
-		F56C8CED131F5DE7000AD0F6 /* libbz2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = F56C8CEC131F5DE7000AD0F6 /* libbz2.dylib */; };
-		F56C8CF0131F5DED000AD0F6 /* libxml2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = F56C8CEF131F5DED000AD0F6 /* libxml2.dylib */; };
 		F56C8CF3131F5DFD000AD0F6 /* libiconv.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = F56C8CF2131F5DFD000AD0F6 /* libiconv.dylib */; };
-		F56C8CF6131F5E0B000AD0F6 /* libncurses.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = F56C8CF5131F5E0B000AD0F6 /* libncurses.dylib */; };
 		F57A1D1E1329B15300498CC7 /* AutoPool.mm in Sources */ = {isa = PBXBuildFile; fileRef = F57A1D1D1329B15300498CC7 /* AutoPool.mm */; };
 		F57B6F801071B8B500079ACB /* JobManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F57B6F7E1071B8B500079ACB /* JobManager.cpp */; };
 		F584E12E0F257C5100DB26A5 /* HTTPDirectory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F584E12D0F257C5100DB26A5 /* HTTPDirectory.cpp */; };
@@ -1994,6 +1993,9 @@
 		DF9A71ED1639C8F6005ECB2E /* HTTPFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HTTPFile.h; sourceTree = "<group>"; };
 		DFAB049613F8376700B70BFB /* InertialScrollingHandler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = InertialScrollingHandler.cpp; sourceTree = "<group>"; };
 		DFAB049713F8376700B70BFB /* InertialScrollingHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = InertialScrollingHandler.h; sourceTree = "<group>"; };
+		DFAF6A4C16EBAE3800D6AE12 /* IRssObserver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IRssObserver.h; sourceTree = "<group>"; };
+		DFAF6A4D16EBAE3800D6AE12 /* RssManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RssManager.cpp; sourceTree = "<group>"; };
+		DFAF6A4E16EBAE3800D6AE12 /* RssManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RssManager.h; sourceTree = "<group>"; };
 		DFB02DE816629DBA00F37752 /* PyContext.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PyContext.cpp; path = python/PyContext.cpp; sourceTree = "<group>"; };
 		DFB02DE916629DBA00F37752 /* PyContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PyContext.h; path = python/PyContext.h; sourceTree = "<group>"; };
 		DFB0F470161B747500D744F4 /* AddonsOperations.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AddonsOperations.cpp; sourceTree = "<group>"; };
@@ -2613,7 +2615,6 @@
 		E38E1A1E0D25F9FB00618676 /* netclient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = netclient.h; sourceTree = "<group>"; };
 		E38E1A1F0D25F9FB00618676 /* rtv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rtv.h; sourceTree = "<group>"; };
 		E38E1A200D25F9FB00618676 /* sleep.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sleep.h; sourceTree = "<group>"; };
-		E38E1A220D25F9FB00618676 /* errors.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = errors.h; sourceTree = "<group>"; };
 		E38E1AB80D25F9FB00618676 /* SConstruct */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = SConstruct; sourceTree = "<group>"; };
 		E38E1ABD0D25F9FB00618676 /* MediaCrawler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MediaCrawler.cpp; sourceTree = "<group>"; };
 		E38E1ABE0D25F9FB00618676 /* MediaCrawler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MediaCrawler.h; sourceTree = "<group>"; };
@@ -3094,15 +3095,14 @@
 		F56352B916E5403400D21BAD /* GUIWindowTestPattern.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GUIWindowTestPattern.h; path = windows/GUIWindowTestPattern.h; sourceTree = "<group>"; };
 		F56352C616E5436900D21BAD /* AppParamParser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AppParamParser.cpp; sourceTree = "<group>"; };
 		F56352C716E5436900D21BAD /* AppParamParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppParamParser.h; sourceTree = "<group>"; };
+		F56353BD16E9BB3500D21BAD /* BitstreamConverter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BitstreamConverter.cpp; sourceTree = "<group>"; };
+		F56353BE16E9BB3500D21BAD /* BitstreamConverter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BitstreamConverter.h; sourceTree = "<group>"; };
 		F56579AD13060D1E0085ED7F /* RenderCapture.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RenderCapture.cpp; sourceTree = "<group>"; };
 		F56579AE13060D1E0085ED7F /* RenderCapture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RenderCapture.h; sourceTree = "<group>"; };
 		F56A08490F4A18FB003F9F87 /* karaokewindowbackground.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = karaokewindowbackground.h; sourceTree = "<group>"; };
 		F56A084A0F4A18FB003F9F87 /* karaokewindowbackground.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = karaokewindowbackground.cpp; sourceTree = "<group>"; };
 		F56C8CE6131F5DC6000AD0F6 /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
-		F56C8CEC131F5DE7000AD0F6 /* libbz2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libbz2.dylib; path = usr/lib/libbz2.dylib; sourceTree = SDKROOT; };
-		F56C8CEF131F5DED000AD0F6 /* libxml2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libxml2.dylib; path = usr/lib/libxml2.dylib; sourceTree = SDKROOT; };
 		F56C8CF2131F5DFD000AD0F6 /* libiconv.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libiconv.dylib; path = usr/lib/libiconv.dylib; sourceTree = SDKROOT; };
-		F56C8CF5131F5E0B000AD0F6 /* libncurses.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libncurses.dylib; path = usr/lib/libncurses.dylib; sourceTree = SDKROOT; };
 		F57A1D1C1329B15300498CC7 /* AutoPool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AutoPool.h; sourceTree = "<group>"; };
 		F57A1D1D1329B15300498CC7 /* AutoPool.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = AutoPool.mm; sourceTree = "<group>"; };
 		F57B6F7E1071B8B500079ACB /* JobManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = JobManager.cpp; sourceTree = "<group>"; };
@@ -3290,10 +3290,7 @@
 				18404DA61396C31B00863BBA /* SlingboxLib.a in Frameworks */,
 				F56C8CE7131F5DC6000AD0F6 /* libz.dylib in Frameworks */,
 				F5364D55155B3C7B0016D00B /* libm.dylib in Frameworks */,
-				F56C8CED131F5DE7000AD0F6 /* libbz2.dylib in Frameworks */,
-				F56C8CF0131F5DED000AD0F6 /* libxml2.dylib in Frameworks */,
 				F56C8CF3131F5DFD000AD0F6 /* libiconv.dylib in Frameworks */,
-				F56C8CF6131F5E0B000AD0F6 /* libncurses.dylib in Frameworks */,
 				F5ED9BFB155EC77400842059 /* ApplicationServices.framework in Frameworks */,
 				E38E23930D2626E600618676 /* AudioUnit.framework in Frameworks */,
 				E38E23920D2626E600618676 /* AudioToolbox.framework in Frameworks */,
@@ -3340,10 +3337,7 @@
 			children = (
 				F56C8CE6131F5DC6000AD0F6 /* libz.dylib */,
 				F5364D54155B3C7B0016D00B /* libm.dylib */,
-				F56C8CEC131F5DE7000AD0F6 /* libbz2.dylib */,
-				F56C8CEF131F5DED000AD0F6 /* libxml2.dylib */,
 				F56C8CF2131F5DFD000AD0F6 /* libiconv.dylib */,
-				F56C8CF5131F5E0B000AD0F6 /* libncurses.dylib */,
 				E38E25340D26365C00618676 /* ApplicationServices.framework */,
 				E38E238C0D2626E600618676 /* AudioUnit.framework */,
 				E38E238B0D2626E600618676 /* AudioToolbox.framework */,
@@ -6117,6 +6111,8 @@
 				F5BDB81E120203C200F0B710 /* AutoPtrHandle.h */,
 				DF52769A151BAEDA00B5B63B /* Base64.cpp */,
 				DF52769B151BAEDA00B5B63B /* Base64.h */,
+				F56353BD16E9BB3500D21BAD /* BitstreamConverter.cpp */,
+				F56353BE16E9BB3500D21BAD /* BitstreamConverter.h */,
 				E38E1E270D25F9FD00618676 /* BitstreamStats.cpp */,
 				E38E1E280D25F9FD00618676 /* BitstreamStats.h */,
 				E38E1E290D25F9FD00618676 /* CharsetConverter.cpp */,
@@ -6165,6 +6161,7 @@
 				DF52769D151BAEDA00B5B63B /* HttpResponse.h */,
 				E38E1E4C0D25F9FD00618676 /* InfoLoader.cpp */,
 				E38E1E4D0D25F9FD00618676 /* InfoLoader.h */,
+				DFAF6A4C16EBAE3800D6AE12 /* IRssObserver.h */,
 				36A9443E15821E5400727135 /* ISortable.h */,
 				7CAA205B107AFC280096DE39 /* Job.h */,
 				F57B6F7E1071B8B500079ACB /* JobManager.cpp */,
@@ -6198,6 +6195,8 @@
 				E38E1E740D25F9FD00618676 /* RegExp.h */,
 				F5DC87E1110A287400EE1B15 /* RingBuffer.cpp */,
 				F5DC87E0110A287400EE1B15 /* RingBuffer.h */,
+				DFAF6A4D16EBAE3800D6AE12 /* RssManager.cpp */,
+				DFAF6A4E16EBAE3800D6AE12 /* RssManager.h */,
 				E38E1E750D25F9FD00618676 /* RssReader.cpp */,
 				E38E1E760D25F9FD00618676 /* RssReader.h */,
 				7C1A495B15A96918004AF4A4 /* SaveFileStateJob.h */,
@@ -7737,6 +7736,8 @@
 				F56352BE16E5403400D21BAD /* GUIWindowSettingsScreenCalibration.cpp in Sources */,
 				F56352BF16E5403400D21BAD /* GUIWindowTestPattern.cpp in Sources */,
 				F56352C816E5436900D21BAD /* AppParamParser.cpp in Sources */,
+				F56353BF16E9BB3500D21BAD /* BitstreamConverter.cpp in Sources */,
+				DFAF6A4F16EBAE3800D6AE12 /* RssManager.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -7826,6 +7827,14 @@
 					"-headerpad_max_install_names",
 					"-all_load",
 					"-L$XBMC_DEPENDS/lib",
+					"-Wl,-search_paths_first",
+					"-lffi",
+					"-lintl",
+					"-lssl",
+					"-lbz2",
+					"-lexpat",
+					"-lresolv",
+					"-lgpg-error",
 					"-lssh",
 					"-llzo2",
 					"-lpcre",
@@ -7852,7 +7861,6 @@
 					"-lswscale",
 					"-lGLEW",
 					"-lSDL",
-					"-lSDL_mixer",
 					"-lsmbclient",
 					"-lpython2.6",
 					"-ltag",
@@ -7944,8 +7952,16 @@
 				);
 				OTHER_LDFLAGS = (
 					"-headerpad_max_install_names",
+					"-Wl,-search_paths_first",
 					"-all_load",
 					"-L$XBMC_DEPENDS/lib",
+					"-lffi",
+					"-lintl",
+					"-lssl",
+					"-lbz2",
+					"-lexpat",
+					"-lresolv",
+					"-lgpg-error",
 					"-lssh",
 					"-llzo2",
 					"-lpcre",
@@ -7972,7 +7988,6 @@
 					"-lswscale",
 					"-lGLEW",
 					"-lSDL",
-					"-lSDL_mixer",
 					"-lsmbclient",
 					"-lpython2.6",
 					"-ltag",
