@@ -55,7 +55,10 @@
 #include "filesystem/File.h"
 #include "filesystem/DirectoryCache.h"
 #include "DatabaseManager.h"
+#ifdef HAS_UPNP
 #include "network/upnp/UPnPSettings.h"
+#endif
+#include "utils/RssManager.h"
 
 using namespace std;
 using namespace XFILE;
@@ -178,7 +181,7 @@ bool CSettings::Load()
   }
 
   LoadSources();
-  LoadRSSFeeds();
+  CRssManager::Get().Load();
   LoadUserFolderLayout();
 
   return true;
@@ -1409,7 +1412,6 @@ void CSettings::Clear()
   m_logFolder.clear();
   m_userAgent.clear();
 
-  m_mapRssUrls.clear();
   m_skinStrings.clear();
   m_skinBools.clear();
 
@@ -1428,7 +1430,10 @@ void CSettings::Clear()
   m_ResInfo.clear();
   m_Calibrations.clear();
 
+#ifdef HAS_UPNP
   CUPnPSettings::Get().Clear();
+#endif
+  CRssManager::Get().Clear();
 }
 
 int CSettings::TranslateSkinString(const CStdString &setting)
@@ -1712,65 +1717,6 @@ CStdString CSettings::GetSourcesFile() const
     URIUtils::AddFileToFolder(GetUserDataFolder(),"sources.xml",folder);
 
   return folder;
-}
-
-void CSettings::LoadRSSFeeds()
-{
-  CStdString rssXML;
-  rssXML = GetUserDataItem("RssFeeds.xml");
-  CXBMCTinyXML rssDoc;
-  if (!CFile::Exists(rssXML))
-  { // set defaults, or assume no rss feeds??
-    return;
-  }
-  if (!rssDoc.LoadFile(rssXML))
-  {
-    CLog::Log(LOGERROR, "Error loading %s, Line %d\n%s", rssXML.c_str(), rssDoc.ErrorRow(), rssDoc.ErrorDesc());
-    return;
-  }
-
-  TiXmlElement *pRootElement = rssDoc.RootElement();
-  if (!pRootElement || strcmpi(pRootElement->Value(),"rssfeeds") != 0)
-  {
-    CLog::Log(LOGERROR, "Error loading %s, no <rssfeeds> node", rssXML.c_str());
-    return;
-  }
-
-  m_mapRssUrls.clear();
-  TiXmlElement* pSet = pRootElement->FirstChildElement("set");
-  while (pSet)
-  {
-    int iId;
-    if (pSet->QueryIntAttribute("id", &iId) == TIXML_SUCCESS)
-    {
-      RssSet set;
-      set.rtl = pSet->Attribute("rtl") && strcasecmp(pSet->Attribute("rtl"),"true")==0;
-      TiXmlElement* pFeed = pSet->FirstChildElement("feed");
-      while (pFeed)
-      {
-        int iInterval;
-        if ( pFeed->QueryIntAttribute("updateinterval",&iInterval) != TIXML_SUCCESS)
-        {
-          iInterval=30; // default to 30 min
-          CLog::Log(LOGDEBUG,"no interval set, default to 30!");
-        }
-        if (pFeed->FirstChild())
-        {
-          // TODO: UTF-8: Do these URLs need to be converted to UTF-8?
-          //              What about the xml encoding?
-          CStdString strUrl = pFeed->FirstChild()->Value();
-          set.url.push_back(strUrl);
-          set.interval.push_back(iInterval);
-        }
-        pFeed = pFeed->NextSiblingElement("feed");
-      }
-      m_mapRssUrls.insert(make_pair(iId,set));
-    }
-    else
-      CLog::Log(LOGERROR,"found rss url set with no id in RssFeeds.xml, ignored");
-
-    pSet = pSet->NextSiblingElement("set");
-  }
 }
 
 CStdString CSettings::GetSettingsFile() const
