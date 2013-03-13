@@ -1,14 +1,15 @@
 ﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="metadata.tv.daum.net"
        name="Daum Movie"
-       version="1.2.4"
+       version="2.0.0"
        provider-name="XBMC-Korea">
   <requires>
     <import addon="xbmc.metadata" version="1.0"/>
   </requires>
   <extension point="xbmc.metadata.scraper.tvshows"
              language="ko"
-             library="daum-tv.xml"/>
+             library="daum-tv.xml"
+             cachepersistence="00:15"/>
   <extension point="xbmc.addon.metadata">
     <summary lang="en">Daum TV Shows Scraper</summary>
     <summary lang="ko">다음 티비쇼 스크래퍼</summary>
