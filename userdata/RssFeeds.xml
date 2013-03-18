@@ -5,6 +5,6 @@
   <set id="1">
     <feed updateinterval="30">http://media.daum.net/rss/today/primary/all/rss2.xml</feed>
     <feed updateinterval="30">http://xbmc-korea.com/xe/rss</feed>
-	 <feed updateinterval="30">http://feeds.feedburner.com/xbmc</feed>
+    <feed updateinterval="30">http://feeds.xbmc.org/xbmc</feed>
   </set>
 </rssfeeds>
