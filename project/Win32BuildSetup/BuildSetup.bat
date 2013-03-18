@@ -183,6 +183,7 @@ IF %comp%==vs2010 (
   Echo asound.conf>>exclude.txt
   Echo voicemasks.xml>>exclude.txt
   Echo Lircmap.xml>>exclude.txt
+  Echo addons\skin.touched\>>exclude.txt
   
   md BUILD_WIN32\Xbmc
 
