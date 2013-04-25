@@ -6,6 +6,8 @@
 #include "FileItem.h"
 #include "pvr/PVRManager.h"
 #include "pvr/recordings/PVRRecordings.h"
+#include "settings/MediaSettings.h"
+#include "network/upnp/UPnP.h"
 
 class CSaveFileStateJob : public CJob
 {
@@ -31,12 +33,23 @@ bool CSaveFileStateJob::DoWork()
   CStdString progressTrackingFile = m_item.GetPath();
   if (m_item.HasVideoInfoTag() && m_item.GetVideoInfoTag()->m_strFileNameAndPath.Find("removable://") == 0)
     progressTrackingFile = m_item.GetVideoInfoTag()->m_strFileNameAndPath; // this variable contains removable:// suffixed by disc label+uniqueid or is empty if label not uniquely identified
-  else if (m_item.HasProperty("original_listitem_url") && 
-      URIUtils::IsPlugin(m_item.GetProperty("original_listitem_url").asString()))
-    progressTrackingFile = m_item.GetProperty("original_listitem_url").asString();
+  else if (m_item.HasProperty("original_listitem_url"))
+  {
+    // only use original_listitem_url for Python & UPnP sources
+    CStdString original = m_item.GetProperty("original_listitem_url").asString();
+    if (URIUtils::IsPlugin(original) || URIUtils::IsUPnP(original))
+      progressTrackingFile = original;
+  }
 
   if (progressTrackingFile != "")
   {
+#ifdef HAS_UPNP
+    // checks if UPnP server of this file is available and supports updating
+    if (URIUtils::IsUPnP(progressTrackingFile)
+          && UPNP::CUPnP::SaveFileState(m_item, m_bookmark, m_updatePlayCount)) {
+        return true;
+    }
+#endif
     if (m_item.IsVideo())
     {
       CLog::Log(LOGDEBUG, "%s - Saving file state for video item %s", __FUNCTION__, progressTrackingFile.c_str());
@@ -87,13 +100,23 @@ bool CSaveFileStateJob::DoWork()
               recording->m_resumePoint = m_bookmark;
             }
 
+            // UPnP announce resume point changes to clients
+            // however not if playcount is modified as that already announces
+            if (m_item.IsVideoDb() && !m_updatePlayCount)
+            {
+              CVariant data;
+              data["id"] = m_item.GetVideoInfoTag()->m_iDbId;
+              data["type"] = m_item.GetVideoInfoTag()->m_type;
+              ANNOUNCEMENT::CAnnouncementManager::Announce(ANNOUNCEMENT::VideoLibrary, "xbmc", "OnUpdate", data);
+            }
+
             updateListing = true;
           }
         }
 
-        if (g_settings.m_currentVideoSettings != g_settings.m_defaultVideoSettings)
+        if (CMediaSettings::Get().GetCurrentVideoSettings() != CMediaSettings::Get().GetDefaultVideoSettings())
         {
-          videodatabase.SetVideoSettings(progressTrackingFile, g_settings.m_currentVideoSettings);
+          videodatabase.SetVideoSettings(progressTrackingFile, CMediaSettings::Get().GetCurrentVideoSettings());
         }
 
         if (m_item.HasVideoInfoTag() && m_item.GetVideoInfoTag()->HasStreamDetails())

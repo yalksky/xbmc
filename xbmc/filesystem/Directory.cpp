@@ -133,14 +133,14 @@ bool CDirectory::GetDirectory(const CStdString& strPath, CFileItemList &items, c
       return false;
 
     // check our cache for this path
-    if (g_directoryCache.GetDirectory(strPath, items, (hints.flags & DIR_FLAG_READ_CACHE) == DIR_FLAG_READ_CACHE))
+    if (g_directoryCache.GetDirectory(realPath, items, (hints.flags & DIR_FLAG_READ_CACHE) == DIR_FLAG_READ_CACHE))
       items.SetPath(strPath);
     else
     {
       // need to clear the cache (in case the directory fetch fails)
       // and (re)fetch the folder
       if (!(hints.flags & DIR_FLAG_BYPASS_CACHE))
-        g_directoryCache.ClearDirectory(strPath);
+        g_directoryCache.ClearDirectory(realPath);
 
       pDirectory->SetFlags(hints.flags);
 
@@ -198,7 +198,7 @@ bool CDirectory::GetDirectory(const CStdString& strPath, CFileItemList &items, c
 
       // cache the directory, if necessary
       if (!(hints.flags & DIR_FLAG_BYPASS_CACHE))
-        g_directoryCache.SetDirectory(strPath, items, pDirectory->GetCacheType(strPath));
+        g_directoryCache.SetDirectory(realPath, items, pDirectory->GetCacheType(strPath));
     }
 
     // now filter for allowed files
@@ -251,11 +251,20 @@ bool CDirectory::Create(const CStdString& strPath)
   return false;
 }
 
-bool CDirectory::Exists(const CStdString& strPath)
+bool CDirectory::Exists(const CStdString& strPath, bool bUseCache /* = true */)
 {
   try
   {
     CStdString realPath = URIUtils::SubstitutePath(strPath);
+    if (bUseCache)
+    {
+      bool bPathInCache;
+      URIUtils::AddSlashAtEnd(realPath);
+      if (g_directoryCache.FileExists(realPath, bPathInCache))
+        return true;
+      if (bPathInCache)
+        return false;
+    }
     auto_ptr<IDirectory> pDirectory(CDirectoryFactory::Create(realPath));
     if (pDirectory.get())
       return pDirectory->Exists(realPath.c_str());

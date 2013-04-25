@@ -25,6 +25,7 @@
 #endif
 
 #include "OMXAudio.h"
+#include "Application.h"
 #include "utils/log.h"
 
 #define CLASSNAME "COMXAudio"
@@ -33,7 +34,6 @@
 
 #include "settings/AdvancedSettings.h"
 #include "settings/GUISettings.h"
-#include "settings/Settings.h"
 #include "guilib/LocalizeStrings.h"
 #include "cores/AudioEngine/Utils/AEConvert.h"
 
@@ -96,6 +96,7 @@ COMXAudio::COMXAudio() :
   m_Pause           (false  ),
   m_CanPause        (false  ),
   m_CurrentVolume   (0      ),
+  m_drc             (0      ),
   m_Passthrough     (false  ),
   m_HWDecode        (false  ),
   m_BytesPerSec     (0      ),
@@ -111,6 +112,7 @@ COMXAudio::COMXAudio() :
   m_eEncoding       (OMX_AUDIO_CodingPCM),
   m_extradata       (NULL   ),
   m_extrasize       (0      ),
+  m_vizBufferSamples(0      ),
   m_last_pts        (DVD_NOPTS_VALUE),
   m_omx_render      (NULL   )
 {
@@ -315,10 +317,7 @@ bool COMXAudio::Initialize(AEAudioFormat format, std::string& device, OMXClock *
   m_pcm_input.nChannels             = m_format.m_channelLayout.Count();
   m_pcm_input.nSamplingRate         = m_format.m_sampleRate;
 
-  OMX_ERRORTYPE omx_err = OMX_ErrorNone;
-  std::string componentName = "";
-
-  componentName = "OMX.broadcom.audio_render";
+  std::string componentName = "OMX.broadcom.audio_render";
 
   if(!m_omx_render)
     m_omx_render = new COMXCoreComponent();
@@ -331,11 +330,13 @@ bool COMXAudio::Initialize(AEAudioFormat format, std::string& device, OMXClock *
   if(!m_omx_render->Initialize((const std::string)componentName, OMX_IndexParamAudioInit))
     return false;
 
+  m_omx_render->ResetEos();
+
   OMX_CONFIG_BRCMAUDIODESTINATIONTYPE audioDest;
   OMX_INIT_STRUCTURE(audioDest);
   strncpy((char *)audioDest.sName, device.c_str(), strlen(device.c_str()));
 
-  omx_err = m_omx_render->SetConfig(OMX_IndexConfigBrcmAudioDestination, &audioDest);
+  OMX_ERRORTYPE omx_err = m_omx_render->SetConfig(OMX_IndexConfigBrcmAudioDestination, &audioDest);
   if (omx_err != OMX_ErrorNone)
     return false;
 
@@ -707,7 +708,6 @@ bool COMXAudio::SetCurrentVolume(float fVolume)
   {
     double r = fVolume;
     const float* coeff = downmixing_coefficients_8;
-    int input_channels = 0;
 
     // normally we normalalise the levels, can be skipped (boosted) at risk of distortion
     if(!g_guiSettings.GetBool("audiooutput.normalizelevels"))
@@ -908,6 +908,7 @@ unsigned int COMXAudio::AddPackets(const void* data, unsigned int len, double dt
       omx_err = m_omx_decoder.EmptyThisBuffer(omx_buffer);
       if (omx_err == OMX_ErrorNone)
       {
+        //CLog::Log(LOGINFO, "AudiD: dts:%.0f pts:%.0f size:%d\n", dts, pts, len);
         break;
       }
       else
@@ -1136,6 +1137,8 @@ void COMXAudio::UnRegisterAudioCallback()
 
 unsigned int COMXAudio::GetAudioRenderingLatency()
 {
+  CSingleLock lock (m_critSection);
+
   if(!m_Initialized)
     return 0;
 
@@ -1156,7 +1159,7 @@ unsigned int COMXAudio::GetAudioRenderingLatency()
   return param.nU32;
 }
 
-void COMXAudio::WaitCompletion()
+void COMXAudio::SubmitEOS()
 {
   CSingleLock lock (m_critSection);
 
@@ -1184,43 +1187,15 @@ void COMXAudio::WaitCompletion()
     CLog::Log(LOGERROR, "%s::%s - OMX_EmptyThisBuffer() failed with result(0x%x)\n", CLASSNAME, __func__, omx_err);
     return;
   }
+}
 
-  unsigned int nTimeOut = AUDIO_BUFFER_SECONDS * 1000;
-  while(nTimeOut)
-  {
-    if(m_omx_render->IsEOS())
-    {
-      CLog::Log(LOGDEBUG, "%s::%s - got eos\n", CLASSNAME, __func__);
-      break;
-    }
-
-    if(nTimeOut == 0)
-    {
-      CLog::Log(LOGERROR, "%s::%s - wait for eos timed out\n", CLASSNAME, __func__);
-      break;
-    }
-    Sleep(50);
-    nTimeOut -= 50;
-  }
-
-  nTimeOut = AUDIO_BUFFER_SECONDS * 1000;
-  while(nTimeOut)
-  {
-    if(!GetAudioRenderingLatency())
-      break;
-
-    if(nTimeOut == 0)
-    {
-      CLog::Log(LOGERROR, "%s::%s - wait for GetAudioRenderingLatency timed out\n", CLASSNAME, __func__);
-      break;
-    }
-    Sleep(50);
-    nTimeOut -= 50;
-  }
-
-  m_omx_render->ResetEos();
-
-  return;
+bool COMXAudio::IsEOS()
+{
+  if(!m_Initialized || m_Pause)
+    return true;
+  unsigned int latency = GetAudioRenderingLatency();
+  CSingleLock lock (m_critSection);
+  return m_omx_decoder.IsEOS() && latency <= 0;
 }
 
 void COMXAudio::SwitchChannels(int iAudioStream, bool bAudioOnAllSpeakers)

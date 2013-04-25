@@ -128,7 +128,7 @@ CDVDVideoCodec* CDVDFactoryCodec::CreateVideoCodec(CDVDStreamInfo &hint, unsigne
   CDVDVideoCodec* pCodec = NULL;
   CDVDCodecOptions options;
 
-  if(formats.size() == 0)
+  if(formats.empty())
     options.m_formats.push_back(RENDER_FMT_YUV420P);
   else
     options.m_formats = formats;
@@ -348,6 +348,12 @@ CDVDOverlayCodec* CDVDFactoryCodec::CreateOverlayCodec( CDVDStreamInfo &hint )
   switch (hint.codec)
   {
     case CODEC_ID_TEXT:
+#if defined(LIBAVCODEC_FROM_FFMPEG) && LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54,53,100)
+    // API changed in:
+    // ffmpeg: commit 2626cc4580bfd560c6983338d77b2c11c16af94f (11 Aug 2012)
+    //         release 1.0 (28 Sept 2012)
+    case AV_CODEC_ID_SUBRIP:
+#endif
       pCodec = OpenCodec(new CDVDOverlayCodecText(), hint, options);
       if( pCodec ) return pCodec;
       break;
