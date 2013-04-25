@@ -24,6 +24,8 @@ SET buildmode=ask
 SET promptlevel=prompt
 SET buildmingwlibs=true
 SET exitcode=0
+SET useshell=rxvt
+SET BRANCH=na
 FOR %%b in (%1, %2, %3, %4, %5) DO (
 	IF %%b==vs2010 SET comp=vs2010
 	IF %%b==dx SET target=dx
@@ -32,6 +34,7 @@ FOR %%b in (%1, %2, %3, %4, %5) DO (
 	IF %%b==noclean SET buildmode=noclean
 	IF %%b==noprompt SET promptlevel=noprompt
 	IF %%b==nomingwlibs SET buildmingwlibs=false
+    IF %%b==sh SET useshell=sh
 )
 
 SET buildconfig=Release (DirectX)
@@ -55,6 +58,14 @@ IF %comp%==vs2010 (
   set OPTS_EXE="..\VS2010Express\XBMC for Windows.sln" /build "%buildconfig%"
   set CLEAN_EXE="..\VS2010Express\XBMC for Windows.sln" /clean "%buildconfig%"
   set EXE= "..\VS2010Express\XBMC\%buildconfig%\XBMC.exe"
+  set PDB= "..\VS2010Express\XBMC\%buildconfig%\XBMC.pdb"
+  
+  :: when building with jenkins there's no branch. First git command gets the branch even there
+  :: but is empty in a normal build environment. Second git command gets the branch there.
+  for /f "tokens=3 delims=/" %%a in ('git branch -r --contains HEAD') do set BRANCH=%%a
+  IF %BRANCH%==na (
+    for /f "tokens=* delims= " %%a in ('git rev-parse --abbrev-ref HEAD') do set BRANCH=%%a
+  )
 	
   rem	CONFIG END
   rem -------------------------------------------------------------
@@ -109,7 +120,7 @@ IF %comp%==vs2010 (
   ECHO ------------------------------------------------------------
   ECHO Cleaning Solution...
   %NET% %CLEAN_EXE%
-  ECHO Compiling XBMC...
+  ECHO Compiling XBMC branch %BRANCH%...
   %NET% %OPTS_EXE%
   IF NOT EXIST %EXE% (
   	set DIETEXT="XBMC.EXE failed to build!  See %CD%\..\vs2010express\XBMC\%buildconfig%\objs\XBMC.log"
@@ -126,7 +137,7 @@ IF %comp%==vs2010 (
 :COMPILE_NO_CLEAN_EXE
   ECHO Wait while preparing the build.
   ECHO ------------------------------------------------------------
-  ECHO Compiling Solution...
+  ECHO Compiling XBMC branch %BRANCH%...
   %NET% %OPTS_EXE%
   IF NOT EXIST %EXE% (
   	set DIETEXT="XBMC.EXE failed to build!  See %CD%\..\vs2010express\XBMC\%buildconfig%\objs\XBMC.log"
@@ -147,7 +158,12 @@ IF %comp%==vs2010 (
 	IF %buildmode%==clean (
 	  ECHO bla>makeclean
 	)
-    call buildmingwlibs.bat
+    rem only use sh to please jenkins
+    IF %useshell%==sh (
+      call buildmingwlibs.bat sh
+    ) ELSE (
+      call buildmingwlibs.bat
+    )
     IF EXIST errormingw (
     	set DIETEXT="failed to build mingw libs"
     	goto DIE
@@ -233,7 +249,8 @@ IF %comp%==vs2010 (
   ECHO ------------------------------------------------------------
   call getdeploydependencies.bat
   CALL extract_git_rev.bat > NUL
-  SET XBMC_SETUPFILE=XBMCSetup-%GIT_REV%-%target%.exe
+  SET XBMC_SETUPFILE=XBMCSetup-%GIT_REV%-%BRANCH%.exe
+  SET XBMC_PDBFILE=XBMCSetup-%GIT_REV%-%BRANCH%.pdb
   ECHO Creating installer %XBMC_SETUPFILE%...
   IF EXIST %XBMC_SETUPFILE% del %XBMC_SETUPFILE% > NUL
   rem get path to makensis.exe from registry, first try tab delim
@@ -245,7 +262,7 @@ IF %comp%==vs2010 (
   )
       
   IF NOT EXIST "%NSISExePath%" (
-    rem fails on localized windows (Default) becomes (Par Défaut)
+    rem fails on localized windows (Default) becomes (Par Dï¿½faut)
     FOR /F "tokens=3* delims=	" %%A IN ('REG QUERY "HKLM\Software\NSIS" /ve') DO SET NSISExePath=%%B
   )
 
@@ -272,11 +289,12 @@ IF %comp%==vs2010 (
   )
 
   SET NSISExe=%NSISExePath%\makensis.exe
-  "%NSISExe%" /V1 /X"SetCompressor /FINAL lzma" /Dxbmc_root="%CD%\BUILD_WIN32" /Dxbmc_revision="%GIT_REV%" /Dxbmc_target="%target%" "XBMC for Windows.nsi"
+  "%NSISExe%" /V1 /X"SetCompressor /FINAL lzma" /Dxbmc_root="%CD%\BUILD_WIN32" /Dxbmc_revision="%GIT_REV%" /Dxbmc_target="%target%" /Dxbmc_branch="%BRANCH%" "XBMC for Windows.nsi"
   IF NOT EXIST "%XBMC_SETUPFILE%" (
 	  set DIETEXT=Failed to create %XBMC_SETUPFILE%. NSIS installed?
 	  goto DIE
   )
+  copy %PDB% %XBMC_PDBFILE% > nul
   ECHO ------------------------------------------------------------
   ECHO Done!
   ECHO Setup is located at %CD%\%XBMC_SETUPFILE%

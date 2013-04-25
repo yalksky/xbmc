@@ -71,6 +71,7 @@ CNfoFile::NFOResult CNfoFile::Create(const CStdString& strPath, const ScraperPtr
     if (episode > -1 && bNfo && m_type == ADDON_SCRAPER_TVSHOWS)
     {
       int infos=0;
+      m_headofdoc = strstr(m_headofdoc,"<episodedetails");
       while (m_headofdoc && details.m_iEpisode != episode)
       {
         m_headofdoc = strstr(m_headofdoc+1,"<episodedetails");
@@ -131,6 +132,11 @@ CNfoFile::NFOResult CNfoFile::Create(const CStdString& strPath, const ScraperPtr
 // return value: 0 - success; 1 - no result; skip; 2 - error
 int CNfoFile::Scrape(ScraperPtr& scraper)
 {
+  if (scraper->IsNoop())
+  {
+    m_scurl = CScraperUrl();
+    return 0;
+  }
   if (scraper->Type() != m_type)
     return 1;
   scraper->ClearCache();

@@ -43,8 +43,6 @@
 #include "utils/log.h"
 #endif
 
-PHANDLE_EVENT_FUNC CWinEventsBase::m_pEventFunc = NULL;
-
 #if defined(_LINUX) && !defined(__APPLE__)
 // The following chunk of code is Linux specific. For keys that have
 // with keysym.sym set to zero it checks the scan code, and sets the sym
@@ -242,8 +240,8 @@ bool CWinEventsSDL::MessagePump()
         //If the window was inconified or restored
         if( event.active.state & SDL_APPACTIVE )
         {
-          g_application.m_AppActive = event.active.gain != 0;
-          g_Windowing.NotifyAppActiveChange(g_application.m_AppActive);
+          g_application.SetRenderGUI(event.active.gain != 0);
+          g_Windowing.NotifyAppActiveChange(g_application.GetRenderGUI());
         }
         else if (event.active.state & SDL_APPINPUTFOCUS)
       {
