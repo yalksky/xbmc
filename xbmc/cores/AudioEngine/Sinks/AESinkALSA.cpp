@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2010-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -32,7 +32,6 @@
 #include "utils/log.h"
 #include "utils/MathUtils.h"
 #include "threads/SingleLock.h"
-#include "settings/GUISettings.h"
 #if defined(HAS_AMLPLAYER)
 #include "cores/amlplayer/AMLUtils.h"
 #endif
@@ -147,7 +146,7 @@ bool CAESinkALSA::Initialize(AEAudioFormat &format, std::string &device)
     m_channelLayout = GetChannelLayout(format);
     m_passthrough   = false;
   }
-#if defined(HAS_AMLPLAYER)
+#if defined(HAS_AMLPLAYER) || defined(HAS_LIBAMCODEC)
   if (aml_present())
   {
     aml_set_audio_passthrough(m_passthrough);
@@ -518,11 +517,7 @@ unsigned int CAESinkALSA::AddPackets(uint8_t *data, unsigned int frames, bool ha
   }
 
   if ((unsigned int)ret < frames)
-  {
-    ret = snd_pcm_wait(m_pcm, m_timeout);
-    if (ret < 0)
-      HandleError("snd_pcm_wait", ret);
-  }
+    return 0;
 
   ret = snd_pcm_writei(m_pcm, (void*)data, frames);
   if (ret < 0)

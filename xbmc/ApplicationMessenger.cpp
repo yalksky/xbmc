@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,23 +22,22 @@
 #include "ApplicationMessenger.h"
 #include "Application.h"
 
+#include "LangInfo.h"
 #include "PlayListPlayer.h"
 #include "Util.h"
-#ifdef HAS_PYTHON
-#include "interfaces/python/XBPython.h"
-#endif
 #include "pictures/GUIWindowSlideShow.h"
 #include "interfaces/Builtins.h"
+#include "interfaces/generic/ScriptInvocationManager.h"
 #include "network/Network.h"
 #include "utils/log.h"
 #include "utils/URIUtils.h"
 #include "utils/Variant.h"
 #include "guilib/GUIWindowManager.h"
-#include "guilib/Key.h"
 #include "settings/AdvancedSettings.h"
-#include "settings/GUISettings.h"
+#include "settings/Settings.h"
 #include "FileItem.h"
 #include "guilib/GUIDialog.h"
+#include "guilib/Key.h"
 #include "GUIInfoManager.h"
 #include "utils/Splash.h"
 #include "cores/IPlayer.h"
@@ -46,9 +45,10 @@
 #include "cores/AudioEngine/AEFactory.h"
 #include "music/tags/MusicInfoTag.h"
 
+#include "peripherals/Peripherals.h"
 #include "powermanagement/PowerManager.h"
 
-#ifdef _WIN32
+#ifdef TARGET_WINDOWS
 #include "WIN32Util.h"
 #define CHalManager CWIN32Util
 #elif defined(TARGET_DARWIN)
@@ -74,6 +74,7 @@
 using namespace PVR;
 using namespace std;
 using namespace MUSIC_INFO;
+using namespace PERIPHERALS;
 
 CDelayedMessage::CDelayedMessage(ThreadMessage& msg, unsigned int delay) : CThread("DelayedMessage")
 {
@@ -227,7 +228,7 @@ void CApplicationMessenger::ProcessMessage(ThreadMessage *pMsg)
   {
     case TMSG_SHUTDOWN:
       {
-        switch (g_guiSettings.GetInt("powermanagement.shutdownstate"))
+        switch (CSettings::Get().GetInt("powermanagement.shutdownstate"))
         {
           case POWERSTATE_SHUTDOWN:
             Powerdown();
@@ -302,6 +303,12 @@ void CApplicationMessenger::ProcessMessage(ThreadMessage *pMsg)
     case TMSG_INHIBITIDLESHUTDOWN:
       {
         g_application.InhibitIdleShutdown(pMsg->dwParam1 != 0);
+      }
+      break;
+
+    case TMSG_ACTIVATESCREENSAVER:
+      {
+        g_application.ActivateScreenSaver();
       }
       break;
 
@@ -456,7 +463,7 @@ void CApplicationMessenger::ProcessMessage(ThreadMessage *pMsg)
         {
           if(items.Size() == 0)
           {
-            g_guiSettings.SetString("screensaver.mode", "screensaver.xbmc.builtin.dim");
+            CSettings::Get().SetString("screensaver.mode", "screensaver.xbmc.builtin.dim");
             g_application.ActivateScreenSaver();
           }
           else
@@ -545,9 +552,9 @@ void CApplicationMessenger::ProcessMessage(ThreadMessage *pMsg)
       {
         CLog::Log(LOGNOTICE, "%s: Failed to suspend AudioEngine before launching external program",__FUNCTION__);
       }
-#if defined( _LINUX) && !defined(TARGET_DARWIN)
+#if defined( TARGET_POSIX) && !defined(TARGET_DARWIN)
       CUtil::RunCommandLine(pMsg->strParam.c_str(), (pMsg->dwParam1 == 1));
-#elif defined(_WIN32)
+#elif defined(TARGET_WINDOWS)
       CWIN32Util::XBMCShellExecute(pMsg->strParam.c_str(), (pMsg->dwParam1 == 1));
 #endif
       /* Resume AE processing of XBMC native audio */
@@ -558,9 +565,7 @@ void CApplicationMessenger::ProcessMessage(ThreadMessage *pMsg)
       break;
 
     case TMSG_EXECUTE_SCRIPT:
-#ifdef HAS_PYTHON
-      g_pythonParser.evalFile(pMsg->strParam.c_str(),ADDON::AddonPtr());
-#endif
+      CScriptInvocationManager::Get().Execute(pMsg->strParam);
       break;
 
     case TMSG_EXECUTE_BUILT_IN:
@@ -703,6 +708,7 @@ void CApplicationMessenger::ProcessMessage(ThreadMessage *pMsg)
       }
       break;
 
+#ifdef HAS_PYTHON
     case TMSG_GUI_PYTHON_DIALOG:
       {
         // This hack is not much better but at least I don't need to make ApplicationMessenger
@@ -711,6 +717,7 @@ void CApplicationMessenger::ProcessMessage(ThreadMessage *pMsg)
         ((CGUIWindow*)pMsg->lpVoid)->OnAction(caction);
       }
       break;
+#endif
 
     case TMSG_GUI_ACTION:
       {
@@ -817,6 +824,21 @@ void CApplicationMessenger::ProcessMessage(ThreadMessage *pMsg)
     case TMSG_LOADPROFILE:
     {
       CGUIWindowLoginScreen::LoadProfile(pMsg->dwParam1);
+      break;
+    }
+    case TMSG_CECTOGGLESTATE:
+    {
+      *((bool*)pMsg->lpVoid) = g_peripherals.ToggleDeviceState(STATE_SWITCH_TOGGLE);
+      break;
+    }
+    case TMSG_CECACTIVATESOURCE:
+    {
+      *((bool*)pMsg->lpVoid) = g_peripherals.ToggleDeviceState(STATE_ACTIVATE_SOURCE);
+      break;
+    }
+    case TMSG_CECSTANDBY:
+    {
+      *((bool*)pMsg->lpVoid) = g_peripherals.ToggleDeviceState(STATE_STANDBY);
       break;
     }
     case TMSG_START_ANDROID_ACTIVITY:
@@ -1152,6 +1174,12 @@ void CApplicationMessenger::InhibitIdleShutdown(bool inhibit)
   SendMessage(tMsg);
 }
 
+void CApplicationMessenger::ActivateScreensaver()
+{
+  ThreadMessage tMsg = {TMSG_ACTIVATESCREENSAVER};
+  SendMessage(tMsg);
+}
+
 void CApplicationMessenger::NetworkMessage(unsigned int dwMessage, unsigned int dwParam)
 {
   ThreadMessage tMsg = {TMSG_NETWORKMESSAGE, dwMessage, dwParam};
@@ -1335,4 +1363,37 @@ void CApplicationMessenger::StartAndroidActivity(const vector<CStdString> &param
   ThreadMessage tMsg = {TMSG_START_ANDROID_ACTIVITY};
   tMsg.params = params;
   SendMessage(tMsg, false);
+}
+
+bool CApplicationMessenger::CECToggleState()
+{
+  bool result;
+
+  ThreadMessage tMsg = {TMSG_CECTOGGLESTATE};
+  tMsg.lpVoid = (void*)&result;
+  SendMessage(tMsg, false);
+
+  return result;
+}
+
+bool CApplicationMessenger::CECActivateSource()
+{
+  bool result;
+
+  ThreadMessage tMsg = {TMSG_CECACTIVATESOURCE};
+  tMsg.lpVoid = (void*)&result;
+  SendMessage(tMsg, false);
+
+  return result;
+}
+
+bool CApplicationMessenger::CECStandby()
+{
+  bool result;
+
+  ThreadMessage tMsg = {TMSG_CECSTANDBY};
+  tMsg.lpVoid = (void*)&result;
+  SendMessage(tMsg, false);
+
+  return result;
 }

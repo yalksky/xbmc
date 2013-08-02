@@ -2,7 +2,7 @@
 
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,13 +21,11 @@
  */
 
 #include "URL.h"
-#include "settings/GUISettings.h"
-#if _MSC_VER > 1400
 #include "Cfgmgr32.h"
-#endif
 #include "MediaSource.h"
-#include "utils/Stopwatch.h"
 #include "guilib/Geometry.h"
+#include "powermanagement/PowerManager.h"
+#include "utils/Stopwatch.h"
 
 enum Drive_Types
 {
@@ -57,7 +55,7 @@ public:
   static CStdString GetResInfoString();
   static int GetDesktopColorDepth();
   static CStdString GetSpecialFolder(int csidl);
-  static CStdString CWIN32Util::GetSystemPath();
+  static CStdString GetSystemPath();
   static CStdString GetProfilePath();
   static CStdString UncToSmb(const CStdString &strPath);
   static CStdString SmbToUnc(const CStdString &strPath);
@@ -89,9 +87,7 @@ public:
   static bool IsUsbDevice(const CStdStringW &strWdrive);
 
 private:
-#if _MSC_VER > 1400
   static DEVINST GetDrivesDevInstByDiskNumber(long DiskNumber);
-#endif
 };
 
 

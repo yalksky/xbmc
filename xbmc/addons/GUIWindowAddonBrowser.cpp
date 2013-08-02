@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -39,12 +39,12 @@
 #include "utils/log.h"
 #include "threads/SingleLock.h"
 #include "settings/Settings.h"
+#include "settings/MediaSourceSettings.h"
 #include "utils/StringUtils.h"
 #include "AddonDatabase.h"
 #include "settings/AdvancedSettings.h"
 #include "settings/MediaSourceSettings.h"
 #include "storage/MediaManager.h"
-#include "settings/GUISettings.h"
 #include "LangInfo.h"
 #include "guilib/Key.h"
 
@@ -59,7 +59,6 @@ using namespace std;
 CGUIWindowAddonBrowser::CGUIWindowAddonBrowser(void)
 : CGUIMediaWindow(WINDOW_ADDON_BROWSER, "AddonBrowser.xml")
 {
-  m_thumbLoader.SetNumOfWorkers(1);
 }
 
 CGUIWindowAddonBrowser::~CGUIWindowAddonBrowser()
@@ -90,20 +89,19 @@ bool CGUIWindowAddonBrowser::OnMessage(CGUIMessage& message)
       int iControl = message.GetSenderId();
       if (iControl == CONTROL_AUTOUPDATE)
       {
-        g_guiSettings.ToggleBool("general.addonautoupdate");
-        g_settings.Save();
+        CSettings::Get().ToggleBool("general.addonautoupdate");
         return true;
       }
       else if (iControl == CONTROL_SHUTUP)
       {
-        g_guiSettings.ToggleBool("general.addonnotifications");
-        g_settings.Save();
+        CSettings::Get().ToggleBool("general.addonnotifications");
+        CSettings::Get().Save();
         return true;
       }
       else if (iControl == CONTROL_FOREIGNFILTER)
       {
-        g_guiSettings.ToggleBool("general.addonforeignfilter");
-        g_settings.Save();
+        CSettings::Get().ToggleBool("general.addonforeignfilter");
+        CSettings::Get().Save();
         Refresh();
         return true;
       }
@@ -251,9 +249,9 @@ bool CGUIWindowAddonBrowser::OnClick(int iItem)
 
 void CGUIWindowAddonBrowser::UpdateButtons()
 {
-  SET_CONTROL_SELECTED(GetID(),CONTROL_AUTOUPDATE,g_guiSettings.GetBool("general.addonautoupdate"));
-  SET_CONTROL_SELECTED(GetID(),CONTROL_SHUTUP,g_guiSettings.GetBool("general.addonnotifications"));
-  SET_CONTROL_SELECTED(GetID(),CONTROL_FOREIGNFILTER,g_guiSettings.GetBool("general.addonforeignfilter"));
+  SET_CONTROL_SELECTED(GetID(),CONTROL_AUTOUPDATE, CSettings::Get().GetBool("general.addonautoupdate"));
+  SET_CONTROL_SELECTED(GetID(),CONTROL_SHUTUP, CSettings::Get().GetBool("general.addonnotifications"));
+  SET_CONTROL_SELECTED(GetID(),CONTROL_FOREIGNFILTER, CSettings::Get().GetBool("general.addonforeignfilter"));
   CGUIMediaWindow::UpdateButtons();
 }
 
@@ -298,14 +296,14 @@ bool CGUIWindowAddonBrowser::GetDirectory(const CStdString& strDirectory,
   else
   {
     result = CGUIMediaWindow::GetDirectory(strDirectory,items);
-    if (g_guiSettings.GetBool("general.addonforeignfilter"))
+    if (CSettings::Get().GetBool("general.addonforeignfilter"))
     {
       int i=0;
       while (i < items.Size())
       {
-        if (!FilterVar(g_guiSettings.GetBool("general.addonforeignfilter"),
+        if (!FilterVar(CSettings::Get().GetBool("general.addonforeignfilter"),
                       items[i]->GetProperty("Addon.Language"), "en") ||
-            !FilterVar(g_guiSettings.GetBool("general.addonforeignfilter"),
+            !FilterVar(CSettings::Get().GetBool("general.addonforeignfilter"),
                       items[i]->GetProperty("Addon.Language"),
                       g_langInfo.GetLanguageLocale()))
         {

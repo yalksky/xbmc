@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,14 +20,16 @@
 
 #include "Addon.h"
 #include "AddonManager.h"
-#include "settings/GUISettings.h"
+#include "settings/Settings.h"
 #include "filesystem/Directory.h"
 #include "filesystem/File.h"
+#ifdef HAS_PYTHON
 #include "interfaces/python/XBPython.h"
+#endif
 #if defined(TARGET_DARWIN)
 #include "../osx/OSXGNUReplacements.h"
 #endif
-#ifdef __FreeBSD__
+#ifdef TARGET_FREEBSD
 #include "freebsd/FreeBSDGNUReplacements.h"
 #endif
 #include "utils/log.h"
@@ -251,8 +253,9 @@ CAddon::CAddon(const cp_extension_t *ext)
   , m_parent(AddonPtr())
 {
   BuildLibName(ext);
+  Props().libname = m_strLibName;
   BuildProfilePath();
-  URIUtils::AddFileToFolder(Profile(), "settings.xml", m_userSettingsPath);
+  m_userSettingsPath = URIUtils::AddFileToFolder(Profile(), "settings.xml");
   m_enabled = true;
   m_hasSettings = true;
   m_hasStrings = false;
@@ -280,7 +283,7 @@ CAddon::CAddon(const AddonProps &props)
   if (props.libname.IsEmpty()) BuildLibName();
   else m_strLibName = props.libname;
   BuildProfilePath();
-  URIUtils::AddFileToFolder(Profile(), "settings.xml", m_userSettingsPath);
+  m_userSettingsPath = URIUtils::AddFileToFolder(Profile(), "settings.xml");
   m_enabled = true;
   m_hasSettings = true;
   m_hasStrings = false;
@@ -299,16 +302,16 @@ CAddon::CAddon(const CAddon &rhs, const AddonPtr &parent)
   m_userSettingsLoaded = rhs.m_userSettingsLoaded;
   m_hasSettings = rhs.m_hasSettings;
   BuildProfilePath();
-  URIUtils::AddFileToFolder(Profile(), "settings.xml", m_userSettingsPath);
+  m_userSettingsPath = URIUtils::AddFileToFolder(Profile(), "settings.xml");
   m_strLibName  = rhs.m_strLibName;
   m_enabled = rhs.Enabled();
   m_hasStrings  = false;
   m_checkedStrings  = false;
 }
 
-AddonPtr CAddon::Clone(const AddonPtr &self) const
+AddonPtr CAddon::Clone(const AddonPtr &parent) const
 {
-  return AddonPtr(new CAddon(*this, self));
+  return AddonPtr(new CAddon(*this, parent));
 }
 
 bool CAddon::MeetsVersion(const AddonVersion &version) const
@@ -391,6 +394,7 @@ void CAddon::BuildLibName(const cp_extension_t *extension)
       case ADDON_PVRDLL:
       case ADDON_PLUGIN:
       case ADDON_SERVICE:
+      case ADDON_REPOSITORY:
         {
           CStdString temp = CAddonMgr::Get().GetExtValue(extension->configuration, "@library");
           m_strLibName = temp;
@@ -411,7 +415,7 @@ bool CAddon::LoadStrings()
   // Path where the language strings reside
   CStdString chosenPath = URIUtils::AddFileToFolder(m_props.path, "resources/language/");
 
-  m_hasStrings = m_strings.Load(chosenPath, g_guiSettings.GetString("locale.language"));
+  m_hasStrings = m_strings.Load(chosenPath, CSettings::Get().GetString("locale.language"));
   return m_checkedStrings = true;
 }
 
@@ -491,7 +495,7 @@ bool CAddon::LoadUserSettings()
 
 void CAddon::SaveSettings(void)
 {
-  if (!m_settings.size())
+  if (m_settings.empty())
     return; // no settings to save
 
   // break down the path into directories
@@ -514,7 +518,9 @@ void CAddon::SaveSettings(void)
   m_userSettingsLoaded = true;
   
   CAddonMgr::Get().ReloadSettings(ID());//push the settings changes to the running addon instance
+#ifdef HAS_PYTHON
   g_pythonParser.OnSettingsChanged(ID());
+#endif
 }
 
 CStdString CAddon::GetSetting(const CStdString& key)

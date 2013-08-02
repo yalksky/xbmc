@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2010-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -28,7 +28,6 @@
 #include "utils/StdString.h"
 #include "utils/log.h"
 #include "utils/TimeUtils.h"
-#include "settings/GUISettings.h"
 
 CAESinkProfiler::CAESinkProfiler()
 {

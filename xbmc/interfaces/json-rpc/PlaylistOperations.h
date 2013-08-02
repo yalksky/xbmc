@@ -1,7 +1,7 @@
 #pragma once
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -41,5 +41,6 @@ namespace JSONRPC
     static int GetPlaylist(const CVariant &playlist);
     static inline void NotifyAll();
     static JSONRPC_STATUS GetPropertyValue(int playlist, const CStdString &property, CVariant &result);
+    static bool CheckMediaParameter(int playlist, const CVariant &parameterObject);
   };
 }

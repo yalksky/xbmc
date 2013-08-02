@@ -2,7 +2,7 @@
 #pragma once
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -78,6 +78,8 @@ public:
 
   virtual const std::string Name() { return "vdpau"; }
 
+  virtual unsigned GetAllowedReferences() { return 2; /* this is a lie, we can only do one, but we block on decode to get the surface */ }
+
   bool MakePixmap(int width, int height);
   bool MakePixmapGL();
 
@@ -94,6 +96,10 @@ public:
                                const AVFrame *src, int offset[4],
                                int y, int type, int height);
   static int              FFGetBuffer(AVCodecContext *avctx, AVFrame *pic);
+  static VdpStatus        Render(VdpDecoder decoder, VdpVideoSurface target,
+                                 VdpPictureInfo const *picture_info,
+                                 uint32_t bitstream_buffer_count,
+                                 VdpBitstreamBuffer const * bitstream_buffers);
 
   void Present();
   bool ConfigVDPAU(AVCodecContext *avctx, int ref_frames);
@@ -222,11 +228,12 @@ public:
   int                  m_feature_count;
 
   static bool IsVDPAUFormat(PixelFormat fmt);
-  static void ReadFormatOf( PixelFormat fmt
+  static void ReadFormatOf( AVCodecID codec
                           , VdpDecoderProfile &decoder_profile
                           , VdpChromaType     &chroma_type);
 
   std::vector<vdpau_render_state*> m_videoSurfaces;
+  AVVDPAUContext m_hwContext;
   DllAvUtil   m_dllAvUtil;
 
   enum VDPAUOutputMethod

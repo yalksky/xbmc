@@ -1,7 +1,7 @@
 #pragma once
 /*
  *      Copyright (C) 2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,6 +21,11 @@
 
 class TiXmlNode;
 
+/*!
+ \ingroup settings
+ \brief Interface defining methods to load additional setting values from an
+ XML file being loaded by the settings system.
+ */
 class ISubSettings
 {
 public:

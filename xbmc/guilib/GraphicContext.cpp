@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -23,9 +23,10 @@
 #include "threads/SingleLock.h"
 #include "Application.h"
 #include "ApplicationMessenger.h"
-#include "settings/DisplaySettings.h"
-#include "settings/GUISettings.h"
 #include "settings/AdvancedSettings.h"
+#include "settings/DisplaySettings.h"
+#include "settings/Setting.h"
+#include "settings/Settings.h"
 #include "cores/VideoRenderers/RenderManager.h"
 #include "windowing/WindowingFactory.h"
 #include "TextureManager.h"
@@ -65,6 +66,19 @@ CGraphicContext::CGraphicContext(void) :
 
 CGraphicContext::~CGraphicContext(void)
 {
+}
+
+void CGraphicContext::OnSettingChanged(const CSetting *setting)
+{
+  if (setting == NULL)
+    return;
+
+  const std::string &settingId = setting->GetId();
+  if (settingId == "videoscreen.fakefullscreen")
+  {
+    if (IsFullScreenRoot())
+      SetVideoResolution(GetVideoResolution(), true);
+  }
 }
 
 void CGraphicContext::SetOrigin(float x, float y)
@@ -279,7 +293,7 @@ void CGraphicContext::SetFullScreenVideo(bool bOnOff)
 #if defined(HAS_VIDEO_PLAYBACK)
   if(m_bFullScreenRoot)
   {
-    bool allowDesktopRes = g_guiSettings.GetInt("videoplayer.adjustrefreshrate") == ADJUST_REFRESHRATE_ALWAYS;
+    bool allowDesktopRes = CSettings::Get().GetInt("videoplayer.adjustrefreshrate") == ADJUST_REFRESHRATE_ALWAYS;
     if(m_bFullScreenVideo || (!allowDesktopRes && g_application.IsPlayingVideo()))
       SetVideoResolution(g_renderManager.GetResolution());
     else if(CDisplaySettings::Get().GetCurrentResolution() > RES_DESKTOP)
@@ -340,8 +354,8 @@ void CGraphicContext::SetVideoResolution(RESOLUTION res, bool forceUpdate)
   if ((res != RES_DESKTOP && res != RES_WINDOW) || (lastRes != RES_DESKTOP && lastRes != RES_WINDOW))
   {
     //pause the player during the refreshrate change
-    int delay = g_guiSettings.GetInt("videoplayer.pauseafterrefreshchange");
-    if (delay > 0 && g_guiSettings.GetInt("videoplayer.adjustrefreshrate") != ADJUST_REFRESHRATE_OFF && g_application.IsPlayingVideo() && !g_application.IsPaused())
+    int delay = CSettings::Get().GetInt("videoplayer.pauseafterrefreshchange");
+    if (delay > 0 && CSettings::Get().GetInt("videoplayer.adjustrefreshrate") != ADJUST_REFRESHRATE_OFF && g_application.IsPlayingVideo() && !g_application.IsPaused())
     {
       g_application.m_pPlayer->Pause();
       ThreadMessage msg = {TMSG_MEDIA_UNPAUSE};
@@ -374,8 +388,8 @@ void CGraphicContext::SetVideoResolution(RESOLUTION res, bool forceUpdate)
 
   if (g_advancedSettings.m_fullScreen)
   {
-#if defined (TARGET_DARWIN) || defined (_WIN32)
-    bool blankOtherDisplays = g_guiSettings.GetBool("videoscreen.blankdisplays");
+#if defined (TARGET_DARWIN) || defined (TARGET_WINDOWS)
+    bool blankOtherDisplays = CSettings::Get().GetBool("videoscreen.blankdisplays");
     g_Windowing.SetFullScreen(true,  CDisplaySettings::Get().GetResolutionInfo(res), blankOtherDisplays);
 #else
     g_Windowing.SetFullScreen(true,  CDisplaySettings::Get().GetResolutionInfo(res), false);
@@ -637,11 +651,11 @@ void CGraphicContext::SetScalingResolution(const RESOLUTION_INFO &res, bool need
     }
 
     if(!g_guiSkinzoom) // lookup gui setting if we didn't have it already
-      g_guiSkinzoom = (CSettingInt*)g_guiSettings.GetSetting("lookandfeel.skinzoom");
+      g_guiSkinzoom = (CSettingInt*)CSettings::Get().GetSetting("lookandfeel.skinzoom");
 
     float fZoom = 1.0f;
     if(g_guiSkinzoom)
-      fZoom *= (100 + g_guiSkinzoom->GetData()) * 0.01f;
+      fZoom *= (100 + g_guiSkinzoom->GetValue()) * 0.01f;
 
     fZoom -= 1.0f;
     fToPosX -= fToWidth * fZoom * 0.5f;
@@ -844,7 +858,6 @@ bool CGraphicContext::ToggleFullScreenRoot ()
 #endif
   }
 
-  SetVideoResolution(newRes);
   CDisplaySettings::Get().SetCurrentResolution(uiRes, true);
 
   return m_bFullScreenRoot;

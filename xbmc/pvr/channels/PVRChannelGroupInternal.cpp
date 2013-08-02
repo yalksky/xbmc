@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2012-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,11 +20,10 @@
 
 #include "PVRChannelGroupInternal.h"
 
-#include "settings/GUISettings.h"
-#include "settings/AdvancedSettings.h"
 #include "guilib/GUIWindowManager.h"
 #include "dialogs/GUIDialogYesNo.h"
 #include "dialogs/GUIDialogOK.h"
+#include "settings/AdvancedSettings.h"
 #include "utils/log.h"
 
 #include "PVRChannelGroupsContainer.h"

@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -13,15 +13,14 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with XBMC; see the file COPYING.  If not, write to
- *  the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
- *  http://www.gnu.org/copyleft/gpl.html
+ *  along with XBMC; see the file COPYING.  If not, see
+ *  <http://www.gnu.org/licenses/>.
  *
  */
 
 // TODO: Need a uniform way of returning an error status
 
-#if (defined HAVE_CONFIG_H) && (!defined WIN32)
+#if (defined HAVE_CONFIG_H) && (!defined TARGET_WINDOWS)
   #include "config.h"
 #endif
 #include "network/Network.h"
@@ -36,8 +35,6 @@
 #include "XTimeUtils.h"
 #endif
 #include "guilib/LocalizeStrings.h"
-#include "settings/AdvancedSettings.h"
-#include "settings/GUISettings.h"
 #include "GUIInfoManager.h"
 #include "guilib/GUIAudioManager.h"
 #include "guilib/GUIWindowManager.h"
@@ -46,12 +43,15 @@
 #include "utils/Crc32.h"
 #include "FileItem.h"
 #include "LangInfo.h"
+#include "settings/AdvancedSettings.h"
+#include "settings/Settings.h"
 #include "guilib/TextureManager.h"
 #include "Util.h"
 #include "URL.h"
 #include "cores/AudioEngine/AEFactory.h"
 #include "storage/MediaManager.h"
 #include "utils/FileUtils.h"
+#include "utils/LangCodeExpander.h"
 
 #include "CallbackHandler.h"
 #include "AddonUtils.h"
@@ -177,13 +177,57 @@ namespace XBMCAddon
     String getSkinDir()
     {
       TRACE;
-      return g_guiSettings.GetString("lookandfeel.skin");
+      return CSettings::Get().GetString("lookandfeel.skin");
     }
 
-    String getLanguage()
+    String getLanguage(int format /* = CLangCodeExpander::ENGLISH_NAME */, bool region /*= false*/)
     {
       TRACE;
-      return g_guiSettings.GetString("locale.language");
+      CStdString lang = CSettings::Get().GetString("locale.language");
+
+      switch (format)
+      {
+      case CLangCodeExpander::ENGLISH_NAME:
+        {
+          if (region)
+          {
+            CStdString region = "-" + g_langInfo.GetCurrentRegion();
+            return (lang += region);
+          }
+          return lang;
+        }
+      case CLangCodeExpander::ISO_639_1:
+        {
+          CStdString langCode;
+          g_LangCodeExpander.ConvertToTwoCharCode(langCode, lang);
+          if (region)
+          {
+            CStdString region = g_langInfo.GetRegionLocale();
+            CStdString region2Code;
+            g_LangCodeExpander.ConvertToTwoCharCode(region2Code, region);
+            region2Code = "-" + region2Code;
+            return (langCode += region2Code);
+          }
+          return langCode;
+        }
+      case CLangCodeExpander::ISO_639_2:
+        {
+          CStdString langCode;
+          g_LangCodeExpander.ConvertToThreeCharCode(langCode, lang);
+          if (region)
+          {
+            CStdString region = g_langInfo.GetRegionLocale();
+            CStdString region3Code;
+            g_LangCodeExpander.ConvertToThreeCharCode(region3Code, region);
+            region3Code = "-" + region3Code;
+            return (langCode += region3Code);
+          }
+
+          return langCode;
+        }
+      default:
+        return "";
+      }
     }
 
     String getIPAddress()
@@ -304,12 +348,11 @@ namespace XBMCAddon
       if (!condition)
         return false;
 
-      int id;
       bool ret;
       {
         LOCKGUI;
 
-        id = g_windowManager.GetTopMostModalDialogID();
+        int id = g_windowManager.GetTopMostModalDialogID();
         if (id == WINDOW_INVALID) id = g_windowManager.GetActiveWindow();
         ret = g_infoManager.EvaluateBool(condition,id);
       }
@@ -446,6 +489,34 @@ namespace XBMCAddon
       CAEFactory::Resume();
     }
 
+    String convertLanguage(const char* language, int format)
+    {
+      CStdString convertedLanguage;
+      switch (format)
+      {
+      case CLangCodeExpander::ENGLISH_NAME:
+        {
+          g_LangCodeExpander.Lookup(convertedLanguage, language);
+          // maybe it's a check whether the language exists or not
+          if (convertedLanguage.empty())
+          {
+            g_LangCodeExpander.ConvertToThreeCharCode(convertedLanguage, language);
+            g_LangCodeExpander.Lookup(convertedLanguage, convertedLanguage);
+          }
+          break;
+        }
+      case CLangCodeExpander::ISO_639_1:
+        g_LangCodeExpander.ConvertToTwoCharCode(convertedLanguage, language);
+        break;
+      case CLangCodeExpander::ISO_639_2:
+        g_LangCodeExpander.ConvertToThreeCharCode(convertedLanguage, language);
+        break;
+      default:
+        return "";
+      }
+      return convertedLanguage;
+    }
+
     int getSERVER_WEBSERVER() { return CApplication::ES_WEBSERVER; }
     int getSERVER_AIRPLAYSERVER() { return CApplication::ES_AIRPLAYSERVER; }
     int getSERVER_UPNPSERVER() { return CApplication::ES_UPNPSERVER; }
@@ -481,6 +552,11 @@ namespace XBMCAddon
     // render capture flags
     int getCAPTURE_FLAG_CONTINUOUS() { return (int)CAPTUREFLAG_CONTINUOUS; }
     int getCAPTURE_FLAG_IMMEDIATELY() { return (int)CAPTUREFLAG_IMMEDIATELY; }
+
+    // language string formats
+    int getISO_639_1() { return CLangCodeExpander::ISO_639_1; } 
+    int getISO_639_2(){ return CLangCodeExpander::ISO_639_2; }
+    int getENGLISH_NAME() { return CLangCodeExpander::ENGLISH_NAME; }
 
     const int lLOGNOTICE = LOGNOTICE;
   }

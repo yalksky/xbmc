@@ -1,8 +1,7 @@
 /*
- *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
- *
  *      Initial code sponsored by: Voddler Inc (voddler.com)
+ *      Copyright (C) 2005-2013 Team XBMC
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,6 +18,7 @@
  *  <http://www.gnu.org/licenses/>.
  *
  */
+
 #include "system.h"
 #include "OverlayRenderer.h"
 #include "cores/dvdplayer/DVDCodecs/Overlay/DVDOverlay.h"
@@ -26,11 +26,13 @@
 #include "cores/dvdplayer/DVDCodecs/Overlay/DVDOverlaySpu.h"
 #include "cores/dvdplayer/DVDCodecs/Overlay/DVDOverlaySSA.h"
 #include "cores/VideoRenderers/RenderManager.h"
+#include "guilib/GraphicContext.h"
 #include "Application.h"
 #include "guilib/GraphicContext.h"
 #include "windowing/WindowingFactory.h"
 #include "settings/DisplaySettings.h"
 #include "settings/Settings.h"
+#include "settings/DisplaySettings.h"
 #include "threads/SingleLock.h"
 #include "utils/MathUtils.h"
 #if defined(HAS_GL) || defined(HAS_GLES)
@@ -90,34 +92,32 @@ long COverlayMainThread::Release()
 
 CRenderer::CRenderer()
 {
-  m_render = 0;
-  m_decode = (m_render + 1) % 2;
 }
 
 CRenderer::~CRenderer()
 {
-  for(int i = 0; i < 2; i++)
+  for(int i = 0; i < NUM_BUFFERS; i++)
     Release(m_buffers[i]);
 }
 
-void CRenderer::AddOverlay(CDVDOverlay* o, double pts)
+void CRenderer::AddOverlay(CDVDOverlay* o, double pts, int index)
 {
   CSingleLock lock(m_section);
 
   SElement   e;
   e.pts = pts;
   e.overlay_dvd = o->Acquire();
-  m_buffers[m_decode].push_back(e);
+  m_buffers[index].push_back(e);
 }
 
-void CRenderer::AddOverlay(COverlay* o, double pts)
+void CRenderer::AddOverlay(COverlay* o, double pts, int index)
 {
   CSingleLock lock(m_section);
 
   SElement   e;
   e.pts = pts;
   e.overlay = o->Acquire();
-  m_buffers[m_decode].push_back(e);
+  m_buffers[index].push_back(e);
 }
 
 void CRenderer::AddCleanup(COverlay* o)
@@ -153,29 +153,25 @@ void CRenderer::Flush()
 {
   CSingleLock lock(m_section);
 
-  for(int i = 0; i < 2; i++)
+  for(int i = 0; i < NUM_BUFFERS; i++)
     Release(m_buffers[i]);
 
   Release(m_cleanup);
 }
 
-void CRenderer::Flip()
+void CRenderer::Release(int idx)
 {
   CSingleLock lock(m_section);
-
-  m_render = m_decode;
-  m_decode =(m_decode + 1) % 2;
-
-  Release(m_buffers[m_decode]);
+  Release(m_buffers[idx]);
 }
 
-void CRenderer::Render()
+void CRenderer::Render(int idx)
 {
   CSingleLock lock(m_section);
 
   Release(m_cleanup);
 
-  SElementV& list = m_buffers[m_render];
+  SElementV& list = m_buffers[idx];
   for(SElementV::iterator it = list.begin(); it != list.end(); ++it)
   {
     COverlay* o = NULL;

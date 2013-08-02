@@ -8,7 +8,7 @@
 
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -109,6 +109,7 @@ namespace INFO
 #define PLAYER_CAN_SEEK              51
 #define PLAYER_START_TIME            52
 #define PLAYER_TITLE                 53
+#define PLAYER_ISINTERNETSTREAM      54
 
 #define WEATHER_CONDITIONS          100
 #define WEATHER_TEMPERATURE         101
@@ -486,7 +487,7 @@ namespace INFO
 
 #define VERSION_MAJOR 13
 #define VERSION_MINOR 0
-#define VERSION_TAG "-ALPHA3"
+#define VERSION_TAG "-ALPHA6"
 
 #define LISTITEM_START              35000
 #define LISTITEM_THUMB              (LISTITEM_START)

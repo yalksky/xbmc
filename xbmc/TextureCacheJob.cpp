@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2012-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 #include "guilib/Texture.h"
 #include "guilib/DDSImage.h"
 #include "settings/AdvancedSettings.h"
-#include "settings/GUISettings.h"
+#include "settings/Settings.h"
 #include "utils/log.h"
 #include "filesystem/File.h"
 #include "pictures/Picture.h"
@@ -173,11 +173,12 @@ CBaseTexture *CTextureCacheJob::LoadImage(const CStdString &image, unsigned int 
 
   // Validate file URL to see if it is an image
   CFileItem file(image, false);
+  file.FillInMimeType();
   if (!(file.IsPicture() && !(file.IsZIP() || file.IsRAR() || file.IsCBR() || file.IsCBZ() ))
       && !file.GetMimeType().Left(6).Equals("image/") && !file.GetMimeType().Equals("application/octet-stream")) // ignore non-pictures
     return NULL;
 
-  CBaseTexture *texture = CBaseTexture::LoadFromFile(image, width, height, g_guiSettings.GetBool("pictures.useexifrotation"));
+  CBaseTexture *texture = CBaseTexture::LoadFromFile(image, width, height, CSettings::Get().GetBool("pictures.useexifrotation"));
   if (!texture)
     return NULL;
 
@@ -236,7 +237,7 @@ bool CTextureDDSJob::operator==(const CJob* job) const
 
 bool CTextureDDSJob::DoWork()
 {
-  if (URIUtils::GetExtension(m_original).Equals(".dds"))
+  if (URIUtils::HasExtension(m_original, ".dds"))
     return false;
   CBaseTexture *texture = CBaseTexture::LoadFromFile(m_original);
   if (texture)

@@ -21,11 +21,16 @@
 
 #include <vector>
 
+#include "settings/ISettingCallback.h"
 #include "settings/ISettingsHandler.h"
 #include "utils/StdString.h"
 #include "utils/GlobalsHandling.h"
 
 class TiXmlElement;
+namespace ADDON
+{
+  class IAddon;
+}
 
 class DatabaseSettings
 {
@@ -82,7 +87,7 @@ struct RefreshVideoLatency
 
 typedef std::vector<TVShowRegexp> SETTINGS_TVSHOWLIST;
 
-class CAdvancedSettings : public ISettingsHandler
+class CAdvancedSettings : public ISettingCallback, public ISettingsHandler
 {
   public:
     CAdvancedSettings();
@@ -90,6 +95,11 @@ class CAdvancedSettings : public ISettingsHandler
     static CAdvancedSettings* getInstance();
 
     virtual void OnSettingsLoaded();
+    virtual void OnSettingsUnloaded();
+
+    virtual void OnSettingChanged(const CSetting *setting);
+
+    virtual void OnSettingAction(const CSetting *setting);
 
     void Initialize();
     bool Initialized() { return m_initialized; };
@@ -181,6 +191,7 @@ class CAdvancedSettings : public ISettingsHandler
     int m_songInfoDuration;
     int m_logLevel;
     int m_logLevelHint;
+    int m_extraLogLevels;
     CStdString m_cddbAddress;
 
     //airtunes + airplay
@@ -289,7 +300,6 @@ class CAdvancedSettings : public ISettingsHandler
     int m_iEdlCommBreakAutowait;    // seconds
     int m_iEdlCommBreakAutowind;    // seconds
 
-    bool m_bFirstLoop;
     int m_curlconnecttimeout;
     int m_curllowspeedtime;
     int m_curlretries;
@@ -326,7 +336,6 @@ class CAdvancedSettings : public ISettingsHandler
 
     CStdString m_cpuTempCmd;
     CStdString m_gpuTempCmd;
-    int m_bgInfoLoaderMaxThreads;
 
     /* PVR/TV related advanced settings */
     int m_iPVRTimeCorrection;     /*!< @brief correct all times (epg tags, timer tags, recording tags) by this amount of minutes. defaults to 0. */
@@ -353,6 +362,7 @@ class CAdvancedSettings : public ISettingsHandler
     unsigned int m_addonPackageFolderSize;
 
     unsigned int m_cacheMemBufferSize;
+    bool m_alwaysForceBuffer;
 
     bool m_jsonOutputCompact;
     unsigned int m_jsonTcpPort;
@@ -365,6 +375,7 @@ class CAdvancedSettings : public ISettingsHandler
     bool m_initialized;
 
     void SetDebugMode(bool debug);
+    void SetExtraLogsFromAddon(ADDON::IAddon* addon);
 
     // runtime settings which cannot be set from advancedsettings.xml
     CStdString m_pictureExtensions;

@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -46,8 +46,8 @@
 #include "ApplicationMessenger.h"
 #include "settings/Settings.h"
 #include "settings/AdvancedSettings.h"
-#include "settings/GUISettings.h"
 #include "guilib/LocalizeStrings.h"
+#include "utils/LegacyPathTranslation.h"
 #include "utils/log.h"
 #include "utils/StringUtils.h"
 #include "TextureCache.h"
@@ -103,7 +103,7 @@ bool CGUIWindowMusicNav::OnMessage(CGUIMessage& message)
 
       // is this the first time the window is opened?
       if (m_vecItems->GetPath() == "?" && message.GetStringParam().IsEmpty())
-        message.SetStringParam(g_guiSettings.GetString("mymusic.defaultlibview"));
+        message.SetStringParam(CSettings::Get().GetString("mymusic.defaultlibview"));
       
       DisplayEmptyDatabaseMessage(false); // reset message state
 
@@ -147,11 +147,6 @@ bool CGUIWindowMusicNav::OnMessage(CGUIMessage& message)
           return true;
         }
         UpdateButtons();
-      }
-      else if (iControl == CONTROL_BTNMANUALINFO)
-      {
-        OnManualAlbumInfo();
-        return true;
       }
       else if (iControl == CONTROL_SEARCH)
       {
@@ -212,31 +207,32 @@ bool CGUIWindowMusicNav::OnAction(const CAction& action)
 
 CStdString CGUIWindowMusicNav::GetQuickpathName(const CStdString& strPath) const
 {
-  if (strPath.Equals("musicdb://genres/") || strPath.Equals("musicdb://1/"))
+  CStdString path = CLegacyPathTranslation::TranslateMusicDbPath(strPath);
+  if (path.Equals("musicdb://genres/"))
     return "Genres";
-  else if (strPath.Equals("musicdb://artists/") || strPath.Equals("musicdb://2/"))
+  else if (path.Equals("musicdb://artists/"))
     return "Artists";
-  else if (strPath.Equals("musicdb://albums/") || strPath.Equals("musicdb://3/"))
+  else if (path.Equals("musicdb://albums/"))
     return "Albums";
-  else if (strPath.Equals("musicdb://songs/") || strPath.Equals("musicdb://4/"))
+  else if (path.Equals("musicdb://songs/"))
     return "Songs";
-  else if (strPath.Equals("musicdb://top100/") || strPath.Equals("musicdb://5/"))
+  else if (path.Equals("musicdb://top100/"))
     return "Top100";
-  else if (strPath.Equals("musicdb://top100/songs/") || strPath.Equals("musicdb://5/2/"))
+  else if (path.Equals("musicdb://top100/songs/"))
     return "Top100Songs";
-  else if (strPath.Equals("musicdb://top100/albums/") || strPath.Equals("musicdb://5/1/"))
+  else if (path.Equals("musicdb://top100/albums/"))
     return "Top100Albums";
-  else if (strPath.Equals("musicdb://recentlyaddedalbums/") || strPath.Equals("musicdb://6/"))
+  else if (path.Equals("musicdb://recentlyaddedalbums/"))
     return "RecentlyAddedAlbums";
-  else if (strPath.Equals("musicdb://recentlyplayedalbums/") || strPath.Equals("musicdb://7/"))
+  else if (path.Equals("musicdb://recentlyplayedalbums/"))
     return "RecentlyPlayedAlbums";
-  else if (strPath.Equals("musicdb://compilations/") || strPath.Equals("musicdb://8/"))
+  else if (path.Equals("musicdb://compilations/"))
     return "Compilations";
-  else if (strPath.Equals("musicdb://years/") || strPath.Equals("musicdb://9/"))
+  else if (path.Equals("musicdb://years/"))
     return "Years";
-  else if (strPath.Equals("musicdb://singles/") || strPath.Equals("musicdb://10/"))
+  else if (path.Equals("musicdb://singles/"))
     return "Singles";
-  else if (strPath.Equals("special://musicplaylists/"))
+  else if (path.Equals("special://musicplaylists/"))
     return "Playlists";
   else
   {
@@ -482,9 +478,9 @@ void CGUIWindowMusicNav::GetContextButtons(int itemNumber, CContextButtons &butt
          nodetype == NODE_TYPE_OVERVIEW ||
          nodetype == NODE_TYPE_TOP100))
     {
-      if (!item->GetPath().Equals(g_guiSettings.GetString("mymusic.defaultlibview")))
+      if (!item->GetPath().Equals(CSettings::Get().GetString("mymusic.defaultlibview").c_str()))
         buttons.Add(CONTEXT_BUTTON_SET_DEFAULT, 13335); // set default
-      if (strcmp(g_guiSettings.GetString("mymusic.defaultlibview"), ""))
+      if (strcmp(CSettings::Get().GetString("mymusic.defaultlibview").c_str(), ""))
         buttons.Add(CONTEXT_BUTTON_CLEAR_DEFAULT, 13403); // clear default
     }
     NODE_TYPE childtype = dir.GetDirectoryChildType(item->GetPath());
@@ -621,13 +617,13 @@ bool CGUIWindowMusicNav::OnContextButton(int itemNumber, CONTEXT_BUTTON button)
     }
 
   case CONTEXT_BUTTON_SET_DEFAULT:
-    g_guiSettings.SetString("mymusic.defaultlibview", GetQuickpathName(item->GetPath()));
-    g_settings.Save();
+    CSettings::Get().SetString("mymusic.defaultlibview", GetQuickpathName(item->GetPath()));
+    CSettings::Get().Save();
     return true;
 
   case CONTEXT_BUTTON_CLEAR_DEFAULT:
-    g_guiSettings.SetString("mymusic.defaultlibview", "");
-    g_settings.Save();
+    CSettings::Get().SetString("mymusic.defaultlibview", "");
+    CSettings::Get().Save();
     return true;
 
   case CONTEXT_BUTTON_GO_TO_ARTIST:
@@ -776,7 +772,7 @@ void CGUIWindowMusicNav::OnSearchUpdate()
   if (!search.IsEmpty())
   {
     CStdString path = "musicsearch://" + search + "/";
-    m_history.ClearPathHistory();
+    m_history.ClearSearchHistory();
     Update(path);
   }
   else if (m_vecItems->IsVirtualDirectoryRoot())

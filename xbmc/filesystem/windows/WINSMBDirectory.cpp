@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
 #include "WINSMBDirectory.h"
 #include "URL.h"
 #include "utils/URIUtils.h"
-#include "settings/GUISettings.h"
+#include "settings/Settings.h"
 #include "FileItem.h"
 #include "WIN32Util.h"
 #include "utils/AutoPtrHandle.h"
@@ -58,7 +58,7 @@ CStdString CWINSMBDirectory::GetLocal(const CStdString& strPath)
 
     if(host.size() > 0)
     {
-      path = "//" + host + "/" + path;
+      path = "\\\\?\\UNC\\" + host + "\\" + path;
     }
   }
   path.Replace('/', '\\');
@@ -101,7 +101,7 @@ bool CWINSMBDirectory::GetDirectory(const CStdString& strPath1, CFileItemList &i
 
   memset(&wfd, 0, sizeof(wfd));
   //rebuild the URL
-  CStdString strUNCShare = "\\\\" + url.GetHostName() + "\\" + url.GetFileName();
+  CStdString strUNCShare = "\\\\?\\UNC\\" + url.GetHostName() + "\\" + url.GetFileName();
   strUNCShare.Replace("/", "\\");
   if(!URIUtils::HasSlashAtEnd(strUNCShare))
     strUNCShare.append("\\");

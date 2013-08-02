@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -207,9 +207,8 @@ bool CScraperUrl::Get(const SUrlEntry& scrURL, std::string& strHTML, XFILE::CCur
 
   if (!scrURL.m_cache.IsEmpty())
   {
-    URIUtils::AddFileToFolder(g_advancedSettings.m_cachePath,
-                              "scrapers/"+cacheContext+"/"+scrURL.m_cache,
-                              strCachePath);
+    strCachePath = URIUtils::AddFileToFolder(g_advancedSettings.m_cachePath,
+                              "scrapers/" + cacheContext + "/" + scrURL.m_cache);
     if (XFILE::CFile::Exists(strCachePath))
     {
       XFILE::CFile file;
@@ -257,10 +256,8 @@ bool CScraperUrl::Get(const SUrlEntry& scrURL, std::string& strHTML, XFILE::CCur
 
   if (!scrURL.m_cache.IsEmpty())
   {
-    CStdString strCachePath;
-    URIUtils::AddFileToFolder(g_advancedSettings.m_cachePath,
-                              "scrapers/"+cacheContext+"/"+scrURL.m_cache,
-                              strCachePath);
+    CStdString strCachePath = URIUtils::AddFileToFolder(g_advancedSettings.m_cachePath,
+                              "scrapers/" + cacheContext + "/" + scrURL.m_cache);
     XFILE::CFile file;
     if (file.OpenForWrite(strCachePath,true))
       file.Write(strHTML.data(),strHTML.size());

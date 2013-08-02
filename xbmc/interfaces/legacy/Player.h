@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -13,9 +13,8 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with XBMC; see the file COPYING.  If not, write to
- *  the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
- *  http://www.gnu.org/copyleft/gpl.html
+ *  along with XBMC; see the file COPYING.  If not, see
+ *  <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -92,10 +91,11 @@ namespace XBMCAddon
       void playStream(const String& item = emptyString, const XBMCAddon::xbmcgui::ListItem* listitem = NULL, bool windowed = false);
 
       /**
-       * playPlaylist([playlist, windowed]) -- Play this item.
+       * playPlaylist([playlist, windowed, startpos]) -- Play this item.
        * 
        * playlist       : [opt] playlist.
        * windowed       : [opt] bool - true=play video windowed, false=play users preference.(default)
+       * startpos       : [opt] int - Playlist starting position (0 based). If not given, current position is used
        * 
        * *Note, If playlist is not given then the Player will try to play the current item
        *        in the current playlist.
@@ -105,7 +105,8 @@ namespace XBMCAddon
        * 
        * example:
        */
-      void playPlaylist(const PlayList* playlist = NULL, bool windowed = false);
+      void playPlaylist(const PlayList* playlist = NULL,
+                        bool windowed = false, int startpos=-1);
 
       /**
        * play() -- try to play the current item in the current playlist.

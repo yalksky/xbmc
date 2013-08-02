@@ -12,7 +12,7 @@ DEPENDS = \
 	libogg libvorbis libflac libmad fribidi libmpeg2 \
 	libass libsamplerate \
 	libmodplug librtmp libxml2 yajl libmicrohttpd mysql libffi \
-	python26 afpfs-ng libshairport \
+	python26 afpfs-ng libshairplay \
 	libplist libcec libbluray boost tinyxml dummy-libxbmc \
 	libamplayer libssh taglib xbmc-pvr-addons libusb libnfs libmp3lame \
         pythonmodule-pil
@@ -31,6 +31,10 @@ endif
 ifeq ($(OS),osx)
   DEPENDS += libGLEW libsdl libcrystalhd
   EXCLUDED_DEPENDS = libusb
+endif
+
+ifeq ($(OS),android)
+  DEPENDS += mdnsresponder
 endif
 
 DEPENDS := $(filter-out $(EXCLUDED_DEPENDS),$(DEPENDS))
@@ -68,12 +72,10 @@ libvorbis: libogg
 libflac: libogg gettext
 libass: fontconfig libpng freetype2 expat $(ICONV)
 librtmp: openssl
-libxml2: $(ICONV)
 libmicrohttpd: openssl libgpg-error libgcrypt
 python26: expat gettext libxml2 sqlite3 openssl libffi
 libcdio: $(ICONV)
 afpfs-ng: libgcrypt $(ICONV)
-libshairport: openssl
 libplist: libxml2 $(ZLIB)
 libbluray: $(ICONV) libxml2
 libssh: openssl

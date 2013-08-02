@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
 #include "utils/XBMCTinyXML.h"
 #include "filesystem/File.h"
 #include "AddonDatabase.h"
-#include "settings/GUISettings.h"
+#include "settings/Settings.h"
 #include "FileItem.h"
 #include "utils/JobManager.h"
 #include "addons/AddonInstaller.h"
@@ -33,6 +33,7 @@
 #include "TextureDatabase.h"
 #include "URL.h"
 #include "pvr/PVRManager.h"
+#include "filesystem/PluginDirectory.h"
 
 using namespace XFILE;
 using namespace ADDON;
@@ -222,7 +223,7 @@ bool CRepositoryUpdateJob::DoWork()
     if (addon && addons[i]->Version() > addon->Version() &&
         !database.IsAddonBlacklisted(addons[i]->ID(),addons[i]->Version().c_str()))
     {
-      if (g_guiSettings.GetBool("general.addonautoupdate") || addon->Type() >= ADDON_VIZ_LIBRARY)
+      if (CSettings::Get().GetBool("general.addonautoupdate") || addon->Type() >= ADDON_VIZ_LIBRARY)
       {
         CStdString referer;
         if (URIUtils::IsInternetStream(addons[i]->Path()))
@@ -234,7 +235,7 @@ bool CRepositoryUpdateJob::DoWork()
         else
           CAddonInstaller::Get().Install(addon->ID(), true, referer);
       }
-      else if (g_guiSettings.GetBool("general.addonnotifications"))
+      else if (CSettings::Get().GetBool("general.addonnotifications"))
       {
         CGUIDialogKaiToast::QueueNotification(addon->Icon(),
                                               g_localizeStrings.Get(24061),
@@ -274,7 +275,19 @@ VECADDONS CRepositoryUpdateJob::GrabAddons(RepositoryPtr& repo)
       CLog::Log(LOGERROR,"Repository %s returned no add-ons, listing may have failed",repo->Name().c_str());
       reposum = checksum; // don't update the checksum
     }
-    database.AddRepository(repo->ID(),addons,reposum);
+    else
+    {
+      bool add=true;
+      if (!repo->Props().libname.empty())
+      {
+        CFileItemList dummy;
+        CStdString s;
+        s.Format("plugin://%s/?action=update", repo->ID());
+        add = CDirectory::GetDirectory(s, dummy);
+      }
+      if (add)
+        database.AddRepository(repo->ID(),addons,reposum);
+    }
   }
   else
     database.GetRepository(repo->ID(),addons);

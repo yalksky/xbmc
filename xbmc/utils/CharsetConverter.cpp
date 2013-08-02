@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,6 +22,8 @@
 #include "Util.h"
 #include <fribidi/fribidi.h>
 #include "LangInfo.h"
+#include "guilib/LocalizeStrings.h"
+#include "settings/Setting.h"
 #include "threads/SingleLock.h"
 #include "log.h"
 
@@ -35,7 +37,7 @@
   #define WCHAR_CHARSET "UTF-32LE"
 #endif
   #define UTF8_SOURCE "UTF-8-MAC"
-#elif defined(WIN32)
+#elif defined(TARGET_WINDOWS)
   #define WCHAR_CHARSET "UTF-16LE"
   #define UTF8_SOURCE "UTF-8"
   #pragma comment(lib, "libfribidi.lib")
@@ -337,6 +339,19 @@ static void logicalToVisualBiDi(const CStdStringA& strSource, CStdStringA& strDe
 
 CCharsetConverter::CCharsetConverter()
 {
+}
+
+void CCharsetConverter::OnSettingChanged(const CSetting *setting)
+{
+  if (setting == NULL)
+    return;
+
+  const std::string &settingId = setting->GetId();
+  // TODO: does this make any sense at all for subtitles and karaoke?
+  if (settingId == "subtitles.charset" ||
+      settingId == "karaoke.charset" ||
+      settingId == "locale.charset")
+    reset();
 }
 
 void CCharsetConverter::clear()
@@ -699,4 +714,14 @@ bool CCharsetConverter::isValidUtf8(const CStdString& str)
 void CCharsetConverter::utf8logicalToVisualBiDi(const CStdStringA& strSource, CStdStringA& strDest)
 {
   logicalToVisualBiDi(strSource, strDest, FRIBIDI_UTF8, FRIBIDI_TYPE_RTL);
+}
+
+void CCharsetConverter::SettingOptionsCharsetsFiller(const CSetting *setting, std::vector< std::pair<std::string, std::string> > &list, std::string &current)
+{
+  vector<CStdString> vecCharsets = g_charsetConverter.getCharsetLabels();
+  sort(vecCharsets.begin(), vecCharsets.end(), sortstringbyname());
+
+  list.push_back(make_pair(g_localizeStrings.Get(13278), "DEFAULT")); // "Default"
+  for (int i = 0; i < (int) vecCharsets.size(); ++i)
+    list.push_back(make_pair(vecCharsets[i], g_charsetConverter.getCharsetNameByLabel(vecCharsets[i])));
 }

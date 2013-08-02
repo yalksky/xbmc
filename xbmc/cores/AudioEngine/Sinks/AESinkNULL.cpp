@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2010-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -110,9 +110,6 @@ unsigned int CAESinkNULL::AddPackets(uint8_t *data, unsigned int frames, bool ha
     m_sinkbuffer_level += frames * m_sink_frameSize;
     m_wake.Set();
   }
-  // AddPackets runs under a non-idled AE thread we must block or sleep.
-  // Trying to calc the optimal sleep is tricky so just a minimal sleep.
-  Sleep(10);
 
   return frames;
 }
@@ -163,7 +160,7 @@ void CAESinkNULL::Process()
       // an approximate sleep time.
       int frames_written = read_bytes / m_sink_frameSize;
       double empty_ms = 1000.0 * (double)frames_written / m_format.m_sampleRate;
-      #if defined(_LINUX)
+      #if defined(TARGET_POSIX)
         usleep(empty_ms * 1000.0);
       #else
         Sleep((int)empty_ms);

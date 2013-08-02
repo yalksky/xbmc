@@ -1,7 +1,7 @@
 #pragma once
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -120,6 +120,17 @@ public:
 
   // scraper media functions
   CScraperUrl NfoUrl(const CStdString &sNfoContent);
+
+  /*! \brief Resolve an external ID (e.g. MusicBrainz IDs) to a URL using scrapers
+   If we have an ID in hand, e.g. MusicBrainz IDs or TheTVDB Season IDs
+   we can get directly to a URL instead of searching by name and choosing from 
+   the search results. The correct scraper type should be used to get the right
+   URL for a given ID, so we can differentiate albums, artists, TV Seasons, etc.
+   \param externalID the external ID - e.g. MusicBrainzArtist/AlbumID
+   \return a populated URL pointing to the details page for the given ID or
+           an empty URL if we couldn't resolve the ID.
+   */
+  CScraperUrl ResolveIDToUrl(const CStdString &externalID);
 
   std::vector<CScraperUrl> FindMovie(XFILE::CCurlFile &fcurl,
     const CStdString &sMovie, bool fFirst);

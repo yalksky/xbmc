@@ -22,6 +22,7 @@
 #include "system.h"
 #include "bus/PeripheralBus.h"
 #include "devices/Peripheral.h"
+#include "settings/ISettingCallback.h"
 #include "threads/CriticalSection.h"
 #include "threads/Thread.h"
 
@@ -36,7 +37,7 @@ namespace PERIPHERALS
 {
   #define g_peripherals CPeripherals::Get()
 
-  class CPeripherals
+  class CPeripherals : public ISettingCallback
   {
   public:
     static CPeripherals &Get(void);
@@ -168,6 +169,14 @@ namespace PERIPHERALS
     virtual bool ToggleMute(void);
 
     /*!
+     * @brief Try to toggle the playing device state via a peripheral.
+     * @param mode Whether to activate, put on standby or toggle the source.
+     * @param iPeripheral Optional CPeripheralCecAdapter pointer to a specific device, instead of iterating through all of them.
+     * @return True when the playing device has been switched on, false otherwise.
+     */
+    virtual bool ToggleDeviceState(const CecStateChange mode = STATE_SWITCH_TOGGLE, const unsigned int iPeripheral = 0);
+
+    /*!
      * @brief Try to mute the audio via a peripheral.
      * @return True when this change was handled by a peripheral (and should not be handled by anything else), false otherwise.
      */
@@ -195,6 +204,9 @@ namespace PERIPHERALS
       return false;
 #endif
     }
+    
+    virtual void OnSettingChanged(const CSetting *setting);
+    virtual void OnSettingAction(const CSetting *setting);
 
   private:
     CPeripherals(void);

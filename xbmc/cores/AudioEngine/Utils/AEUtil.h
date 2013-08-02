@@ -27,6 +27,9 @@
 #ifdef TARGET_WINDOWS
 #if _M_IX86_FP>0 && !defined(__SSE__)
 #define __SSE__
+#if _M_IX86_FP>1 && !defined(__SSE2__)
+#define __SSE2__
+#endif
 #endif
 #endif
 
@@ -36,17 +39,38 @@
 #define __m128 void
 #endif
 
+#ifdef __SSE2__
+#include <emmintrin.h>
+#endif
+
 #ifdef __GNUC__
   #define MEMALIGN(b, x) x __attribute__((aligned(b)))
 #else
   #define MEMALIGN(b, x) __declspec(align(b)) x
 #endif
 
+#define AUDIO_IS_BITSTREAM(x) ((x) == AUDIO_IEC958 || (x) == AUDIO_HDMI)
+
+enum AudioOutputs
+{
+  AUDIO_ANALOG  = 0,
+  AUDIO_IEC958,
+  AUDIO_HDMI
+};
+
+// AV sync options
+enum AVSync
+{
+  SYNC_DISCON   = 0,
+  SYNC_SKIPDUP,
+  SYNC_RESAMPLE
+};
+
 class CAEUtil
 {
 private:
   static unsigned int m_seed;
-  #ifdef __SSE__
+  #ifdef __SSE2__
     static __m128i m_sseSeed;
   #endif
 
