@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,8 +19,8 @@
  */
 
 #include "LabelFormatter.h"
-#include "settings/GUISettings.h"
 #include "settings/AdvancedSettings.h"
+#include "settings/Settings.h"
 #include "RegExp.h"
 #include "Util.h"
 #include "video/VideoInfoTag.h"
@@ -108,7 +108,7 @@ CLabelFormatter::CLabelFormatter(const CStdString &mask, const CStdString &mask2
   AssembleMask(0, mask);
   AssembleMask(1, mask2);
   // save a bool for faster lookups
-  m_hideFileExtensions = !g_guiSettings.GetBool("filelists.showextensions");
+  m_hideFileExtensions = !CSettings::Get().GetBool("filelists.showextensions");
 }
 
 CStdString CLabelFormatter::GetContent(unsigned int label, const CFileItem *item) const
@@ -262,7 +262,7 @@ CStdString CLabelFormatter::GetMaskContent(const CMaskString &mask, const CFileI
   case 'E':
     if (movie && movie->m_iEpisode > 0)
     { // episode number
-      if (movie->m_iSpecialSortEpisode > 0)
+      if (movie->m_iSeason == 0)
         value.Format("S%02.2i", movie->m_iEpisode);
       else
         value.Format("%02.2i", movie->m_iEpisode);
@@ -275,8 +275,8 @@ CStdString CLabelFormatter::GetMaskContent(const CMaskString &mask, const CFileI
   case 'H':
     if (movie && movie->m_iEpisode > 0)
     { // season*100+episode number
-      if (movie->m_iSpecialSortSeason > 0)
-        value.Format("Sx%02.2i", movie->m_iEpisode);
+      if (movie->m_iSeason == 0)
+        value.Format("S%02.2i", movie->m_iEpisode);
       else
         value.Format("%ix%02.2i", movie->m_iSeason,movie->m_iEpisode);
     }

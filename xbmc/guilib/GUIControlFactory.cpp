@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
  *
  */
 
+#include "system.h"
 #include "GUIControlFactory.h"
 #include "LocalizeStrings.h"
 #include "GUIButtonControl.h"
@@ -59,10 +60,10 @@
 #include "utils/XMLUtils.h"
 #include "GUIFontManager.h"
 #include "GUIColorManager.h"
-#include "settings/Settings.h"
 #include "utils/RssManager.h"
 #include "utils/StringUtils.h"
 #include "GUIAction.h"
+#include "utils/RssReader.h"
 
 using namespace std;
 using namespace EPG;
@@ -254,6 +255,7 @@ bool CGUIControlFactory::GetTexture(const TiXmlNode* pRootNode, const char* strT
   const char *flipY = pNode->Attribute("flipy");
   if (flipY && strcmpi(flipY, "true") == 0) image.orientation = 3 - image.orientation;  // either 3 or 2
   image.diffuse = pNode->Attribute("diffuse");
+  image.diffuseColor.Parse(pNode->Attribute("colordiffuse"), 0);
   const char *background = pNode->Attribute("background");
   if (background && strnicmp(background, "true", 4) == 0)
     image.useLarge = true;
@@ -1064,15 +1066,9 @@ CGUIControl* CGUIControlFactory::Create(int parentID, const CRect &rect, TiXmlEl
     control = new CGUIRSSControl(
       parentID, id, posX, posY, width, height,
       labelInfo, textColor3, headlineColor, strRSSTags);
-
     RssUrls::const_iterator iter = CRssManager::Get().GetUrls().find(iUrlSet);
     if (iter != CRssManager::Get().GetUrls().end())
-    {
-      ((CGUIRSSControl *)control)->SetUrls(iter->second.url,iter->second.rtl);
-      ((CGUIRSSControl *)control)->SetIntervals(iter->second.interval);
-    }
-    else
-      CLog::Log(LOGERROR,"invalid rss url set referenced in skin");
+      ((CGUIRSSControl *)control)->SetUrlSet(iUrlSet);
   }
   else if (type == CGUIControl::GUICONTROL_BUTTON)
   {

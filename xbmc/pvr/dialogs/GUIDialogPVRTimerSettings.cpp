@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2012-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,7 +21,6 @@
 #include "GUIDialogPVRTimerSettings.h"
 #include "guilib/GUIKeyboardFactory.h"
 #include "dialogs/GUIDialogNumeric.h"
-#include "settings/GUISettings.h"
 #include "guilib/LocalizeStrings.h"
 
 #include "pvr/PVRManager.h"
@@ -48,7 +47,10 @@ CGUIDialogPVRTimerSettings::CGUIDialogPVRTimerSettings(void)
   : CGUIDialogSettings(WINDOW_DIALOG_PVR_TIMER_SETTING, "DialogPVRTimerSettings.xml")
 {
   m_cancelled = true;
-  m_tmp_day   = 11;
+  m_tmp_day = 11;
+  m_bTimerActive = false;
+  m_tmp_iFirstDay = 0;
+  m_timerItem = NULL;
   m_loadType = LOAD_EVERY_TIME;
 }
 

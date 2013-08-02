@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2010-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
 #include "DVDAudioCodecPassthrough.h"
 #include "DVDCodecs/DVDCodecs.h"
 #include "DVDStreamInfo.h"
-#include "settings/GUISettings.h"
+#include "cores/AudioEngine/Utils/AEUtil.h"
 #include "settings/Settings.h"
 #include "utils/log.h"
 
@@ -49,17 +49,17 @@ bool CDVDAudioCodecPassthrough::Open(CDVDStreamInfo &hints, CDVDCodecOptions &op
   bool bSupportsTrueHDOut = false;
   bool bSupportsDTSHDOut  = false;
 
-  int audioMode = g_guiSettings.GetInt("audiooutput.mode");
+  int audioMode = CSettings::Get().GetInt("audiooutput.mode");
   if (AUDIO_IS_BITSTREAM(audioMode))
   {
-    bSupportsAC3Out = g_guiSettings.GetBool("audiooutput.ac3passthrough");
-    bSupportsDTSOut = g_guiSettings.GetBool("audiooutput.dtspassthrough");
+    bSupportsAC3Out = CSettings::Get().GetBool("audiooutput.ac3passthrough");
+    bSupportsDTSOut = CSettings::Get().GetBool("audiooutput.dtspassthrough");
   }
 
   if (audioMode == AUDIO_HDMI)
   {
-    bSupportsTrueHDOut = g_guiSettings.GetBool("audiooutput.truehdpassthrough");
-    bSupportsDTSHDOut  = g_guiSettings.GetBool("audiooutput.dtshdpassthrough" ) && bSupportsDTSOut;
+    bSupportsTrueHDOut = CSettings::Get().GetBool("audiooutput.truehdpassthrough");
+    bSupportsDTSHDOut  = CSettings::Get().GetBool("audiooutput.dtshdpassthrough" ) && bSupportsDTSOut;
   }
 
   /* only get the dts core from the parser if we don't support dtsHD */
@@ -67,12 +67,12 @@ bool CDVDAudioCodecPassthrough::Open(CDVDStreamInfo &hints, CDVDCodecOptions &op
   m_bufferSize = 0;
 
   if (
-      (hints.codec == CODEC_ID_AC3 && bSupportsAC3Out) ||
-      (hints.codec == CODEC_ID_DTS && bSupportsDTSOut) ||
+      (hints.codec == AV_CODEC_ID_AC3 && bSupportsAC3Out) ||
+      (hints.codec == AV_CODEC_ID_DTS && bSupportsDTSOut) ||
       (audioMode == AUDIO_HDMI &&
         (
-          (hints.codec == CODEC_ID_EAC3   && bSupportsAC3Out   ) ||
-          (hints.codec == CODEC_ID_TRUEHD && bSupportsTrueHDOut)
+          (hints.codec == AV_CODEC_ID_EAC3   && bSupportsAC3Out   ) ||
+          (hints.codec == AV_CODEC_ID_TRUEHD && bSupportsTrueHDOut)
         )
       )
   )
@@ -144,7 +144,7 @@ void CDVDAudioCodecPassthrough::Dispose()
   m_bufferSize = 0;
 }
 
-int CDVDAudioCodecPassthrough::Decode(BYTE* pData, int iSize)
+int CDVDAudioCodecPassthrough::Decode(uint8_t* pData, int iSize)
 {
   if (iSize <= 0) return 0;
 
@@ -159,7 +159,7 @@ int CDVDAudioCodecPassthrough::Decode(BYTE* pData, int iSize)
   return used;
 }
 
-int CDVDAudioCodecPassthrough::GetData(BYTE** dst)
+int CDVDAudioCodecPassthrough::GetData(uint8_t** dst)
 {
   int size = m_packer.GetSize();
   *dst     = m_packer.GetBuffer();

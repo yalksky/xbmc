@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -26,7 +26,6 @@
 #include "guilib/GUIImage.h"
 #include "guilib/GUIControlGroupList.h"
 #include "guilib/LocalizeStrings.h"
-#include "settings/GUISettings.h"
 #include "utils/log.h"
 #include "guilib/GUIKeyboardFactory.h"
 

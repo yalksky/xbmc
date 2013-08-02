@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -44,6 +44,8 @@
 #include "addons/AddonInstaller.h"
 #include "addons/AddonManager.h"
 #include "addons/PluginSource.h"
+#include "interfaces/generic/ScriptInvocationManager.h"
+#include "network/NetworkServices.h"
 #include "utils/log.h"
 #include "storage/MediaManager.h"
 #include "utils/RssManager.h"
@@ -79,10 +81,6 @@
 
 #endif
 
-#ifdef HAS_PYTHON
-#include "interfaces/python/XBPython.h"
-#endif
-
 #if defined(TARGET_DARWIN)
 #include "filesystem/SpecialProtocol.h"
 #include "osx/CocoaInterface.h"
@@ -93,7 +91,8 @@
 #endif
 
 #include <vector>
-#include "xbmc/settings/AdvancedSettings.h"
+#include "settings/AdvancedSettings.h"
+#include "settings/DisplaySettings.h"
 
 using namespace std;
 using namespace XFILE;
@@ -121,10 +120,12 @@ const BUILT_IN commands[] = {
   { "Suspend",                    false,  "Suspends the system" },
   { "InhibitIdleShutdown",        false,  "Inhibit idle shutdown" },
   { "AllowIdleShutdown",          false,  "Allow idle shutdown" },
+  { "ActivateScreensaver",        false,  "Activate Screensaver" },
   { "RestartApp",                 false,  "Restart XBMC" },
   { "Minimize",                   false,  "Minimize XBMC" },
   { "Reset",                      false,  "Reset the system (same as reboot)" },
   { "Mastermode",                 false,  "Control master mode" },
+  { "SetGUILanguage",             true,   "Set GUI Language" },
   { "ActivateWindow",             true,   "Activate the specified window" },
   { "ActivateWindowAndFocus",     true,   "Activate the specified window and sets focus to the specified id" },
   { "ReplaceWindowAndFocus",      true,   "Replaces the current window with the new one and sets focus to the specified id" },
@@ -203,6 +204,9 @@ const BUILT_IN commands[] = {
   { "UpdateAddonRepos",           false,  "Check add-on repositories for updates" },
   { "UpdateLocalAddons",          false,  "Check for local add-on changes" },
   { "ToggleDPMS",                 false,  "Toggle DPMS mode manually"},
+  { "CECToggleState",             false,  "Toggle state of playing device via a CEC peripheral"},
+  { "CECActivateSource",          false,  "Wake up playing device via a CEC peripheral"},
+  { "CECStandby",                 false,  "Put playing device on standby via a CEC peripheral"},
   { "Weather.Refresh",            false,  "Force weather data refresh"},
   { "Weather.LocationNext",       false,  "Switch to next weather location"},
   { "Weather.LocationPrevious",   false,  "Switch to previous weather location"},
@@ -289,6 +293,10 @@ int CBuiltins::Execute(const CStdString& execString)
     bool inhibit = (params.size() == 1 && params[0].Equals("true"));
     CApplicationMessenger::Get().InhibitIdleShutdown(inhibit);
   }
+  else if (execute.Equals("activatescreensaver"))
+  {
+    CApplicationMessenger::Get().ActivateScreensaver();
+  }
   else if (execute.Equals("minimize"))
   {
     CApplicationMessenger::Get().Minimize();
@@ -323,6 +331,13 @@ int CBuiltins::Execute(const CStdString& execString)
     CUtil::DeleteVideoDatabaseDirectoryCache();
     CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE);
     g_windowManager.SendMessage(msg);
+  }
+  else if (execute.Equals("setguilanguage"))
+  {
+    if (params.size())
+    {
+      CApplicationMessenger::Get().SetGUILanguage(params[0]);
+    }
   }
   else if (execute.Equals("takescreenshot"))
   {
@@ -373,7 +388,7 @@ int CBuiltins::Execute(const CStdString& execString)
     {
       // disable the screensaver
       g_application.WakeUpScreenSaverAndDPMS();
-#if defined(__APPLE__) && defined(__arm__)
+#if defined(TARGET_DARWIN_IOS)
       if (params[0].Equals("shutdownmenu"))
         CBuiltins::Execute("Quit");
 #endif
@@ -399,8 +414,7 @@ int CBuiltins::Execute(const CStdString& execString)
   else if (execute.Equals("runscript") && params.size())
   {
 #if defined(TARGET_DARWIN_OSX)
-    if (URIUtils::GetExtension(strParameterCaseIntact) == ".applescript" ||
-        URIUtils::GetExtension(strParameterCaseIntact) == ".scpt")
+    if (URIUtils::HasExtension(strParameterCaseIntact, ".applescript|.scpt"))
     {
       CStdString osxPath = CSpecialProtocol::TranslatePath(strParameterCaseIntact);
       Cocoa_DoAppleScriptFile(osxPath.c_str());
@@ -408,8 +422,9 @@ int CBuiltins::Execute(const CStdString& execString)
     else
 #endif
     {
-#ifdef HAS_PYTHON
-      vector<CStdString> argv = params;
+      vector<string> argv;
+      for (vector<CStdString>::const_iterator param = params.begin(); param != params.end(); ++param)
+        argv.push_back(*param);
 
       vector<CStdString> path;
       //split the path up to find the filename
@@ -422,8 +437,7 @@ int CBuiltins::Execute(const CStdString& execString)
       if (CAddonMgr::Get().GetAddon(params[0], script))
         scriptpath = script->LibPath();
 
-      g_pythonParser.evalFile(scriptpath, argv,script);
-#endif
+      CScriptInvocationManager::Get().Execute(scriptpath, script, argv);
     }
   }
 #if defined(TARGET_DARWIN_OSX)
@@ -434,7 +448,6 @@ int CBuiltins::Execute(const CStdString& execString)
 #endif
   else if (execute.Equals("stopscript"))
   {
-#ifdef HAS_PYTHON
     CStdString scriptpath(params[0]);
 
     // Test to see if the param is an addon ID
@@ -442,8 +455,7 @@ int CBuiltins::Execute(const CStdString& execString)
     if (CAddonMgr::Get().GetAddon(params[0], script))
       scriptpath = script->LibPath();
 
-    g_pythonParser.StopScript(scriptpath);
-#endif
+    CScriptInvocationManager::Get().Stop(scriptpath);
   }
   else if (execute.Equals("system.exec"))
   {
@@ -471,7 +483,6 @@ int CBuiltins::Execute(const CStdString& execString)
     if (g_graphicsContext.IsValidResolution(res))
     {
       CDisplaySettings::Get().SetCurrentResolution(res, true);
-      g_graphicsContext.SetVideoResolution(res);
       g_application.ReloadSkin();
     }
   }
@@ -636,6 +647,18 @@ int CBuiltins::Execute(const CStdString& execString)
       }
     }
   }
+  else if (execute.Equals("showPicture"))
+  {
+    if (!params.size())
+    {
+      CLog::Log(LOGERROR, "XBMC.ShowPicture called with empty parameter");
+      return -2;
+    }
+    CGUIMessage msg(GUI_MSG_SHOW_PICTURE, 0, 0);
+    msg.SetStringParam(params[0]);
+    CGUIWindow *pWindow = g_windowManager.GetWindow(WINDOW_SLIDESHOW);
+    if (pWindow) pWindow->OnMessage(msg);
+  }
   else if (execute.Equals("slideShow") || execute.Equals("recursiveslideShow"))
   {
     if (!params.size())
@@ -768,7 +791,6 @@ int CBuiltins::Execute(const CStdString& execString)
     else if (parameter.Left(14).Equals("seekpercentage"))
     {
       CStdString offset = "";
-      float offsetpercent;
       if (parameter.size() == 14)
         CLog::Log(LOGERROR,"PlayerControl(seekpercentage(n)) called with no argument");
       else if (parameter.size() < 17) // arg must be at least "(N)"
@@ -777,7 +799,7 @@ int CBuiltins::Execute(const CStdString& execString)
       {
         // Don't bother checking the argument: an invalid arg will do seek(0)
         offset = parameter.Mid(15).TrimRight(")");
-        offsetpercent = (float) atof(offset.c_str());
+        float offsetpercent = (float) atof(offset.c_str());
         if (offsetpercent < 0 || offsetpercent > 100)
           CLog::Log(LOGERROR,"PlayerControl(seekpercentage(n)) argument, %f, must be 0-100", offsetpercent);
         else if (g_application.IsPlaying())
@@ -835,11 +857,11 @@ int CBuiltins::Execute(const CStdString& execString)
       {
       case PLAYLIST_MUSIC:
         CMediaSettings::Get().SetMusicPlaylistShuffled(g_playlistPlayer.IsShuffled(iPlaylist));
-        g_settings.Save();
+        CSettings::Get().Save();
         break;
       case PLAYLIST_VIDEO:
         CMediaSettings::Get().SetVideoPlaylistShuffled(g_playlistPlayer.IsShuffled(iPlaylist));
-        g_settings.Save();
+        CSettings::Get().Save();
       }
 
       // send message
@@ -879,11 +901,11 @@ int CBuiltins::Execute(const CStdString& execString)
       {
       case PLAYLIST_MUSIC:
         CMediaSettings::Get().SetMusicPlaylistRepeat(state == PLAYLIST::REPEAT_ALL);
-        g_settings.Save();
+        CSettings::Get().Save();
         break;
       case PLAYLIST_VIDEO:
         CMediaSettings::Get().SetVideoPlaylistRepeat(state == PLAYLIST::REPEAT_ALL);
-        g_settings.Save();
+        CSettings::Get().Save();
       }
 
       // send messages so now playing window can get updated
@@ -1044,7 +1066,7 @@ int CBuiltins::Execute(const CStdString& execString)
   {
     int setting = CSkinSettings::Get().TranslateBool(parameter);
     CSkinSettings::Get().SetBool(setting, !CSkinSettings::Get().GetBool(setting));
-    g_settings.Save();
+    CSettings::Get().Save();
   }
   else if (execute.Equals("skin.setbool") && params.size())
   {
@@ -1052,23 +1074,23 @@ int CBuiltins::Execute(const CStdString& execString)
     {
       int string = CSkinSettings::Get().TranslateBool(params[0]);
       CSkinSettings::Get().SetBool(string, params[1].CompareNoCase("true") == 0);
-      g_settings.Save();
+      CSettings::Get().Save();
       return 0;
     }
     // default is to set it to true
     int setting = CSkinSettings::Get().TranslateBool(params[0]);
     CSkinSettings::Get().SetBool(setting, true);
-    g_settings.Save();
+    CSettings::Get().Save();
   }
   else if (execute.Equals("skin.reset"))
   {
     CSkinSettings::Get().Reset(parameter);
-    g_settings.Save();
+    CSettings::Get().Save();
   }
   else if (execute.Equals("skin.resetsettings"))
   {
     CSkinSettings::Get().Reset();
-    g_settings.Save();
+    CSettings::Get().Save();
   }
   else if (execute.Equals("skin.theme"))
   {
@@ -1079,11 +1101,11 @@ int CBuiltins::Execute(const CStdString& execString)
     int iTheme = -1;
 
     // find current theme
-    if (!g_guiSettings.GetString("lookandfeel.skintheme").Equals("SKINDEFAULT"))
+    if (!StringUtils::EqualsNoCase(CSettings::Get().GetString("lookandfeel.skintheme"), "SKINDEFAULT"))
     {
       for (unsigned int i=0;i<vecTheme.size();++i)
       {
-        CStdString strTmpTheme(g_guiSettings.GetString("lookandfeel.skintheme"));
+        CStdString strTmpTheme(CSettings::Get().GetString("lookandfeel.skintheme"));
         URIUtils::RemoveExtension(strTmpTheme);
         if (vecTheme[i].Equals(strTmpTheme))
         {
@@ -1107,12 +1129,12 @@ int CBuiltins::Execute(const CStdString& execString)
     if (iTheme != -1 && iTheme < (int)vecTheme.size())
       strSkinTheme = vecTheme[iTheme];
 
-    g_guiSettings.SetString("lookandfeel.skintheme", strSkinTheme);
+    CSettings::Get().SetString("lookandfeel.skintheme", strSkinTheme);
     // also set the default color theme
     CStdString colorTheme(URIUtils::ReplaceExtension(strSkinTheme, ".xml"));
     if (colorTheme.Equals("Textures.xml"))
       colorTheme = "defaults.xml";
-    g_guiSettings.SetString("lookandfeel.skincolors", colorTheme);
+    CSettings::Get().SetString("lookandfeel.skincolors", colorTheme);
     g_application.ReloadSkin();
   }
   else if (execute.Equals("skin.setstring") || execute.Equals("skin.setimage") || execute.Equals("skin.setfile") ||
@@ -1126,7 +1148,7 @@ int CBuiltins::Execute(const CStdString& execString)
       if (execute.Equals("skin.setstring"))
       {
         CSkinSettings::Get().SetString(string, params[1]);
-        g_settings.Save();
+        CSettings::Get().Save();
         return 0;
       }
     }
@@ -1225,7 +1247,7 @@ int CBuiltins::Execute(const CStdString& execString)
       if (CGUIDialogFileBrowser::ShowAndGetDirectory(localShares, g_localizeStrings.Get(1031), value))
         CSkinSettings::Get().SetString(string, value);
     }
-    g_settings.Save();
+    CSettings::Get().Save();
   }
   else if (execute.Equals("skin.setaddon") && params.size() > 1)
   {
@@ -1241,7 +1263,7 @@ int CBuiltins::Execute(const CStdString& execString)
     if (types.size() > 0 && CGUIWindowAddonBrowser::SelectAddonID(types, result, true) == 1)
     {
       CSkinSettings::Get().SetString(string, result);
-      g_settings.Save();
+      CSettings::Get().Save();
     }
   }
   else if (execute.Equals("dialog.close") && params.size())
@@ -1282,8 +1304,8 @@ int CBuiltins::Execute(const CStdString& execString)
     CProfilesManager::Get().LoadMasterProfileForLogin();
     g_passwordManager.bMasterUser = false;
     g_windowManager.ActivateWindow(WINDOW_LOGIN_SCREEN);
-    if (!g_application.StartEventServer()) // event server could be needed in some situations
-      CGUIDialogKaiToast::QueueNotification("DefaultIconWarning.png", g_localizeStrings.Get(33102), g_localizeStrings.Get(33100));
+    if (!CNetworkServices::Get().StartEventServer()) // event server could be needed in some situations
+      CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Warning, g_localizeStrings.Get(33102), g_localizeStrings.Get(33100));
   }
   else if (execute.Equals("pagedown"))
   {
@@ -1408,7 +1430,7 @@ int CBuiltins::Execute(const CStdString& execString)
       else
       {
         if (URIUtils::HasSlashAtEnd(path))
-          URIUtils::AddFileToFolder(path, "musicdb.xml", path);
+          path = URIUtils::AddFileToFolder(path, "musicdb.xml");
         CMusicDatabase musicdatabase;
         musicdatabase.Open();
         musicdatabase.ExportToXML(path, singleFile, thumbs, overwrite);
@@ -1572,6 +1594,18 @@ int CBuiltins::Execute(const CStdString& execString)
   {
     g_application.ToggleDPMS(true);
   }
+  else if (execute.Equals("cectogglestate"))
+  {
+    CApplicationMessenger::Get().CECToggleState();
+  }
+  else if (execute.Equals("cecactivatesource"))
+  {
+    CApplicationMessenger::Get().CECActivateSource();
+  }
+  else if (execute.Equals("cecstandby"))
+  {
+    CApplicationMessenger::Get().CECStandby();
+  }
 #if defined(HAS_LIRC) || defined(HAS_IRSERVERSUITE)
   else if (execute.Equals("lirc.stop"))
   {
@@ -1623,8 +1657,8 @@ int CBuiltins::Execute(const CStdString& execString)
   }
   else if (execute.Equals("toggledebug"))
   {
-    bool debug = g_guiSettings.GetBool("debug.showloginfo");
-    g_guiSettings.SetBool("debug.showloginfo", !debug);
+    bool debug = CSettings::Get().GetBool("debug.showloginfo");
+    CSettings::Get().SetBool("debug.showloginfo", !debug);
     g_advancedSettings.SetDebugMode(!debug);
   }
   else if (execute.Equals("startpvrmanager"))

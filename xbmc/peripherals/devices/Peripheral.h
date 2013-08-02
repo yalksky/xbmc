@@ -25,9 +25,18 @@
 
 class TiXmlDocument;
 
+class CSetting;
+
 namespace PERIPHERALS
 {
   class CGUIDialogPeripheralSettings;
+
+  typedef enum
+  {
+    STATE_SWITCH_TOGGLE,
+    STATE_ACTIVATE_SOURCE,
+    STATE_STANDBY
+  } CecStateChange;
 
   class CPeripheral
   {

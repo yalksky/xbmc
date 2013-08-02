@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,18 +24,18 @@
 #include "GraphicContext.h"
 #include "DirectXGraphics.h"
 #include "utils/log.h"
-#ifndef _LINUX
+#ifndef TARGET_POSIX
 #include <sys/stat.h>
 #include "utils/CharsetConverter.h"
 #endif
 #include <lzo/lzo1x.h>
 #include "addons/Skin.h"
-#include "settings/GUISettings.h"
+#include "settings/Settings.h"
 #include "filesystem/SpecialProtocol.h"
 #include "utils/EndianSwap.h"
 #include "utils/URIUtils.h"
 
-#ifdef _WIN32
+#ifdef TARGET_WINDOWS
 #pragma comment(lib,"liblzo2.lib")
 #endif
 
@@ -125,7 +125,7 @@ bool CTextureBundleXPR::OpenBundle()
   {
     // if we are the theme bundle, we only load if the user has chosen
     // a valid theme (or the skin has a default one)
-    CStdString theme = g_guiSettings.GetString("lookandfeel.skintheme");
+    CStdString theme = CSettings::Get().GetString("lookandfeel.skintheme");
     if (!theme.IsEmpty() && theme.CompareNoCase("SKINDEFAULT"))
     {
       CStdString themeXPR(URIUtils::ReplaceExtension(theme, ".xpr"));
@@ -140,7 +140,7 @@ bool CTextureBundleXPR::OpenBundle()
 
   strPath = CSpecialProtocol::TranslatePathConvertCase(strPath);
 
-#ifndef _LINUX
+#ifndef TARGET_POSIX
   CStdStringW strPathW;
   g_charsetConverter.utf8ToW(CSpecialProtocol::TranslatePath(strPath), strPathW, false);
   m_hFile = _wfopen(strPathW.c_str(), L"rb");
@@ -278,13 +278,13 @@ bool CTextureBundleXPR::LoadFile(const CStdString& Filename, CAutoTexBuffer& Unp
 
   if (!buffer || !UnpackedBuf.Set((BYTE*)XPhysicalAlloc(file->second.UnpackedSize, MAXULONG_PTR, 128, PAGE_READWRITE)))
   { // failed due to lack of memory
-#ifndef _LINUX
+#ifndef TARGET_POSIX
     MEMORYSTATUSEX stat;
     stat.dwLength = sizeof(MEMORYSTATUSEX);
     GlobalMemoryStatusEx(&stat);
     CLog::Log(LOGERROR, "Out of memory loading texture: %s (need %lu bytes, have %"PRIu64" bytes)", name.c_str(),
               file->second.UnpackedSize + file->second.PackedSize, stat.ullAvailPhys);
-#elif defined(TARGET_DARWIN) || defined(__FreeBSD__)
+#elif defined(TARGET_DARWIN) || defined(TARGET_FREEBSD)
     CLog::Log(LOGERROR, "Out of memory loading texture: %s (need %d bytes)", name.c_str(),
               file->second.UnpackedSize + file->second.PackedSize);
 #else

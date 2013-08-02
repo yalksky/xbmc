@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@
 #include "dialogs/GUIDialogYesNo.h"
 #include "dialogs/GUIDialogOK.h"
 #include "dialogs/GUIDialogKaiToast.h"
-#include "settings/GUISettings.h"
+#include "settings/Settings.h"
 #include "utils/log.h"
 
 namespace ADDON
@@ -89,7 +89,7 @@ void CAddonStatusHandler::Process()
   {
     if (m_addon->Type() == ADDON_PVRDLL)
     {
-      if (!g_guiSettings.GetBool("pvrmanager.hideconnectionlostwarning"))
+      if (!CSettings::Get().GetBool("pvrmanager.hideconnectionlostwarning"))
         CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Info, m_addon->Name().c_str(), g_localizeStrings.Get(36030)); // connection lost
       // TODO handle disconnects after the add-on's been initialised
     }

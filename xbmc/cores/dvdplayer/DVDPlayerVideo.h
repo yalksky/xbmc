@@ -2,7 +2,7 @@
 
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -31,7 +31,6 @@
 #include "cores/VideoRenderers/RenderManager.h"
 #endif
 
-enum CodecID;
 class CDemuxStreamVideo;
 class CDVDOverlayCodecCC;
 
@@ -60,12 +59,6 @@ public:
   int  GetLevel();
   bool IsInited() const                             { return m_messageQueue.IsInited(); }
   void SendMessage(CDVDMsg* pMsg, int priority = 0) { m_messageQueue.Put(pMsg, priority); }
-
-#ifdef HAS_VIDEO_PLAYBACK
-  void Update(bool bPauseDrawing)                   { g_renderManager.Update(bPauseDrawing); }
-#else
-  void Update(bool bPauseDrawing)                   { }
-#endif
 
   void EnableSubtitle(bool bEnable)                 { m_bRenderSubs = bEnable; }
   bool IsSubtitleEnabled()                          { return m_bRenderSubs; }
@@ -171,17 +164,9 @@ protected:
   int m_iNrOfPicturesNotToSkip;
   int m_speed;
 
-  double m_droptime;
-  double m_dropbase;
-
   bool m_stalled;
   bool m_started;
   std::string m_codecname;
-
-  /* autosync decides on how much of clock we should use when deciding sleep time */
-  /* the value is the same as 63% timeconstant, ie that the step response of */
-  /* iSleepTime will be at 63% of iClockSleep after autosync frames */
-  unsigned int m_autosync;
 
   BitstreamStats m_videoStats;
 

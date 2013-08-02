@@ -3,7 +3,7 @@
 
 /*
  *      Copyright (C) 2010-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@
 #include "xbmc/guilib/Shader.h"
 #include "settings/VideoSettings.h"
 #include "RenderFlags.h"
+#include "RenderFormats.h"
 #include "guilib/GraphicContext.h"
 #include "BaseRenderer.h"
 #include "xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodec.h"
@@ -40,8 +41,6 @@ namespace Shaders { class BaseYUV2RGBShader; }
 namespace Shaders { class BaseVideoFilterShader; }
 class COpenMaxVideo;
 typedef std::vector<int>     Features;
-
-#define NUM_BUFFERS 3
 
 
 #undef ALIGN
@@ -123,7 +122,7 @@ public:
   CLinuxRendererGLES();
   virtual ~CLinuxRendererGLES();
 
-  virtual void Update(bool bPauseDrawing);
+  virtual void Update();
   virtual void SetupScreenshot() {};
 
   bool RenderCapture(CRenderCapture* capture);
@@ -138,6 +137,9 @@ public:
   virtual void         UnInit();
   virtual void         Reset(); /* resets renderer after seek for example */
   virtual void         ReorderDrawPoints();
+  virtual void         SetBufferSize(int numBuffers) { m_NumYV12Buffers = numBuffers; }
+  virtual unsigned int GetMaxBufferSize() { return NUM_BUFFERS; }
+  virtual unsigned int GetProcessorSize();
 
   virtual void RenderUpdate(bool clear, DWORD flags = 0, DWORD alpha = 255);
 
@@ -153,16 +155,15 @@ public:
   virtual std::vector<ERenderFormat> SupportedFormats() { return m_formats; }
 
 #ifdef HAVE_LIBOPENMAX
-  virtual void         AddProcessor(COpenMax* openMax, DVDVideoPicture *picture);
+  virtual void         AddProcessor(COpenMax* openMax, DVDVideoPicture *picture, int index);
 #endif
 #ifdef HAVE_VIDEOTOOLBOXDECODER
-  virtual void         AddProcessor(struct __CVBuffer *cvBufferRef);
+  virtual void         AddProcessor(struct __CVBuffer *cvBufferRef, int index);
 #endif
 
 protected:
   virtual void Render(DWORD flags, int index);
 
-  virtual void ManageTextures();
   int  NextYV12Texture();
   virtual bool ValidateRenderTarget();
   virtual void LoadShaders(int field=FIELD_FULL);
@@ -260,7 +261,7 @@ protected:
 
   void LoadPlane( YUVPLANE& plane, int type, unsigned flipindex
                 , unsigned width,  unsigned height
-                , int stride, void* data );
+                , unsigned int stride, void* data );
 
   Shaders::BaseYUV2RGBShader     *m_pYUVShader;
   Shaders::BaseVideoFilterShader *m_pVideoFilterShader;
@@ -280,9 +281,6 @@ protected:
   struct SwsContext *m_sw_context;
   BYTE	      *m_rgbBuffer;  // if software scale is used, this will hold the result image
   unsigned int m_rgbBufferSize;
-
-  CEvent* m_eventTexturesDone[NUM_BUFFERS];
-
 };
 
 

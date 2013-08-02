@@ -2,19 +2,22 @@
  * Many concepts and protocol specification in this code are taken
  * from Airplayer. https://github.com/PascalW/Airplayer
  *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
+ *      http://xbmc.org
  *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
+ *  This Program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2.1, or (at your option)
+ *  any later version.
  *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ *  This Program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with XBMC; see the file COPYING.  If not, see
+ *  <http://www.gnu.org/licenses/>.
+ *
  */
 
 #include "network/Network.h"
@@ -212,6 +215,14 @@ void CAirPlayServer::StopServer(bool bWait)
   }
 }
 
+bool CAirPlayServer::IsRunning()
+{
+  if (ServerInstance == NULL)
+    return false;
+
+  return ((CThread*)ServerInstance)->IsRunning();
+}
+
 void CAirPlayServer::AnnounceToClients(int state)
 {
   CSingleLock lock (m_connectionLock);
@@ -323,7 +334,7 @@ void CAirPlayServer::Process()
       {
         CLog::Log(LOGDEBUG, "AIRPLAY Server: New connection detected");
         CTCPClient newconnection;
-        newconnection.m_socket = accept(m_ServerSocket, &newconnection.m_cliaddr, &newconnection.m_addrlen);
+        newconnection.m_socket = accept(m_ServerSocket, (struct sockaddr*) &newconnection.m_cliaddr, &newconnection.m_addrlen);
         sessionCounter++;
         newconnection.m_sessionCounter = sessionCounter;
 
@@ -353,41 +364,10 @@ void CAirPlayServer::Process()
 bool CAirPlayServer::Initialize()
 {
   Deinitialize();
-
-  struct sockaddr_in myaddr;
-  memset(&myaddr, 0, sizeof(myaddr));
-
-  myaddr.sin_family = AF_INET;
-  myaddr.sin_port = htons(m_port);
-
-  if (m_nonlocal)
-    myaddr.sin_addr.s_addr = INADDR_ANY;
-  else
-    inet_pton(AF_INET, "127.0.0.1", &myaddr.sin_addr.s_addr);
-
-  m_ServerSocket = socket(PF_INET, SOCK_STREAM, 0);
-
-  if (m_ServerSocket == INVALID_SOCKET)
-  {
-
-    CLog::Log(LOGERROR, "AIRPLAY Server: Failed to create serversocket");
+  
+  if ((m_ServerSocket = CreateTCPServerSocket(m_port, !m_nonlocal, 10, "AIRPLAY")) == INVALID_SOCKET)
     return false;
-  }
-
-  if (bind(m_ServerSocket, (struct sockaddr*)&myaddr, sizeof myaddr) < 0)
-  {
-    CLog::Log(LOGERROR, "AIRPLAY Server: Failed to bind serversocket");
-    close(m_ServerSocket);
-    return false;
-  }
-
-  if (listen(m_ServerSocket, 10) < 0)
-  {
-    CLog::Log(LOGERROR, "AIRPLAY Server: Failed to set listen");
-    close(m_ServerSocket);
-    return false;
-  }
-
+  
   CLog::Log(LOGINFO, "AIRPLAY Server: Successfully initialized");
   return true;
 }
@@ -414,7 +394,7 @@ CAirPlayServer::CTCPClient::CTCPClient()
   m_socket = INVALID_SOCKET;
   m_httpParser = new HttpParser();
 
-  m_addrlen = sizeof(struct sockaddr);
+  m_addrlen = sizeof(struct sockaddr_storage);
   m_pLibPlist = new DllLibPlist();
 
   m_bAuthenticated = false;

@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2011-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -53,6 +53,10 @@ int CFileURLProtocol::Open(AML_URLContext *h, const char *filename, int flags)
     url = url.Right(url.size() - strlen("xb-"));
   }
   else if (url.Left(strlen("xb-ftps://")).Equals("xb-ftps://"))
+  {
+    url = url.Right(url.size() - strlen("xb-"));
+  }
+  else if (url.Left(strlen("xb-sftp://")).Equals("xb-sftp://"))
   {
     url = url.Right(url.size() - strlen("xb-"));
   }

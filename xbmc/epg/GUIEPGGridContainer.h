@@ -2,7 +2,7 @@
 
 /*
  *      Copyright (C) 2012-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
 #include "FileItem.h"
 #include "guilib/GUIControl.h"
 #include "guilib/GUIListItemLayout.h"
-#include "guilib/GUIBaseContainer.h"
+#include "guilib/IGUIContainer.h"
 
 namespace PVR
 {
@@ -98,7 +98,7 @@ namespace EPG
 
   protected:
     bool OnClick(int actionID);
-    bool SelectItemFromPoint(const CPoint &point);
+    bool SelectItemFromPoint(const CPoint &point, bool justGrid = true);
 
     void UpdateItems();
 
@@ -128,10 +128,17 @@ namespace EPG
 
     void ScrollToBlockOffset(int offset);
     void ScrollToChannelOffset(int offset);
-    void UpdateScrollOffset();
-    void RenderChannelItem(float posX, float posY, CGUIListItem *item, bool focused);
-    void RenderProgrammeItem(float posX, float posY, float width, float height, CGUIListItem *item, bool focused);
+    void UpdateScrollOffset(unsigned int currentTime);
+    void ProcessItem(float posX, float posY, CGUIListItem *item, CGUIListItem *&lastitem, bool focused, CGUIListItemLayout* normallayout, CGUIListItemLayout* focusedlayout, unsigned int currentTime, CDirtyRegionList &dirtyregions, float resize = -1.0f);
+    void RenderItem(float posX, float posY, CGUIListItem *item, bool focused);
     void GetCurrentLayouts();
+
+    void ProcessChannels(unsigned int currentTime, CDirtyRegionList &dirtyregions);
+    void ProcessRuler(unsigned int currentTime, CDirtyRegionList &dirtyregions);
+    void ProcessProgrammeGrid(unsigned int currentTime, CDirtyRegionList &dirtyregions);
+    void RenderChannels();
+    void RenderRuler();
+    void RenderProgrammeGrid();
 
     CPoint m_renderOffset; ///< \brief render offset of the first item in the list \sa SetRenderOffset
 
@@ -166,12 +173,11 @@ namespace EPG
                       // changing around)
 
     void FreeChannelMemory(int keepStart, int keepEnd);
-    void FreeProgrammeMemory(int keepStart, int keepEnd);
+    void FreeProgrammeMemory(int channel, int keepStart, int keepEnd);
     void FreeRulerMemory(int keepStart, int keepEnd);
 
     void GetChannelCacheOffsets(int &cacheBefore, int &cacheAfter);
     void GetProgrammeCacheOffsets(int &cacheBefore, int &cacheAfter);
-    void GetRulerCacheOffsets(int &cacheBefore, int &cacheAfter);
 
   private:
     int   m_rulerUnit; //! number of blocks that makes up one element of the ruler
@@ -210,8 +216,6 @@ namespace EPG
     GridItemsPtr *m_item;
     CGUIListItem *m_lastItem;
     CGUIListItem *m_lastChannel;
-
-    unsigned int m_renderTime;
 
     int   m_scrollTime;
     bool  m_gridWrapAround; //! only when no more data available should this be true

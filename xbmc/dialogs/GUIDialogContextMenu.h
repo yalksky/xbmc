@@ -2,7 +2,7 @@
 
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -128,6 +128,7 @@ enum CONTEXT_BUTTON { CONTEXT_BUTTON_CANCELLED = 0,
                       CONTEXT_BUTTON_TAGS_REMOVE_ITEMS,
                       CONTEXT_BUTTON_SET_MOVIESET,
                       CONTEXT_BUTTON_MOVIESET_ADD_REMOVE_ITEMS,
+                      CONTEXT_BUTTON_BROWSE_INTO,
                       CONTEXT_BUTTON_USER1,
                       CONTEXT_BUTTON_USER2,
                       CONTEXT_BUTTON_USER3,

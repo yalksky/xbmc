@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -43,7 +43,8 @@ CGUIVideoControl::~CGUIVideoControl(void)
 void CGUIVideoControl::Process(unsigned int currentTime, CDirtyRegionList &dirtyregions)
 {
   // TODO Proper processing which marks when its actually changed. Just mark always for now.
-  MarkDirtyRegion();
+  if (g_renderManager.RendererHandlesPresent())
+    MarkDirtyRegion();
 
   CGUIControl::Process(currentTime, dirtyregions);
 }
@@ -67,7 +68,7 @@ void CGUIVideoControl::Render()
 
 #ifdef HAS_VIDEO_PLAYBACK
     color_t alpha = g_graphicsContext.MergeAlpha(0xFF000000) >> 24;
-    g_renderManager.RenderUpdate(false, 0, alpha);
+    g_renderManager.Render(false, 0, alpha);
 #else
     ((CDummyVideoPlayer *)g_application.m_pPlayer)->Render();
 #endif

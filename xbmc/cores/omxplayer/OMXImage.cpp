@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2010-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,9 +18,9 @@
  *
  */
 
-#if (defined HAVE_CONFIG_H) && (!defined WIN32)
+#if (defined HAVE_CONFIG_H) && (!defined TARGET_WINDOWS)
   #include "config.h"
-#elif defined(_WIN32)
+#elif defined(TARGET_WINDOWS)
 #include "system.h"
 #endif
 
@@ -34,9 +34,9 @@
 #include <sys/time.h>
 #include <inttypes.h>
 #include "guilib/GraphicContext.h"
-#include "settings/DisplaySettings.h"
-#include "settings/GUISettings.h"
 #include "settings/AdvancedSettings.h"
+#include "settings/DisplaySettings.h"
+#include "settings/Settings.h"
 
 #ifdef CLASSNAME
 #undef CLASSNAME

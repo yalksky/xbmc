@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -34,7 +34,6 @@
 #include "filesystem/File.h"
 #include "FileItem.h"
 #include "settings/Settings.h"
-#include "settings/GUISettings.h"
 #include "guilib/LocalizeStrings.h"
 #include "TextureCache.h"
 
@@ -267,7 +266,7 @@ bool CGUIDialogProfileSettings::ShowForProfile(unsigned int iProfile, bool first
 
     bool bLock = CProfilesManager::Get().GetMasterProfile().getLockMode() != LOCK_MODE_EVERYONE && !g_passwordManager.bMasterUser;
     dialog->m_locks.addonManager = bLock;
-    dialog->m_locks.settings = bLock;
+    dialog->m_locks.settings = (bLock) ? LOCK_LEVEL::ALL : LOCK_LEVEL::NONE;
     dialog->m_locks.files = bLock;
 
     dialog->m_strDirectory.Empty();
@@ -340,12 +339,12 @@ bool CGUIDialogProfileSettings::ShowForProfile(unsigned int iProfile, bool first
         else
         {
           // create some new settings
-          CGUISettings localSettings;
-          localSettings.Initialize();
           CStdString path = URIUtils::AddFileToFolder("special://masterprofile/", dialog->m_strDirectory);
           path = URIUtils::AddFileToFolder(path, "guisettings.xml");
+
           CSettings settings;
-          settings.SaveSettings(path, &localSettings);
+          settings.Initialize();
+          settings.Save(path);
         }
       }
 

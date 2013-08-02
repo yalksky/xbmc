@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -28,9 +28,6 @@
 #include "profiles/windows/GUIWindowSettingsProfile.h"
 #include "dialogs/GUIDialogContextMenu.h"
 #include "GUIPassword.h"
-#ifdef HAS_PYTHON
-#include "interfaces/python/XBPython.h"
-#endif
 #ifdef HAS_JSONRPC
 #include "interfaces/json-rpc/JSONRPC.h"
 #endif
@@ -42,7 +39,7 @@
 #include "GUIUserMessages.h"
 #include "guilib/GUIWindowManager.h"
 #include "dialogs/GUIDialogOK.h"
-#include "settings/GUISettings.h"
+#include "settings/Settings.h"
 #include "FileItem.h"
 #include "guilib/Key.h"
 #include "guilib/LocalizeStrings.h"
@@ -234,7 +231,7 @@ bool CGUIWindowLoginScreen::OnPopupMenu(int iItem)
   if (choice == 3)
   {
     if (g_passwordManager.CheckLock(CProfilesManager::Get().GetMasterProfile().getLockMode(),CProfilesManager::Get().GetMasterProfile().getLockCode(),20075))
-      g_passwordManager.iMasterLockRetriesLeft = g_guiSettings.GetInt("masterlock.maxretries");
+      g_passwordManager.iMasterLockRetriesLeft = CSettings::Get().GetInt("masterlock.maxretries");
     else // be inconvenient
       CApplicationMessenger::Get().Shutdown();
 
@@ -306,9 +303,7 @@ void CGUIWindowLoginScreen::LoadProfile(unsigned int profile)
   ADDON::CAddonMgr::Get().ReInit();
 
   g_weatherManager.Refresh();
-#ifdef HAS_PYTHON
-  g_pythonParser.m_bLogin = true;
-#endif
+  g_application.SetLoggingIn(true);
 
 #ifdef HAS_JSONRPC
   JSONRPC::CJSONRPC::Initialize();

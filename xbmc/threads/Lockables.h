@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -48,6 +48,7 @@ namespace XbmcThreads
    */
   template<class L> class CountingLockable : public NonCopyable
   {
+    friend class ConditionVariable;
   protected:
     L mutex;
     unsigned int count;

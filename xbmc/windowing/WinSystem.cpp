@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,8 +21,8 @@
 #include "WinSystem.h"
 #include "guilib/GraphicContext.h"
 #include "settings/DisplaySettings.h"
+#include "settings/Setting.h"
 #include "settings/Settings.h"
-#include "settings/GUISettings.h"
 
 using namespace std;
 
@@ -112,17 +112,28 @@ int CWinSystemBase::DesktopResolution(int screen)
   return RES_DESKTOP;
 }
 
-static void AddResolution(vector<RESOLUTION_WHR> &resolutions, unsigned int addindex)
+static void AddResolution(vector<RESOLUTION_WHR> &resolutions, unsigned int addindex, float bestRefreshrate)
 {
-  int width  = CDisplaySettings::Get().GetResolutionInfo(addindex).iScreenWidth;
-  int height = CDisplaySettings::Get().GetResolutionInfo(addindex).iScreenHeight;
-  int interlaced = CDisplaySettings::Get().GetResolutionInfo(addindex).dwFlags & D3DPRESENTFLAG_INTERLACED;
+  RESOLUTION_INFO resInfo = CDisplaySettings::Get().GetResolutionInfo(addindex);
+  int width  = resInfo.iScreenWidth;
+  int height = resInfo.iScreenHeight;
+  int interlaced = resInfo.dwFlags & D3DPRESENTFLAG_INTERLACED;
+  float refreshrate = resInfo.fRefreshRate;
 
   for (unsigned int idx = 0; idx < resolutions.size(); idx++)
     if (   resolutions[idx].width == width
         && resolutions[idx].height == height
         && resolutions[idx].interlaced == interlaced)
-      return; // already taken care of.
+    {
+      // check if the refresh rate of this resolution is better suited than
+      // the refresh rate of the resolution with the same width/height/interlaced
+      // property and if so replace it
+      if (bestRefreshrate > 0.0 && refreshrate == bestRefreshrate)
+        resolutions[idx].ResInfo_Index = addindex;
+
+      // no need to add the resolution again
+      return;
+    }
 
   RESOLUTION_WHR res = {width, height, interlaced, (int)addindex};
   resolutions.push_back(res);
@@ -135,13 +146,16 @@ static bool resSortPredicate(RESOLUTION_WHR i, RESOLUTION_WHR j)
           || (i.width == j.width && i.height == j.height && i.interlaced != j.interlaced) );
 }
 
-vector<RESOLUTION_WHR> CWinSystemBase::ScreenResolutions(int screen)
+vector<RESOLUTION_WHR> CWinSystemBase::ScreenResolutions(int screen, float refreshrate)
 {
   vector<RESOLUTION_WHR> resolutions;
 
   for (unsigned int idx = RES_DESKTOP; idx < CDisplaySettings::Get().ResolutionInfoSize(); idx++)
-    if (CDisplaySettings::Get().GetResolutionInfo(idx).iScreen == screen)
-      AddResolution(resolutions, idx);
+  {
+    RESOLUTION_INFO info = CDisplaySettings::Get().GetResolutionInfo(idx);
+    if (info.iScreen == screen)
+      AddResolution(resolutions, idx, refreshrate);
+  }
 
   // Can't assume a sort order
   sort(resolutions.begin(), resolutions.end(), resSortPredicate);
@@ -207,8 +221,8 @@ REFRESHRATE CWinSystemBase::DefaultRefreshRate(int screen, vector<REFRESHRATE> r
 bool CWinSystemBase::UseLimitedColor()
 {
 #if defined(HAS_GL) || defined(HAS_DX)
-  static CSettingBool* setting = (CSettingBool*)g_guiSettings.GetSetting("videoscreen.limitedrange");
-  return setting->GetData();
+  static CSettingBool* setting = (CSettingBool*)CSettings::Get().GetSetting("videoscreen.limitedrange");
+  return setting->GetValue();
 #else
   return false;
 #endif

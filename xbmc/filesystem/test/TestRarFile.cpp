@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -23,7 +23,6 @@
 #include "filesystem/Directory.h"
 #include "filesystem/File.h"
 #include "filesystem/NFSFile.h"
-#include "settings/GUISettings.h"
 #include "utils/URIUtils.h"
 #include "FileItem.h"
 #include "test/TestUtils.h"

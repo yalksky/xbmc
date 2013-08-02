@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@
 #include "cores/dvdplayer/DVDStreamInfo.h"
 #include "cores/dvdplayer/DVDCodecs/DVDFactoryCodec.h"
 #include "utils/log.h"
-#include "settings/GUISettings.h"
+#include "settings/Settings.h"
 #include "URL.h"
 
 #include "AudioDecoder.h"
@@ -97,7 +97,7 @@ bool DVDPlayerCodec::Init(const CStdString &strFile, unsigned int filecache)
   }
   catch(...)
   {
-    CLog::Log(LOGERROR, "%s: Exception thrown when opeing demuxer", __FUNCTION__);
+    CLog::Log(LOGERROR, "%s: Exception thrown when opening demuxer", __FUNCTION__);
     if (m_pDemuxer)
     {
       delete m_pDemuxer;
@@ -132,7 +132,7 @@ bool DVDPlayerCodec::Init(const CStdString &strFile, unsigned int filecache)
 
   CDVDStreamInfo hint(*pStream, true);
 
-  bool passthrough = AUDIO_IS_BITSTREAM(g_guiSettings.GetInt("audiooutput.mode"));
+  bool passthrough = AUDIO_IS_BITSTREAM(CSettings::Get().GetInt("audiooutput.mode"));
   m_pAudioCodec = CDVDFactoryCodec::CreateAudioCodec(hint, passthrough);
   if (!m_pAudioCodec)
   {

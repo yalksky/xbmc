@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -132,12 +132,12 @@ bool CRarManager::CacheRarredFile(CStdString& strPathInCache, const CStdString& 
   }
 
   CStdString strPath = strPathInRar;
-#ifndef _LINUX
+#ifndef TARGET_POSIX
   strPath.Replace('/', '\\');
 #endif
   //g_charsetConverter.unknownToUTF8(strPath);
-  CStdString strCachedPath;
-  URIUtils::AddFileToFolder(strDir + "rarfolder%04d", URIUtils::GetFileName(strPathInRar), strCachedPath);
+  CStdString strCachedPath = URIUtils::AddFileToFolder(strDir + "rarfolder%04d",
+                                           URIUtils::GetFileName(strPathInRar));
   strCachedPath = CUtil::GetNextPathname(strCachedPath, 9999);
   if (strCachedPath.IsEmpty())
   {

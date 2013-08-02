@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -27,6 +27,8 @@
 #include "filesystem/SpecialProtocol.h"
 #include "settings/DisplaySettings.h"
 #include "settings/Settings.h"
+#include "settings/DisplaySettings.h"
+#include "guilib/GraphicContext.h"
 #include "guilib/Texture.h"
 #include "windowing/X11/XRandR.h"
 #include <vector>
@@ -83,8 +85,8 @@ CWinSystemX11GLES::CWinSystemX11GLES() : CWinSystemBase()
   m_eglDisplay = NULL;
   m_eglContext = NULL;
   m_eglSurface = NULL;
-  m_eglWindow  = NULL;
-  m_wmWindow   = NULL;
+  m_eglWindow  = None;
+  m_wmWindow   = None;
   m_dpy        = NULL;
   
   m_iVSyncErrors = 0;

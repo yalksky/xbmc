@@ -10,7 +10,7 @@
 
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -37,6 +37,7 @@ class CGUIFont;
 class CGUIFontTTFBase;
 class CXBMCTinyXML;
 class TiXmlNode;
+class CSetting;
 
 struct OrigFontInfo
 {
@@ -81,6 +82,8 @@ public:
 
   void ReloadTTFFonts();
   void UnloadTTFFonts();
+
+  static void SettingOptionsFontsFiller(const CSetting *setting, std::vector< std::pair<std::string, std::string> > &list, std::string &current);
 
 protected:
   void RescaleFontSizeAndAspect(float *size, float *aspect, const RESOLUTION_INFO &sourceRes, bool preserveAspect) const;

@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -13,9 +13,8 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with XBMC; see the file COPYING.  If not, write to
- *  the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
- *  http://www.gnu.org/copyleft/gpl.html
+ *  along with XBMC; see the file COPYING.  If not, see
+ *  <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -475,7 +474,11 @@ namespace XBMCAddon
                             const char* focusedColor = NULL,
                             const String& label2 = emptyString) throw(UnimplementedException);
 #ifndef SWIG
-      ControlLabel() : Control("ControlLabel") {}
+      ControlLabel() : 
+        Control ("ControlLabel"),
+        bHasPath(false),
+        iAngle  (0)
+      {}
 
       std::string strFont;
       std::string strText;
@@ -573,7 +576,10 @@ namespace XBMCAddon
       virtual String getText() throw(UnimplementedException);
 
 #ifndef SWIG
-      ControlEdit() : Control("ControlEdit") {}
+      ControlEdit() :
+        Control     ("ControlEdit"),
+        bIsPassword (false)
+      {}
 
       std::string strFont;
       std::string strText;
@@ -815,7 +821,15 @@ namespace XBMCAddon
 
       // This is called from AddonWindow.cpp but shouldn't be available
       //  to the scripting languages.
-      ControlList() : Control("ControlList") {}
+      ControlList() :
+        Control("ControlList"),
+        imageHeight     (0),
+        imageWidth      (0),
+        itemHeight      (0),
+        space           (0),
+        itemTextOffsetX (0),
+        itemTextOffsetY (0)
+      {}
 
       std::vector<AddonClass::Ref<ListItem> > vecItems;
       std::string strFont;
@@ -1016,7 +1030,10 @@ namespace XBMCAddon
       virtual void setColorDiffuse(const char* hexString) throw (UnimplementedException);
 
 #ifndef SWIG
-      ControlImage() : Control("ControlImage") {}
+      ControlImage() :
+        Control     ("ControlImage"),
+        aspectRatio (0)
+      {}
 
       std::string strFileName;
       int aspectRatio;
@@ -1066,7 +1083,10 @@ namespace XBMCAddon
       color_t colorDiffuse;
 
       SWIGHIDDENVIRTUAL CGUIControl* Create() throw (WindowException);
-      ControlProgress() : Control("ControlProgress") {}
+      ControlProgress() :
+        Control     ("ControlProgress"),
+        aspectRatio (0)
+      {}
 #endif
     };
 
@@ -1186,7 +1206,14 @@ namespace XBMCAddon
 
       SWIGHIDDENVIRTUAL CGUIControl* Create() throw (WindowException);
 
-      ControlButton() : Control("ControlButton") {}
+      ControlButton() :
+        Control     ("ControlButton"),
+        textOffsetX (0),
+        textOffsetY (0),
+        iAngle      (0),
+        shadowColor (0),
+        focusedColor(0)
+      {}
 #endif
     };
 
@@ -1294,7 +1321,11 @@ namespace XBMCAddon
 
       SWIGHIDDENVIRTUAL CGUIControl* Create() throw (WindowException);
 
-      ControlCheckMark() : Control("ControlCheckMark") {}
+      ControlCheckMark() :
+        Control     ("ControlCheckMark"),
+        checkWidth  (0),
+        checkHeight (0)
+      {}
 #endif
     };
 
@@ -1422,7 +1453,12 @@ namespace XBMCAddon
 
       SWIGHIDDENVIRTUAL CGUIControl* Create() throw (WindowException);
 
-      ControlRadioButton() : Control("ControlRadioButton") {}
+      ControlRadioButton() :
+        Control     ("ControlRadioButton"),
+        textOffsetX (0),
+        textOffsetY (0),
+        iAngle      (0)
+      {}
 #endif
     };
 	

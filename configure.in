@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT([xbmc], [12.9.3], [http://trac.xbmc.org])
+AC_INIT([xbmc], [12.9.6], [http://trac.xbmc.org])
 AC_CONFIG_HEADERS([xbmc/config.h])
 AH_TOP([#pragma once])
 m4_include([m4/ax_python_devel.m4])
@@ -30,6 +30,21 @@ AC_DEFUN([XB_ADD_PLAYER],
   esac
 ])
 
+# check for enabling additional codecs
+AC_DEFUN([XB_ADD_CODEC],
+[
+  AC_MSG_CHECKING([for $2])
+  case $add_codecs in
+    *$2*)
+      AC_SUBST([USE_$1], 1)
+      AC_DEFINE([HAS_$1], 1, [using $2])
+      AC_MSG_RESULT([enabling $2])
+      ;;
+    *)
+      AC_MSG_RESULT([$2 is not enabled])
+  esac
+])
+
 # check for library basenames
 AC_DEFUN([XB_FIND_SONAME],
 [
@@ -44,7 +59,7 @@ AC_DEFUN([XB_FIND_SONAME],
     $1_FILENAME=$($CC -nostdlib -o /dev/null $LDFLAGS -l$2 -Wl,-M 2>/dev/null | grep "^LOAD.*$2" | awk '{V=2; print $V}')
     if [[ -z $$1_FILENAME ]]; then
       #try gold linker syntax
-      $1_FILENAME=$($CC -nostdlib -o /dev/null $LDFLAGS -l$2 -Wl,-t 3>&1 1>&2 2>&3 | grep "$2")
+      $1_FILENAME=$($CC -nostdlib -o /dev/null $LDFLAGS -l$2 -Wl,-t 3>&1 1>&2 2>&3 | grep "lib$2")
     fi
     if [[ ! -z $$1_FILENAME ]]; then
       $1_SONAME=$($OBJDUMP -p $$1_FILENAME | grep "SONAME.*$2" | awk '{V=2; print $V}')
@@ -120,14 +135,14 @@ halstorage_not_found="== Could not find hal-storage. HAL support disabled. =="
 hal_disabled="== HAL support disabled. =="
 avahi_not_found="== Could not find libavahi-common or libavahi-client. Avahi support disabled. =="
 avahi_disabled="== Avahi support disabled. =="
+mdnsembedded_not_found="== Could not find mDNSEmbedded. Might prevent zeroconf support. =="
+mdnsembedded_disabled="== mDNSEmbedded support disabled. =="
 vdpau_not_found="== Could not find libvdpau. VDPAU support disabled. =="
 vdpau_disabled="== VDPAU support manually disabled. =="
 vaapi_not_found="== Could not find libva. VAAPI support disabled. =="
 vaapi_disabled="== VAAPI support manually disabled. =="
 crystalhd_not_found="== Could not find libcrystalhd. CrystalHD support disabled. =="
 crystalhd_disabled="== CrystalHD support manually disabled. =="
-vdadecoder_enabled="== VDADecoder support enabled. =="
-vdadecoder_disabled="== VDADecoder support manually disabled. =="
 vtbdecoder_enabled="== VTBDecoder support enabled. =="
 vtbdecoder_disabled="== VTBDecoder support manually disabled. =="
 openmax_disabled="== OpenMax support manually disabled. =="
@@ -140,8 +155,8 @@ libnfs_not_found="== Could not find libnfs. NFS client support disabled. =="
 libnfs_disabled="== NFS support disabled. =="
 libafpclient_not_found="== Could not find libafpclient. AFP client support disabled. =="
 libafpclient_disabled="== AFP support disabled. =="
-libshairport_not_found="== Could not find libshairport. AirTunes support disabled. =="
-libshairport_disabled="== AirTunes support disabled. =="
+libshairport_not_found="== Could not find libshairport. =="
+libshairplay_not_found="== Could not find libshairplay. =="
 samba_disabled="== SAMBA support disabled. =="
 libplist_not_found="== Could not find libplist. AirPlay support disabled. =="
 libplist_disabled="== AirPlay support disabled. =="
@@ -247,12 +262,6 @@ AC_ARG_ENABLE([crystalhd],
   [enable CrystalHD decoding (default is auto)])],
   [use_crystalhd=$enableval],
   [use_crystalhd=auto])
-
-AC_ARG_ENABLE([vdadecoder],
-  [AS_HELP_STRING([--enable-vdadecoder],
-  [enable VDADecoder decoding (default is auto)])],
-  [use_vdadecoder=$enableval],
-  [use_vdadecoder=auto])
 
 AC_ARG_ENABLE([vtbdecoder],
   [AS_HELP_STRING([--enable-vtbdecoder],
@@ -415,6 +424,12 @@ AC_ARG_ENABLE([avahi],
   [disable Avahi support (default is enabled if libavahi-common and libavahi-client is found)])],
   [use_avahi=$enableval],
   [use_avahi=yes])
+  
+  AC_ARG_ENABLE([mdnsembedded],
+  [AS_HELP_STRING([--disable-mdnsembedded],
+  [disable mDNSEmbedded support (default is auto)])],
+  [use_mdnsembedded=$enableval],
+  [use_mdnsembedded=auto])
 
 AC_ARG_ENABLE([non-free],
   [AS_HELP_STRING([--disable-non-free],
@@ -513,6 +528,12 @@ AC_ARG_ENABLE([gtest],
   [configure_gtest=$enableval],
   [configure_gtest=no])
 
+AC_ARG_ENABLE([codec],
+  [AS_HELP_STRING([--enable-codec],
+  [enable additional codecs from a list of comma separated names, (default is none, choices are amcodec)])],
+  [add_codecs=$enableval],
+  [add_codecs=no])
+
 ### External libraries options
 AC_ARG_ENABLE([external-libraries],
   [AS_HELP_STRING([--enable-external-libraries],
@@ -587,7 +608,6 @@ case $host in
      use_neon=yes
      use_libcec=no
      use_crystalhd=no
-     use_vdadecoder=no
      use_vtbdecoder=yes
      use_optical_drive=no
      use_dvdcss=no
@@ -612,7 +632,6 @@ case $host in
      ;;
   powerpc-apple-darwin*)
      use_joystick=no
-     use_vdadecoder=no
      use_vtbdecoder=no
      use_crystalhd=no
      ARCH="powerpc-osx"
@@ -687,7 +706,6 @@ case $use_platform in
      use_cpu=arm1176jzf-s
      use_hardcoded_tables="yes"
      use_alsa="no"
-     USE_TEXTUREPACKER_NATIVE_ROOT="$TEXTUREPACKER_NATIVE_ROOT"
      ARCH="arm"
      AC_SUBST(ARCH_DEFINES, "-DTARGET_POSIX -DTARGET_LINUX -D_LINUX -D_ARMEL -DTARGET_RASPBERRY_PI")
      AC_DEFINE(HAS_EGLGLES, [1], [Define if supporting EGL based GLES Framebuffer])
@@ -842,7 +860,7 @@ AC_FUNC_STRFTIME
 AC_FUNC_STRTOD
 AC_FUNC_UTIME_NULL
 AC_FUNC_VPRINTF
-AC_CHECK_FUNCS([atexit dup2 fdatasync floor fs_stat_dev ftime ftruncate getcwd gethostbyaddr gethostbyname gethostname getpagesize getpass gettimeofday inet_ntoa lchown localeconv memchr memmove memset mkdir modf munmap pow rmdir select setenv setlocale socket sqrt strcasecmp strchr strcspn strdup strerror strncasecmp strpbrk strrchr strspn strstr strtol strtoul sysinfo tzset utime])
+AC_CHECK_FUNCS([atexit dup2 fdatasync floor fs_stat_dev ftime ftruncate getcwd gethostbyaddr gethostbyname gethostname getpagesize getpass gettimeofday inet_ntoa lchown localeconv memchr memmove memset mkdir modf munmap pow rmdir select setenv setlocale socket sqrt strcasecmp strchr strcspn strdup strerror strncasecmp strpbrk strrchr strspn strstr strtol strtoul sysinfo tzset utime posix_fadvise])
 
 # Check for various sizes
 AC_CHECK_SIZEOF([int])
@@ -850,7 +868,7 @@ AC_CHECK_SIZEOF([size_t])
 
 # Check for intrinsics
 AC_MSG_CHECKING([for __sync_add_and_fetch(temp, 1)])
-AC_TRY_COMPILE([],[long* temp=0; __sync_add_and_fetch(temp, 1);],
+AC_TRY_LINK([],[long* temp=0; long ret=__sync_add_and_fetch(temp, 1);],
                 [have_builtin_sync_add_and_fetch=yes],
                 [have_builtin_sync_add_and_fetch=no])
 AC_MSG_RESULT($have_builtin_sync_add_and_fetch)
@@ -860,7 +878,7 @@ if test "x$have_builtin_sync_add_and_fetch" = "xyes"; then
 fi
 
 AC_MSG_CHECKING([for __sync_sub_and_fetch(temp, 1)])
-AC_TRY_COMPILE([],[long* temp=0; __sync_sub_and_fetch(temp, 1);],
+AC_TRY_LINK([],[long* temp=0; long ret=__sync_sub_and_fetch(temp, 1);],
                 [have_builtin_sync_sub_and_fetch=yes],
                 [have_builtin_sync_sub_and_fetch=no])
 AC_MSG_RESULT($have_builtin_sync_sub_and_fetch)
@@ -870,7 +888,7 @@ if test "x$have_builtin_sync_sub_and_fetch" = "xyes"; then
 fi
 
 AC_MSG_CHECKING([for __sync_val_compare_and_swap(temp, 1, 1)])
-AC_TRY_COMPILE([],[long *temp = 0; __sync_val_compare_and_swap(temp, 1, 1);],
+AC_TRY_LINK([],[long *temp = 0; long ret=__sync_val_compare_and_swap(temp, 1, 1);],
                 [have_builtin_sync_val_compare_and_swap=yes],
                 [have_builtin_sync_val_compare_and_swap=no])
 AC_MSG_RESULT($have_builtin_sync_val_compare_and_swap)
@@ -1011,6 +1029,7 @@ AC_CHECK_LIB([tinyxml],     [main],, AC_MSG_ERROR($missing_library))
 if test "$target_platform" = "target_android" ; then
   AC_CHECK_LIB([android],     [main],, AC_MSG_ERROR($missing_library))
   AC_CHECK_LIB([log],         [__android_log_vprint],, AC_MSG_ERROR($missing_library))
+  AC_CHECK_LIB([jnigraphics],     [main],, AC_MSG_ERROR($missing_library))
 fi
 PKG_CHECK_MODULES([FRIBIDI],    [fribidi],
   [INCLUDES="$INCLUDES $FRIBIDI_CFLAGS"; LIBS="$LIBS $FRIBIDI_LIBS"],
@@ -1240,6 +1259,27 @@ else
   fi
 fi
 
+# mdnsembedded
+if test "$use_mdnsembedded" != "no"; then
+  AC_CHECK_LIB([mDNSEmbedded], [embedded_mDNSInit],,
+    [if test "$use_mdnsembedded" = "yes"; then
+      AC_MSG_ERROR($mdnsembedded_not_found)
+      USE_MDNSEMBEDDED=0
+    elif test "$use_mdnsembedded" != "no"; then
+      AC_MSG_NOTICE($mdnsembedded_not_found)
+      use_mdnsembedded="no"
+      USE_MDNSEMBEDDED=0
+    fi
+   ])
+  if test $use_mdnsembedded != "no"; then
+    USE_MDNSEMBEDDED=1
+  fi
+else
+  AC_MSG_RESULT($mdnsembedded_disabled)
+  USE_MDNSEMBEDDED=0
+fi
+AC_SUBST(USE_MDNSEMBEDDED)
+
 # X11
 if test "$use_x11" = "yes" && test "$host_vendor" != "apple"; then
   AC_MSG_NOTICE($x11_enabled)
@@ -1436,24 +1476,45 @@ if test "$use_airplay" != "no"; then
   fi
 fi
 
-# libshairport for AirTunes
+# libshairplay for AirTunes (prefered lib)
 USE_AIRTUNES=0
 if test "x$use_airtunes" != "xno"; then
-  AC_CHECK_HEADERS([shairport/shairport.h],,
+  AC_CHECK_HEADERS([shairplay/raop.h],,
    [if test "x$use_airtunes" = "xyes"; then
-      AC_MSG_ERROR($libshairport_not_found)
+      AC_MSG_ERROR($libshairplay_not_found)
     elif test "x$use_airtunes" != "xno"; then
-      AC_MSG_NOTICE($libshairport_not_found)
+      AC_MSG_NOTICE($libshairplay_not_found)
       use_airtunes="no"
     fi
    ])
 
   if test "x$use_airtunes" != "xno"; then
-    XB_FIND_SONAME([SHAIRPORT], [shairport], [use_airtunes])
+    XB_FIND_SONAME([SHAIRPLAY], [shairplay], [use_airtunes])
     USE_AIRTUNES=1
-    AC_CHECK_MEMBERS([struct AudioOutput.ao_set_metadata],,,
-                     [[#include <shairport/shairport.h>]])
-    AC_DEFINE([HAVE_LIBSHAIRPORT],[1],["Define to 1 if you have libshairport."])
+    USE_LIBSHAIRPORT=1
+    AC_CHECK_MEMBERS([struct raop_callbacks_s.cls],,,
+                     [[#include <shairplay/raop.h>]])
+    AC_DEFINE([HAVE_LIBSHAIRPLAY],[1],["Define to 1 if you have libshairplay."])
+  fi
+
+  #libshairport - as a fallback for AirTunes
+  if test "x$USE_AIRTUNES" == "x0"; then
+    AC_CHECK_HEADERS([shairport/shairport.h],,
+     [if test "x$use_airtunes" = "xyes"; then
+        AC_MSG_ERROR($libshairport_not_found)
+      elif test "x$use_airtunes" != "xno"; then
+        AC_MSG_NOTICE($libshairport_not_found)
+        use_airtunes="no"
+      fi
+     ])
+
+    if test "x$use_airtunes" != "xno"; then
+      XB_FIND_SONAME([SHAIRPORT], [shairport], [use_airtunes])
+      USE_AIRTUNES=1
+      AC_CHECK_MEMBERS([struct AudioOutput.ao_set_metadata],,,
+                       [[#include <shairport/shairport.h>]])
+      AC_DEFINE([HAVE_LIBSHAIRPORT],[1],["Define to 1 if you have libshairport."])
+    fi
   fi
 fi
 
@@ -1560,9 +1621,6 @@ fi
 if test "$use_external_ffmpeg" = "yes"; then
   FFMPEG_LIBNAMES="libavcodec libavfilter libavformat libavutil libpostproc libswscale"
 
-  # libavcore is optional
-  PKG_CHECK_EXISTS([libavcore], FFMPEG_LIBNAMES="$FFMPEG_LIBNAMES libavcore")
-
   # one of libswresample or libavresample is needed
   PKG_CHECK_EXISTS([libswresample], FFMPEG_LIBNAMES="$FFMPEG_LIBNAMES libswresample",
                    [PKG_CHECK_EXISTS([libavresample],
@@ -1574,80 +1632,24 @@ if test "$use_external_ffmpeg" = "yes"; then
                     [INCLUDES="$INCLUDES $FFMPEG_CFLAGS"; LIBS="$LIBS $FFMPEG_LIBS"],
                     AC_MSG_ERROR($missing_library))
 
-  # Determine whether AVPacket and relevant functions are defined in libavformat
-  # or libavcodec
-  AC_CHECK_LIB([avcodec], [av_free_packet],
-  [AC_MSG_NOTICE(== AVPacket and relevant functions defined in libavcodec. ==)],
-  [AC_MSG_NOTICE(== AVPacket and relevant functions defined in libavformat. ==)
-   AC_DEFINE([AVPACKET_IN_AVFORMAT], [1], [Whether AVPacket is in libavformat.])])
-
   # in case the headers are in a custom directory
   SAVE_CPPFLAGS="$CPPFLAGS"
   CPPFLAGS="$CPPFLAGS $FFMPEG_CFLAGS"
 
-  # Possible places the ffmpeg headers may be
   AC_CHECK_HEADERS([libavcodec/avcodec.h libavfilter/avfilter.h libavformat/avformat.h libavutil/avutil.h libpostproc/postprocess.h libswscale/swscale.h],,
-  [AC_CHECK_HEADERS([ffmpeg/avcodec.h ffmpeg/avfilter.h ffmpeg/avformat.h ffmpeg/avutil.h postproc/postprocess.h ffmpeg/swscale.h],,
-  [AC_MSG_ERROR($missing_headers)])])
-
-  # optional
-  AC_CHECK_HEADERS([libavcore/avcore.h libavcore/samplefmt.h libavutil/mem.h libavutil/samplefmt.h])
-
-  # old FFmpeg have this in libavcodec/opt.h instead:
-  AC_CHECK_HEADERS([libavutil/opt.h])
-
-  # new FFmpeg have math headers
-  AC_CHECK_HEADERS([libavutil/mathematics.h],,)
-
-  # We'll support the use of rgb2rgb.h if it exists.
-  AC_CHECK_HEADERS([libswscale/rgb2rgb.h],,)
-  AC_CHECK_HEADERS([ffmpeg/rgb2rgb.h],,)
+  [AC_MSG_ERROR($missing_headers)])
 
   # Check for libswresample or libavresample headers.
   AC_CHECK_HEADERS([libswresample/swresample.h libavresample/avresample.h])
-
-  # Check if AVFilterBufferRefVideoProps AVRational member is named
-  # 'pixel_aspect' or 'sample_aspect_ratio'.
-  AC_CHECK_MEMBER([AVFilterBufferRefVideoProps.sample_aspect_ratio],
-    [AC_DEFINE([HAVE_AVFILTERBUFFERREFVIDEOPROPS_SAMPLE_ASPECT_RATIO],
-    [1],
-    [Define to 1 if AVFilterBufferRefVideoProps has member sample_aspect_ratio.])],
-      [AC_CHECK_MEMBER([AVFilterBufferRefVideoProps.sample_aspect_ratio],
-      [AC_DEFINE([HAVE_AVFILTERBUFFERREFVIDEOPROPS_SAMPLE_ASPECT_RATIO],
-      [1],
-      [Define to 1 if AVFilterBufferRefVideoProps has member sample_aspect_ratio.])],
-      ,
-      [[#include <ffmpeg/avfilter.h>]])],
-    [[#include <libavfilter/avfilter.h>]])
 
   AC_MSG_NOTICE($external_ffmpeg_enabled)
   USE_EXTERNAL_FFMPEG=1
   AC_DEFINE([USE_EXTERNAL_FFMPEG], [1], [Whether to use external FFmpeg libraries.])
 
-  # Disable vdpau support if external libavcodec doesn't have it
-  AC_CHECK_LIB([avcodec], [ff_vdpau_vc1_decode_picture],,
-    [if test "x$use_vdpau" = "xyes"; then
-      AC_MSG_ERROR($ffmpeg_vdpau_not_supported)
-    else
-      use_vdpau=no
-      AC_MSG_RESULT($ffmpeg_vdpau_not_supported)
-    fi])
-
-  # Check for 'PIX_FMT_VDPAU_MPEG4' from libavutil
-  if test "x$use_vdpau" != "xno"; then
-    AC_LANG_PUSH([C++])
-    AC_LINK_IFELSE(
-      [AC_LANG_SOURCE([ #include <libavutil/pixfmt.h>
-        int main() { PixelFormat format = PIX_FMT_VDPAU_MPEG4; }])],
-      [AC_DEFINE([PIX_FMT_VDPAU_MPEG4_IN_AVUTIL], [1],
-      [Whether AVUtil defines PIX_FMT_VDPAU_MPEG4.])],)
-    AC_LANG_POP([C++])
-  fi
   CPPFLAGS="$SAVE_CPPFLAGS"
 else
   AC_MSG_NOTICE($external_ffmpeg_disabled)
   USE_EXTERNAL_FFMPEG=0
-  AC_DEFINE([PIX_FMT_VDPAU_MPEG4_IN_AVUTIL], [1], [Whether AVUtil defines PIX_FMT_VDPAU_MPEG4.])
 fi
 
 echo "Checking for SWIG installation"
@@ -1778,26 +1780,6 @@ else
   USE_CRYSTALHD=0
 fi
 
-# VDADecoder
-if test "x$use_vdadecoder" != "xno"; then
-  if test "$host_vendor" = "apple" ; then
-    HAVE_LIBVDADECODER=1
-    AC_DEFINE([HAVE_LIBVDADECODER], [1], [Define to 1 if you have the 'VDADecoder' library.])
-    AC_MSG_NOTICE($vdadecoder_enabled)
-    USE_VDA=1
-  else
-    if test "x$use_vdadecoder" = "xyes"; then
-      AC_MSG_ERROR([VDA Decoder not supported on this platform])
-    else
-      use_vdadecoder="no"
-      AC_MSG_NOTICE($vdadecoder_disabled)
-    fi
-    USE_VDA=0
-  fi
-else
-  AC_MSG_NOTICE($vdadecoder_disabled)
-fi
-
 # VTBDecoder
 if test "x$use_vtbdecoder" != "xno"; then
   if test "$host_vendor" = "apple" ; then
@@ -1854,6 +1836,14 @@ case $add_players in
       ;;
   *omxplayer*)
       XB_ADD_PLAYER([OMXPLAYER], [omxplayer])
+      ;;
+esac
+
+# additional internal codecs
+case $add_codecs in
+  *amcodec*)
+      AC_CHECK_HEADER([amlplayer/codec_error.h],, AC_MSG_ERROR($missing_headers))
+      XB_ADD_CODEC([LIBAMCODEC], [amcodec])
       ;;
 esac
 
@@ -1985,12 +1975,6 @@ if test "x$use_crystalhd" != "xno"; then
   final_message="$final_message\n  CrystalHD:\tYes"
 else
   final_message="$final_message\n  CrystalHD:\tNo"
-fi
-
-if test "x$use_vdadecoder" != "xno"; then
-  final_message="$final_message\n  VDADecoder:\tYes"
-else
-  final_message="$final_message\n  VDADecoder:\tNo"
 fi
 
 if test "x$use_vtbdecoder" != "xno"; then
@@ -2162,6 +2146,12 @@ else
   final_message="$final_message\n  Avahi:\tNo"
 fi
 
+if test "$use_mdnsembedded" != "no"; then
+  final_message="$final_message\n  mDNSEmbedded:\tYes"
+else
+  final_message="$final_message\n  mDNSEmbedded:\tNo"
+fi
+
 if test "$use_nonfree" = "yes"; then
   final_message="$final_message\n  Non-free:\tYes"
   HAVE_XBMC_NONFREE=1
@@ -2240,7 +2230,11 @@ else
 fi
 
 if test "x$use_airtunes" != "xno"; then
-  final_message="$final_message\n  AirTunes support:\tYes"  
+  if test "x$USE_LIBSHAIRPORT" == "x1"; then
+    final_message="$final_message\n  AirTunes support (libshairplay):\tYes"  
+  else
+    final_message="$final_message\n  AirTunes support (libshairport):\tYes"
+  fi
 else
   final_message="$final_message\n  AirTunes support:\tNo"
 fi
@@ -2390,6 +2384,7 @@ OUTPUT_FILES="Makefile \
     xbmc/visualizations/fishBMC/Makefile \
     xbmc/visualizations/WaveForm/Makefile \
     lib/addons/library.xbmc.addon/Makefile \
+    lib/addons/library.xbmc.codec/Makefile \
     lib/addons/library.xbmc.gui/Makefile \
     lib/addons/library.xbmc.pvr/Makefile \
     xbmc/visualizations/EGLHelpers/Makefile \
@@ -2401,6 +2396,8 @@ OUTPUT_FILES="Makefile \
     xbmc/peripherals/devices/Makefile \
     xbmc/android/activity/Makefile \
     xbmc/android/loader/Makefile \
+    xbmc/android/jni/Makefile \
+    xbmc/utils/Makefile \
     xbmc/main/Makefile"
 
 if test "$use_skin_touched" = "yes"; then
@@ -2454,7 +2451,6 @@ AC_SUBST(USE_LIBSMBCLIENT)
 AC_SUBST(USE_LIBNFS)
 AC_SUBST(USE_LIBAFPCLIENT)
 AC_SUBST(USE_AIRPLAY)
-AC_SUBST(USE_VDA)
 AC_SUBST(USE_OPENMAX)
 AC_SUBST(USE_PULSE)
 AC_SUBST(USE_XRANDR)
@@ -2533,7 +2529,7 @@ XB_CONFIG_MODULE([lib/ffmpeg], [
     ffmpg_config="$ffmpg_config --disable-devices  --disable-doc"
     ffmpg_config="$ffmpg_config --disable-ffplay   --disable-ffmpeg"
     ffmpg_config="$ffmpg_config --disable-ffprobe  --disable-ffserver"
-    ffmpg_config="$ffmpg_config --disable-vda      --disable-crystalhd"
+    ffmpg_config="$ffmpg_config --enable-vda       --disable-crystalhd"
     ffmpg_config="$ffmpg_config --disable-decoder=mpeg_xvmc"
 
     # handle conditional enables/disables
@@ -2567,8 +2563,8 @@ XB_CONFIG_MODULE([lib/ffmpeg], [
     ffmpg_config="$ffmpg_config --enable-gpl"
     ffmpg_config="$ffmpg_config --enable-postproc"
     ffmpg_config="$ffmpg_config --enable-static      --enable-pthreads"
-    ffmpg_config="$ffmpg_config --enable-muxer=spdif --enable-muxer=adts"
-    ffmpg_config="$ffmpg_config --enable-encoder=ac3 --enable-encoder=aac"
+    ffmpg_config="$ffmpg_config --enable-muxer=spdif --enable-muxer=adts --enable-muxer=asf --enable-muxer=ipod"
+    ffmpg_config="$ffmpg_config --enable-encoder=ac3 --enable-encoder=aac --enable-encoder=wmav2"
     ffmpg_config="$ffmpg_config --enable-protocol=http"
     ffmpg_config="$ffmpg_config --enable-runtime-cpudetect"
 
@@ -2614,9 +2610,12 @@ XB_CONFIG_MODULE([lib/ffmpeg], [
       --disable-muxers \
       --enable-muxer=spdif \
       --enable-muxer=adts \
+      --enable-muxer=asf \
+      --enable-muxer=ipod \
       --disable-encoders \
       --enable-encoder=ac3 \
       --enable-encoder=aac \
+      --enable-encoder=wmav2 \
       `if test "$use_ffmpeg_libvorbis" = "yes"; then echo --enable-libvorbis --enable-muxer=ogg --enable-encoder=libvorbis; else echo --disable-libvorbis; fi` \
       --disable-decoder=mpeg_xvmc \
       --disable-devices \
@@ -2782,15 +2781,11 @@ XB_CONFIG_MODULE([lib/gtest], [
 ], [$SKIP_CONFIG_GTEST])
 
 XB_CONFIG_MODULE([pvr-addons], [
-   if test "$USE_EXTERNAL_FFMPEG" = 1; then
-      PVR_EXT_FFMPEG="--enable-external-ffmpeg"
-   fi
   ./configure \
     --prefix="${prefix}" \
     --host=$host_alias \
     --build=$build_alias \
     --target=$target_alias \
-    $PVR_EXT_FFMPEG \
     CC="$CC" \
     CXX="$CXX" \
     CFLAGS="$CFLAGS" \

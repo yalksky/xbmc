@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2012-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@
 #include "threads/Event.h"
 #include "Application.h"
 #include "WindowingFactory.h"
-#include "Settings.h"
+#include "settings/DisplaySettings.h"
 #undef BOOL
 
 #import <Foundation/Foundation.h>

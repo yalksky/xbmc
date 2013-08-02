@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2012-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -40,6 +40,8 @@ class CGUIDialogKeyboardGeneric : public CGUIDialog, public CGUIKeyboard
     virtual void FrameMove();
     void SetHeading(const std::string& heading);
     void SetText(const CStdString& aTextString);
+    void InputText(const CStdString& aTextString);
+    void InputTextEditing(const CStdString& aTextString, int start, int length);
     CStdString GetText() const;
     bool IsConfirmed() { return m_bIsConfirmed; };
     void SetHiddenInput(bool hiddenInput) { m_hiddenInput = hiddenInput; };
@@ -70,6 +72,13 @@ class CGUIDialogKeyboardGeneric : public CGUIDialog, public CGUIKeyboard
     void SendSearchMessage();
 
     CStdStringW m_strEdit;
+    int m_iCursorPos;
+
+    // holds the spelling region of keystrokes/text generated from 'input method'
+    CStdStringW m_strEditing;
+    int m_iEditingOffset;
+    int m_iEditingLength;
+
     bool m_bIsConfirmed;
     KEYBOARD m_keyType;
     int m_iMode;

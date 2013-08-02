@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@
 #include "filesystem/File.h"
 #include "music/MusicDatabase.h"
 #include "playlists/SmartPlayList.h"
-#include "settings/GUISettings.h"
+#include "settings/Settings.h"
 #include "utils/log.h"
 #include "utils/StringUtils.h"
 #include "utils/URIUtils.h"
@@ -70,7 +70,7 @@ namespace XFILE
     sorting.limitEnd = playlist.GetLimit();
     sorting.sortBy = playlist.GetOrder();
     sorting.sortOrder = playlist.GetOrderAscending() ? SortOrderAscending : SortOrderDescending;
-    if (g_guiSettings.GetBool("filelists.ignorethewhensorting"))
+    if (CSettings::Get().GetBool("filelists.ignorethewhensorting"))
       sorting.sortAttributes = SortAttributeIgnoreArticle;
 
     std::string option = !filter ? "xsp" : "filter";
@@ -314,7 +314,7 @@ namespace XFILE
   {
     CFileItemList list;
     bool filesExist = false;
-    if (playlistType == "songs" || playlistType == "albums")
+    if (playlistType == "songs" || playlistType == "albums" || playlistType == "artists")
       filesExist = CDirectory::GetDirectory("special://musicplaylists/", list, ".xsp", false);
     else // all others are video
       filesExist = CDirectory::GetDirectory("special://videoplaylists/", list, ".xsp", false);

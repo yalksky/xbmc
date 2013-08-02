@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -23,9 +23,8 @@
 #include "WinRenderer.h"
 #include "Util.h"
 #include "settings/DisplaySettings.h"
-#include "settings/Settings.h"
-#include "settings/GUISettings.h"
 #include "settings/MediaSettings.h"
+#include "settings/Settings.h"
 #include "guilib/Texture.h"
 #include "windowing/WindowingFactory.h"
 #include "settings/AdvancedSettings.h"
@@ -112,21 +111,19 @@ static enum PixelFormat PixelFormatFromFormat(ERenderFormat format)
 
 void CWinRenderer::ManageTextures()
 {
-  int neededbuffers = 2;
-
-  if( m_NumYV12Buffers < neededbuffers )
+  if( m_NumYV12Buffers < m_neededBuffers )
   {
-    for(int i = m_NumYV12Buffers; i<neededbuffers;i++)
+    for(int i = m_NumYV12Buffers; i<m_neededBuffers;i++)
       CreateYV12Texture(i);
 
-    m_NumYV12Buffers = neededbuffers;
+    m_NumYV12Buffers = m_neededBuffers;
   }
-  else if( m_NumYV12Buffers > neededbuffers )
+  else if( m_NumYV12Buffers > m_neededBuffers )
   {
-    m_NumYV12Buffers = neededbuffers;
+    m_NumYV12Buffers = m_neededBuffers;
     m_iYV12RenderBuffer = m_iYV12RenderBuffer % m_NumYV12Buffers;
 
-    for(int i = m_NumYV12Buffers-1; i>=neededbuffers;i--)
+    for(int i = m_NumYV12Buffers-1; i>=m_neededBuffers;i--)
       DeleteYV12Texture(i);
   }
 }
@@ -232,6 +229,15 @@ bool CWinRenderer::Configure(unsigned int width, unsigned int height, unsigned i
     // reinitialize the filters/shaders
     m_bFilterInitialized = false;
   }
+  else
+  {
+    if (m_VideoBuffers[m_iYV12RenderBuffer] != NULL)
+      m_VideoBuffers[m_iYV12RenderBuffer]->StartDecode();
+
+    m_iYV12RenderBuffer = 0;
+    if (m_VideoBuffers[0] != NULL)
+      m_VideoBuffers[0]->StartRender();
+  }
 
   m_fps = fps;
   m_iFlags = flags;
@@ -262,12 +268,12 @@ int CWinRenderer::NextYV12Texture()
     return -1;
 }
 
-bool CWinRenderer::AddVideoPicture(DVDVideoPicture* picture)
+bool CWinRenderer::AddVideoPicture(DVDVideoPicture* picture, int index)
 {
   if (m_renderMethod == RENDER_DXVA)
   {
-    int source = NextYV12Texture();
-    if(source < 0)
+    int source = index;
+    if(source < 0 || NextYV12Texture() < 0)
       return false;
 
     DXVABuffer *buf = (DXVABuffer*)m_VideoBuffers[source];
@@ -283,7 +289,7 @@ int CWinRenderer::GetImage(YV12Image *image, int source, bool readonly)
   if( source == AUTOSOURCE )
     source = NextYV12Texture();
 
-  if( source < 0 )
+  if( source < 0 || NextYV12Texture() < 0)
     return -1;
 
   YUVBuffer *buf = (YUVBuffer*)m_VideoBuffers[source];
@@ -317,7 +323,7 @@ void CWinRenderer::Reset()
 {
 }
 
-void CWinRenderer::Update(bool bPauseDrawing)
+void CWinRenderer::Update()
 {
   if (!m_bConfigured) return;
   ManageDisplay();
@@ -382,7 +388,7 @@ unsigned int CWinRenderer::PreInit()
 
   g_Windowing.Get3DDevice()->GetDeviceCaps(&m_deviceCaps);
 
-  m_iRequestedMethod = g_guiSettings.GetInt("videoplayer.rendermethod");
+  m_iRequestedMethod = CSettings::Get().GetInt("videoplayer.rendermethod");
 
   if ((g_advancedSettings.m_DXVAForceProcessorRenderer || m_iRequestedMethod == RENDER_METHOD_DXVA) && !m_processor.PreInit())
     CLog::Log(LOGNOTICE, "CWinRenderer::Preinit - could not init DXVA2 processor - skipping");
@@ -1085,7 +1091,7 @@ bool CWinRenderer::Supports(ESCALINGMETHOD method)
         // if scaling is below level, avoid hq scaling
         float scaleX = fabs(((float)m_sourceWidth - m_destRect.Width())/m_sourceWidth)*100;
         float scaleY = fabs(((float)m_sourceHeight - m_destRect.Height())/m_sourceHeight)*100;
-        int minScale = g_guiSettings.GetInt("videoplayer.hqscalers");
+        int minScale = CSettings::Get().GetInt("videoplayer.hqscalers");
         if (scaleX < minScale && scaleY < minScale)
           return false;
         return true;
@@ -1111,6 +1117,14 @@ EINTERLACEMETHOD CWinRenderer::AutoInterlaceMethod()
     return VS_INTERLACEMETHOD_DXVA_BOB;
   else
     return VS_INTERLACEMETHOD_DEINTERLACE_HALF;
+}
+
+unsigned int CWinRenderer::GetProcessorSize()
+{
+  if (m_format == RENDER_FMT_DXVA)
+    return m_processor.Size();
+  else
+    return 0;
 }
 
 //============================================
@@ -1262,6 +1276,7 @@ void YUVBuffer::Clear()
 
   }
 }
+
 
 //==================================
 

@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
 #include "commons/Exception.h"
 #include "FileItem.h"
 #include "DirectoryCache.h"
-#include "settings/GUISettings.h"
+#include "settings/Settings.h"
 #include "utils/log.h"
 #include "utils/Job.h"
 #include "utils/JobManager.h"
@@ -209,7 +209,7 @@ bool CDirectory::GetDirectory(const CStdString& strPath, CFileItemList &items, c
       // TODO: we shouldn't be checking the gui setting here;
       // callers should use getHidden instead
       if ((!item->m_bIsFolder && !pDirectory->IsAllowed(item->GetPath())) ||
-          (item->GetProperty("file:hidden").asBoolean() && !(hints.flags & DIR_FLAG_GET_HIDDEN) && !g_guiSettings.GetBool("filelists.showhidden")))
+          (item->GetProperty("file:hidden").asBoolean() && !(hints.flags & DIR_FLAG_GET_HIDDEN) && !CSettings::Get().GetBool("filelists.showhidden")))
       {
         items.Remove(i);
         i--; // don't confuse loop
@@ -286,7 +286,10 @@ bool CDirectory::Remove(const CStdString& strPath)
     auto_ptr<IDirectory> pDirectory(CDirectoryFactory::Create(realPath));
     if (pDirectory.get())
       if(pDirectory->Remove(realPath.c_str()))
+      {
+        g_directoryCache.ClearFile(realPath);
         return true;
+      }
   }
   XBMCCOMMONS_HANDLE_UNCHECKED
   catch (...)
@@ -302,7 +305,7 @@ void CDirectory::FilterFileDirectories(CFileItemList &items, const CStdString &m
   for (int i=0; i< items.Size(); ++i)
   {
     CFileItemPtr pItem=items[i];
-    if ((!pItem->m_bIsFolder) && (!pItem->IsInternetStream()))
+    if (!pItem->m_bIsFolder && pItem->IsFileFolder(EFILEFOLDER_TYPE_ALWAYS))
     {
       auto_ptr<IFileDirectory> pDirectory(CFileDirectoryFactory::Create(pItem->GetPath(),pItem.get(),mask));
       if (pDirectory.get())

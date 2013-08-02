@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2010-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -69,6 +69,16 @@ typedef struct
   uint64_t cache;
 } nal_bitstream;
 
+typedef struct mpeg2_sequence
+{
+  uint32_t  width;
+  uint32_t  height;
+  float     rate;
+  uint32_t  rate_info;
+  float     ratio;
+  uint32_t  ratio_info;
+} mpeg2_sequence;
+
 typedef struct
 {
   int profile_idc;
@@ -114,7 +124,7 @@ public:
   static void     skip_bits( bits_reader_t *br, int nbits );
   static uint32_t get_bits( bits_reader_t *br, int nbits );
 
-  bool Open(enum CodecID codec, uint8_t *in_extradata, int in_extrasize, bool to_annexb);
+  bool Open(enum AVCodecID codec, uint8_t *in_extradata, int in_extrasize, bool to_annexb);
   void Close(void);
   bool NeedConvert(void) { return m_convert_bitstream; };
   bool Convert(uint8_t *pData, int iSize);
@@ -122,15 +132,17 @@ public:
   int GetConvertSize();
   uint8_t *GetExtraData(void);
   int GetExtraSize();
-  void parseh264_sps(const uint8_t *sps, const uint32_t sps_size, bool *interlaced, int32_t *max_ref_frames);
+
+  static void parseh264_sps(const uint8_t *sps, const uint32_t sps_size, bool *interlaced, int32_t *max_ref_frames);
+  static bool mpeg2_sequence_header(const uint8_t *data, const uint32_t size, mpeg2_sequence *sequence);
 protected:
   // bytestream (Annex B) to bistream conversion support.
-  void nal_bs_init(nal_bitstream *bs, const uint8_t *data, size_t size);
-  uint32_t nal_bs_read(nal_bitstream *bs, int n);
-  bool nal_bs_eos(nal_bitstream *bs);
-  int nal_bs_read_ue(nal_bitstream *bs);
-  const uint8_t *avc_find_startcode_internal(const uint8_t *p, const uint8_t *end);
-  const uint8_t *avc_find_startcode(const uint8_t *p, const uint8_t *end);
+  static void nal_bs_init(nal_bitstream *bs, const uint8_t *data, size_t size);
+  static uint32_t nal_bs_read(nal_bitstream *bs, int n);
+  static bool nal_bs_eos(nal_bitstream *bs);
+  static int nal_bs_read_ue(nal_bitstream *bs);
+  static const uint8_t *avc_find_startcode_internal(const uint8_t *p, const uint8_t *end);
+  static const uint8_t *avc_find_startcode(const uint8_t *p, const uint8_t *end);
   const int avc_parse_nal_units(AVIOContext *pb, const uint8_t *buf_in, int size);
   const int avc_parse_nal_units_buf(const uint8_t *buf_in, uint8_t **buf, int *size);
   const int isom_write_avcc(AVIOContext *pb, const uint8_t *data, int len);
@@ -163,7 +175,7 @@ protected:
   bool              m_convert_bytestream;
   DllAvUtil         *m_dllAvUtil;
   DllAvFormat       *m_dllAvFormat;
-  CodecID           m_codec;
+  AVCodecID           m_codec;
 };
 
 #endif

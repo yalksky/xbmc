@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2012-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -35,6 +35,8 @@
 #include "threads/SingleLock.h"
 
 using namespace PVR;
+
+#define CHANNELS_REFRESH_INTERVAL 5000
 
 CGUIWindowPVR::CGUIWindowPVR(void) :
   CGUIMediaWindow(WINDOW_PVR, "MyPVR.xml"),
@@ -76,6 +78,9 @@ void CGUIWindowPVR::SetActiveView(CGUIWindowPVRCommon *window)
       m_currentSubwindow->m_history = m_history;
       m_currentSubwindow->m_iSelected = m_viewControl.GetSelectedItem();
     }
+
+    if (window == m_windowChannelsRadio || window == m_windowChannelsTV)
+      m_refreshWatch.StartZero();
 
     // update m_history
     if (window)
@@ -334,4 +339,18 @@ void CGUIWindowPVR::Cleanup(void)
 
   ClearFileItems();
   FreeResources();
+}
+
+void CGUIWindowPVR::FrameMove()
+{
+  CGUIWindowPVRCommon* view = GetActiveView();
+  if (view == m_windowChannelsRadio || view == m_windowChannelsTV)
+  {
+    if (m_refreshWatch.GetElapsedMilliseconds() > CHANNELS_REFRESH_INTERVAL)
+    {
+      view->SetInvalid();
+      m_refreshWatch.Reset();
+    }
+  }
+  CGUIMediaWindow::FrameMove();
 }

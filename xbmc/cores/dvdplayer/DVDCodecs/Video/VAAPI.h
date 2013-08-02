@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -12,9 +12,9 @@
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this library; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ *  You should have received a copy of the GNU General Public License
+ *  along with XBMC; see the file COPYING.  If not, see
+ *  <http://www.gnu.org/licenses/>.
  *
  */
 #pragma once
@@ -112,6 +112,7 @@ public:
   virtual void Close();
   virtual const std::string Name() { return "vaapi"; }
   virtual CCriticalSection* Section() { if(m_display) return m_display.get(); else return NULL; }
+  virtual unsigned GetAllowedReferences();
 
   int   GetBuffer(AVCodecContext *avctx, AVFrame *pic);
   void  RelBuffer(AVCodecContext *avctx, AVFrame *pic);
@@ -122,6 +123,7 @@ protected:
   static const unsigned  m_surfaces_max = 32;
   unsigned               m_surfaces_count;
   VASurfaceID            m_surfaces[m_surfaces_max];
+  unsigned               m_renderbuffers_count;
 
   int                    m_refs;
   std::list<CSurfacePtr> m_surfaces_used;

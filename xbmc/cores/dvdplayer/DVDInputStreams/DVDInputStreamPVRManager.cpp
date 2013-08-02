@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2012-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@
 #include "utils/StringUtils.h"
 #include "pvr/addons/PVRClients.h"
 #include "pvr/channels/PVRChannelGroupsContainer.h"
-#include "settings/GUISettings.h"
+#include "settings/Settings.h"
 
 using namespace XFILE;
 using namespace PVR;
@@ -131,7 +131,7 @@ bool CDVDInputStreamPVRManager::Open(const char* strFile, const std::string& con
     }
   }
 
-  ResetScanTimeout((unsigned int) g_guiSettings.GetInt("pvrplayback.scantime") * 1000);
+  ResetScanTimeout((unsigned int) CSettings::Get().GetInt("pvrplayback.scantime") * 1000);
   m_content = content;
   CLog::Log(LOGDEBUG, "CDVDInputStreamPVRManager::Open - stream opened: %s", transFile.c_str());
 
@@ -165,7 +165,7 @@ void CDVDInputStreamPVRManager::Close()
   CLog::Log(LOGDEBUG, "CDVDInputStreamPVRManager::Close - stream closed");
 }
 
-int CDVDInputStreamPVRManager::Read(BYTE* buf, int buf_size)
+int CDVDInputStreamPVRManager::Read(uint8_t* buf, int buf_size)
 {
   if(!m_pFile) return -1;
 
@@ -315,8 +315,9 @@ CDVDInputStream::ENextStream CDVDInputStreamPVRManager::NextStream()
 
   m_eof = IsEOF();
 
-  if (m_pOtherStream)
-    return m_pOtherStream->NextStream();
+  CDVDInputStream::ENextStream next;
+  if (m_pOtherStream && ((next = m_pOtherStream->NextStream()) != NEXTSTREAM_NONE))
+    return next;
   else if(m_pFile->SkipNext())
   {
     if (m_eof)

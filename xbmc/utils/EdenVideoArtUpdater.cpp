@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2012-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -31,8 +31,8 @@
 #include "TextureCacheJob.h"
 #include "pictures/Picture.h"
 #include "profiles/ProfilesManager.h"
-#include "settings/GUISettings.h"
 #include "settings/AdvancedSettings.h"
+#include "settings/Settings.h"
 #include "guilib/Texture.h"
 #include "guilib/GUIWindowManager.h"
 #include "guilib/LocalizeStrings.h"
@@ -246,7 +246,7 @@ void CEdenVideoArtUpdater::Process()
   items.Clear();
 
   // now actors
-  if (g_guiSettings.GetBool("videolibrary.actorthumbs"))
+  if (CSettings::Get().GetBool("videolibrary.actorthumbs"))
   {
     db.GetActorsNav("videodb://movies/titles/", items, VIDEODB_CONTENT_MOVIES);
     db.GetActorsNav("videodb://tvshows/titles/", items, VIDEODB_CONTENT_TVSHOWS);

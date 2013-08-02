@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -32,8 +32,8 @@
 #include "storage/MediaManager.h"
 #include "utils/AsyncFileCopy.h"
 #include "settings/AdvancedSettings.h"
-#include "settings/GUISettings.h"
 #include "settings/MediaSourceSettings.h"
+#include "settings/Settings.h"
 #include "guilib/Key.h"
 #include "guilib/LocalizeStrings.h"
 #include "utils/log.h"
@@ -373,7 +373,7 @@ void CGUIDialogMusicInfo::OnGetThumb()
     database.Open();
     CStdString strArtistPath;
     if (database.GetArtistPath(m_artist.idArtist,strArtistPath))
-      URIUtils::AddFileToFolder(strArtistPath,"folder.jpg",localThumb);
+      localThumb = URIUtils::AddFileToFolder(strArtistPath, "folder.jpg");
   }
   else
     localThumb = m_albumItem->GetUserMusicThumb();
@@ -494,7 +494,7 @@ void CGUIDialogMusicInfo::OnGetFanart()
   }
 
   CStdString result;
-  VECSOURCES sources(*CMediaSourceSettings::Get().GetSources("music"));
+  VECSOURCES sources = *CMediaSourceSettings::Get().GetSources("music");
   g_mediaManager.GetLocalDrives(sources);
   bool flip=false;
   if (!CGUIDialogFileBrowser::ShowAndGetImage(items, sources, g_localizeStrings.Get(20437), result, &flip, 20445))

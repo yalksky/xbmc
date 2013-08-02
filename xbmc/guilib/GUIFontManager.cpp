@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -26,13 +26,17 @@
 #include "GUIFont.h"
 #include "utils/XMLUtils.h"
 #include "GUIControlFactory.h"
+#include "filesystem/Directory.h"
 #include "filesystem/File.h"
 #include "filesystem/SpecialProtocol.h"
+#include "settings/Setting.h"
 #include "utils/log.h"
 #include "utils/URIUtils.h"
 #include "utils/StringUtils.h"
 #include "windowing/WindowingFactory.h"
+#include "FileItem.h"
 #include "URL.h"
+#include "Util.h"
 
 using namespace std;
 
@@ -78,7 +82,7 @@ static bool CheckFont(CStdString& strPath, const CStdString& newPath,
   if (!XFILE::CFile::Exists(strPath))
   {
     strPath = URIUtils::AddFileToFolder(newPath,filename);
-#ifdef _LINUX
+#ifdef TARGET_POSIX
     strPath = CSpecialProtocol::TranslatePathConvertCase(strPath);
 #endif
     return false;
@@ -112,7 +116,7 @@ CGUIFont* GUIFontManager::LoadTTF(const CStdString& strFontName, const CStdStrin
   else
     strPath = strFilename;
 
-#ifdef _LINUX
+#ifdef TARGET_POSIX
   strPath = CSpecialProtocol::TranslatePathConvertCase(strPath);
 #endif
 
@@ -575,4 +579,28 @@ bool GUIFontManager::IsFontSetUnicode(const CStdString& strFontSet)
   }
 
   return false;
+}
+
+void GUIFontManager::SettingOptionsFontsFiller(const CSetting *setting, std::vector< std::pair<std::string, std::string> > &list, std::string &current)
+{
+  CFileItemList items;
+  CFileItemList items2;
+
+  // find TTF fonts
+  XFILE::CDirectory::GetDirectory("special://home/media/Fonts/", items2);
+
+  if (XFILE::CDirectory::GetDirectory("special://xbmc/media/Fonts/", items))
+  {
+    items.Append(items2);
+    for (int i = 0; i < items.Size(); ++i)
+    {
+      CFileItemPtr pItem = items[i];
+
+      if (!pItem->m_bIsFolder
+          && URIUtils::HasExtension(pItem->GetLabel(), ".ttf"))
+      {
+        list.push_back(make_pair(pItem->GetLabel(), pItem->GetLabel()));
+      }
+    }
+  }
 }

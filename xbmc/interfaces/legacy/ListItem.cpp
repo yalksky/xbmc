@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -13,9 +13,8 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with XBMC; see the file COPYING.  If not, write to
- *  the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
- *  http://www.gnu.org/copyleft/gpl.html
+ *  along with XBMC; see the file COPYING.  If not, see
+ *  <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -251,7 +250,7 @@ namespace XBMCAddon
 
       if (strcmpi(type, "video") == 0)
       {
-        for (Dictionary::const_iterator it = infoLabels.begin(); it != infoLabels.end(); it++)
+        for (Dictionary::const_iterator it = infoLabels.begin(); it != infoLabels.end(); ++it)
         {
           CStdString key = it->first;
           key.ToLower();
@@ -379,7 +378,7 @@ namespace XBMCAddon
       }
       else if (strcmpi(type, "music") == 0)
       {
-        for (Dictionary::const_iterator it = infoLabels.begin(); it != infoLabels.end(); it++)
+        for (Dictionary::const_iterator it = infoLabels.begin(); it != infoLabels.end(); ++it)
         {
           CStdString key = it->first;
 
@@ -418,11 +417,11 @@ namespace XBMCAddon
           else if (key == "musicbrainztrackid")
             item->GetMusicInfoTag()->SetMusicBrainzTrackID(value);
           else if (key == "musicbrainzartistid")
-            item->GetMusicInfoTag()->SetMusicBrainzArtistID(value);
+            item->GetMusicInfoTag()->SetMusicBrainzArtistID(StringUtils::Split(value, g_advancedSettings.m_musicItemSeparator));
           else if (key == "musicbrainzalbumid")
             item->GetMusicInfoTag()->SetMusicBrainzAlbumID(value);
           else if (key == "musicbrainzalbumartistid")
-            item->GetMusicInfoTag()->SetMusicBrainzAlbumArtistID(value);
+            item->GetMusicInfoTag()->SetMusicBrainzAlbumArtistID(StringUtils::Split(value, g_advancedSettings.m_musicItemSeparator));
           else if (key == "musicbrainztrmid")
             item->GetMusicInfoTag()->SetMusicBrainzTRMID(value);
           else if (key == "comment")
@@ -442,7 +441,7 @@ namespace XBMCAddon
       }
       else if (strcmpi(type,"pictures") == 0)
       {
-        for (Dictionary::const_iterator it = infoLabels.begin(); it != infoLabels.end(); it++)
+        for (Dictionary::const_iterator it = infoLabels.begin(); it != infoLabels.end(); ++it)
         {
           CStdString key = it->first;
           key.ToLower();
@@ -476,11 +475,10 @@ namespace XBMCAddon
     {
       LOCKGUI;
 
-      String tmp;
       if (strcmpi(cType, "video") == 0)
       {
         CStreamDetailVideo* video = new CStreamDetailVideo;
-        for (Dictionary::const_iterator it = dictionary.begin(); it != dictionary.end(); it++)
+        for (Dictionary::const_iterator it = dictionary.begin(); it != dictionary.end(); ++it)
         {
           const String& key = it->first;
           const CStdString value(it->second.c_str());
@@ -501,7 +499,7 @@ namespace XBMCAddon
       else if (strcmpi(cType, "audio") == 0)
       {
         CStreamDetailAudio* audio = new CStreamDetailAudio;
-        for (Dictionary::const_iterator it = dictionary.begin(); it != dictionary.end(); it++)
+        for (Dictionary::const_iterator it = dictionary.begin(); it != dictionary.end(); ++it)
         {
           const String& key = it->first;
           const String& value = it->second;
@@ -518,7 +516,7 @@ namespace XBMCAddon
       else if (strcmpi(cType, "subtitle") == 0)
       {
         CStreamDetailSubtitle* subtitle = new CStreamDetailSubtitle;
-        for (Dictionary::const_iterator it = dictionary.begin(); it != dictionary.end(); it++)
+        for (Dictionary::const_iterator it = dictionary.begin(); it != dictionary.end(); ++it)
         {
           const String& key = it->first;
           const String& value = it->second;
@@ -534,7 +532,7 @@ namespace XBMCAddon
       throw (ListItemException)
     {
       int itemCount = 0;
-      for (std::vector<Tuple<String,String> >::const_iterator iter = items.begin(); iter < items.end(); iter++, itemCount++)
+      for (std::vector<Tuple<String,String> >::const_iterator iter = items.begin(); iter < items.end(); ++iter, ++itemCount)
       {
         Tuple<String,String> tuple = *iter;
         if (tuple.GetNumValuesSet() != 2)

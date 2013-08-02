@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@
 #include "ApplicationMessenger.h"
 #include "filesystem/Directory.h"
 #include "filesystem/File.h"
-#include "settings/GUISettings.h"
+#include "settings/Settings.h"
 
 using namespace MUSIC_INFO;
 using namespace JSONRPC;
@@ -67,7 +67,7 @@ JSONRPC_STATUS CAudioLibrary::GetArtists(const CStdString &method, ITransportLay
     musicUrl.AddOption("xsp", xsp);
   }
 
-  bool albumArtistsOnly = !g_guiSettings.GetBool("musiclibrary.showcompilationartists");
+  bool albumArtistsOnly = !CSettings::Get().GetBool("musiclibrary.showcompilationartists");
   if (parameterObject["albumartistsonly"].isBoolean())
     albumArtistsOnly = parameterObject["albumartistsonly"].asBoolean();
 
@@ -261,7 +261,7 @@ JSONRPC_STATUS CAudioLibrary::GetSongDetails(const CStdString &method, ITranspor
     return InternalError;
 
   CSong song;
-  if (!musicdatabase.GetSongById(idSong, song))
+  if (!musicdatabase.GetSong(idSong, song))
     return InvalidParams;
 
   CFileItemList items;
@@ -484,7 +484,7 @@ JSONRPC_STATUS CAudioLibrary::SetSongDetails(const CStdString &method, ITranspor
     return InternalError;
 
   CSong song;
-  if (!musicdatabase.GetSongById(id, song) || song.idSong != id)
+  if (!musicdatabase.GetSong(id, song) || song.idSong != id)
     return InvalidParams;
 
   if (ParameterNotNull(parameterObject, "title"))
@@ -511,14 +511,8 @@ JSONRPC_STATUS CAudioLibrary::SetSongDetails(const CStdString &method, ITranspor
     song.strComment = parameterObject["comment"].asString();
   if (ParameterNotNull(parameterObject, "musicbrainztrackid"))
     song.strMusicBrainzTrackID = parameterObject["musicbrainztrackid"].asString();
-  if (ParameterNotNull(parameterObject, "musicbrainzartistid"))
-    song.strMusicBrainzArtistID = parameterObject["musicbrainzartistid"].asString();
-  if (ParameterNotNull(parameterObject, "musicbrainzalbumid"))
-    song.strMusicBrainzAlbumID = parameterObject["musicbrainzalbumid"].asString();
-  if (ParameterNotNull(parameterObject, "musicbrainzalbumartistid"))
-    song.strMusicBrainzAlbumArtistID = parameterObject["musicbrainzalbumartistid"].asString();
 
-  if (musicdatabase.UpdateSong(song, id) <= 0)
+  if (musicdatabase.UpdateSong(id, song.strTitle, song.strMusicBrainzTrackID, song.strFileName, song.strComment, song.strThumb, song.artist, song.genre, song.iTrack, song.iDuration, song.iYear, song.iTimesPlayed, song.iStartOffset, song.iEndOffset, song.lastPlayed, song.rating, song.iKaraokeNumber) <= 0)
     return InternalError;
 
   CJSONRPCUtils::NotifyItemUpdated();
@@ -561,43 +555,49 @@ JSONRPC_STATUS CAudioLibrary::Clean(const CStdString &method, ITransportLayer *t
 bool CAudioLibrary::FillFileItem(const CStdString &strFilename, CFileItemPtr &item, const CVariant &parameterObject /* = CVariant(CVariant::VariantTypeArray) */)
 {
   CMusicDatabase musicdatabase;
-  if (strFilename.empty() || !musicdatabase.Open())
+  if (strFilename.empty())
     return false;
 
-  if (CDirectory::Exists(strFilename))
+  bool filled = false;
+  if (musicdatabase.Open())
   {
-    CAlbum album;
-    int albumid = musicdatabase.GetAlbumIdByPath(strFilename);
-    if (!musicdatabase.GetAlbumInfo(albumid, album, NULL))
-      return false;
+    if (CDirectory::Exists(strFilename))
+    {
+      CAlbum album;
+      int albumid = musicdatabase.GetAlbumIdByPath(strFilename);
+      if (musicdatabase.GetAlbumInfo(albumid, album, NULL))
+      {
+        item->SetFromAlbum(album);
 
-    item->SetFromAlbum(album);
+        CFileItemList items;
+        items.Add(item);
+        if (GetAdditionalAlbumDetails(parameterObject, items, musicdatabase) == OK)
+          filled = true;
+      }
+    }
+    else
+    {
+      CSong song;
+      if (musicdatabase.GetSongByFileName(strFilename, song))
+      {
+        item->SetFromSong(song);
 
-    CFileItemList items;
-    items.Add(item);
-    if (GetAdditionalAlbumDetails(parameterObject, items, musicdatabase) != OK)
-      return false;
-  }
-  else
-  {
-    CSong song;
-    if (!musicdatabase.GetSongByFileName(strFilename, song))
-      return false;
-
-    item->SetFromSong(song);
-
-    CFileItemList items;
-    items.Add(item);
-    if (GetAdditionalSongDetails(parameterObject, items, musicdatabase) != OK)
-      return false;
+        CFileItemList items;
+        items.Add(item);
+        if (GetAdditionalSongDetails(parameterObject, items, musicdatabase) == OK)
+          filled = true;
+      }
+    }
   }
 
   if (item->GetLabel().empty())
+  {
     item->SetLabel(CUtil::GetTitleFromPath(strFilename, false));
-  if (item->GetLabel())
-    item->SetLabel(URIUtils::GetFileName(strFilename));
+    if (item->GetLabel().empty())
+      item->SetLabel(URIUtils::GetFileName(strFilename));
+  }
 
-  return true;
+  return filled;
 }
 
 bool CAudioLibrary::FillFileItemList(const CVariant &parameterObject, CFileItemList &list)
@@ -626,7 +626,7 @@ bool CAudioLibrary::FillFileItemList(const CVariant &parameterObject, CFileItemL
   if (songID != -1)
   {
     CSong song;
-    if (musicdatabase.GetSongById(songID, song))
+    if (musicdatabase.GetSong(songID, song))
     {
       list.Add(CFileItemPtr(new CFileItem(song)));
       success = true;
@@ -678,7 +678,7 @@ JSONRPC_STATUS CAudioLibrary::GetAdditionalAlbumDetails(const CVariant &paramete
       if (musicdatabase.GetGenresByAlbum(item->GetMusicInfoTag()->GetDatabaseId(), genreids))
       {
         CVariant genreidObj(CVariant::VariantTypeArray);
-        for (std::vector<int>::const_iterator genreid = genreids.begin(); genreid != genreids.end(); genreid++)
+        for (std::vector<int>::const_iterator genreid = genreids.begin(); genreid != genreids.end(); ++genreid)
           genreidObj.push_back(*genreid);
 
         item->SetProperty("genreid", genreidObj);
@@ -690,7 +690,7 @@ JSONRPC_STATUS CAudioLibrary::GetAdditionalAlbumDetails(const CVariant &paramete
       if (musicdatabase.GetArtistsByAlbum(item->GetMusicInfoTag()->GetDatabaseId(), true, artistids))
       {
         CVariant artistidObj(CVariant::VariantTypeArray);
-        for (std::vector<int>::const_iterator artistid = artistids.begin(); artistid != artistids.end(); artistid++)
+        for (std::vector<int>::const_iterator artistid = artistids.begin(); artistid != artistids.end(); ++artistid)
           artistidObj.push_back(*artistid);
 
         item->SetProperty("artistid", artistidObj);
@@ -723,7 +723,7 @@ JSONRPC_STATUS CAudioLibrary::GetAdditionalSongDetails(const CVariant &parameter
       if (musicdatabase.GetGenresBySong(item->GetMusicInfoTag()->GetDatabaseId(), genreids))
       {
         CVariant genreidObj(CVariant::VariantTypeArray);
-        for (std::vector<int>::const_iterator genreid = genreids.begin(); genreid != genreids.end(); genreid++)
+        for (std::vector<int>::const_iterator genreid = genreids.begin(); genreid != genreids.end(); ++genreid)
           genreidObj.push_back(*genreid);
 
         item->SetProperty("genreid", genreidObj);
@@ -735,7 +735,7 @@ JSONRPC_STATUS CAudioLibrary::GetAdditionalSongDetails(const CVariant &parameter
       if (musicdatabase.GetArtistsBySong(item->GetMusicInfoTag()->GetDatabaseId(), true, artistids))
       {
         CVariant artistidObj(CVariant::VariantTypeArray);
-        for (std::vector<int>::const_iterator artistid = artistids.begin(); artistid != artistids.end(); artistid++)
+        for (std::vector<int>::const_iterator artistid = artistids.begin(); artistid != artistids.end(); ++artistid)
           artistidObj.push_back(*artistid);
 
         item->SetProperty("artistid", artistidObj);
@@ -747,7 +747,7 @@ JSONRPC_STATUS CAudioLibrary::GetAdditionalSongDetails(const CVariant &parameter
       if (musicdatabase.GetArtistsByAlbum(item->GetMusicInfoTag()->GetAlbumId(), true, albumartistids))
       {
         CVariant albumartistidObj(CVariant::VariantTypeArray);
-        for (std::vector<int>::const_iterator albumartistid = albumartistids.begin(); albumartistid != albumartistids.end(); albumartistid++)
+        for (std::vector<int>::const_iterator albumartistid = albumartistids.begin(); albumartistid != albumartistids.end(); ++albumartistid)
           albumartistidObj.push_back(*albumartistid);
 
         item->SetProperty("albumartistid", albumartistidObj);

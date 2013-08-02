@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -28,7 +28,6 @@
 #include "Application.h"
 #include "settings/DisplaySettings.h"
 #include "settings/Settings.h"
-#include "settings/GUISettings.h"
 #include "guilib/GUIWindowManager.h"
 #include "dialogs/GUIDialogYesNo.h"
 #include "guilib/Key.h"
@@ -50,6 +49,9 @@ using namespace std;
 CGUIWindowSettingsScreenCalibration::CGUIWindowSettingsScreenCalibration(void)
     : CGUIWindow(WINDOW_SCREEN_CALIBRATION, "SettingsScreenCalibration.xml")
 {
+  m_iCurRes = 0;
+  m_iControl = 0;
+  m_fPixelRatioBoxHeight = 0.0f;
   m_needsScaling = false;         // we handle all the scaling
 }
 
@@ -119,14 +121,14 @@ bool CGUIWindowSettingsScreenCalibration::OnMessage(CGUIMessage& message)
   case GUI_MSG_WINDOW_DEINIT:
     {
       CDisplaySettings::Get().UpdateCalibrations();
-      g_settings.Save();
+      CSettings::Get().Save();
       g_graphicsContext.SetCalibrating(false);
       g_windowManager.ShowOverlay(OVERLAY_STATE_SHOWN);
       // reset our screen resolution to what it was initially
       g_graphicsContext.SetVideoResolution(CDisplaySettings::Get().GetCurrentResolution());
       // Inform the player so we can update the resolution
 #ifdef HAS_VIDEO_PLAYBACK
-      g_renderManager.Update(false);
+      g_renderManager.Update();
 #endif
       g_windowManager.SendMessage(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_WINDOW_RESIZE);
     }
@@ -147,7 +149,7 @@ bool CGUIWindowSettingsScreenCalibration::OnMessage(CGUIMessage& message)
         RESOLUTION res = g_renderManager.GetResolution();
         g_graphicsContext.SetVideoResolution(res);
         // Inform the renderer so we can update the resolution
-        g_renderManager.Update(false);
+        g_renderManager.Update();
 #endif
 
         m_iCurRes = 0;
