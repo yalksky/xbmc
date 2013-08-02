@@ -1131,14 +1131,14 @@
         </setting>
         <setting id="musiclibrary.albumsscraper" type="addon" label="20193" help="36257">
           <level>1</level>
-          <default>metadata.album.universal</default>
+          <default>metadata.albums.naver.com</default>
           <constraints>
             <addontype>xbmc.metadata.scraper.albums</addontype>
           </constraints>
         </setting>
         <setting id="musiclibrary.artistsscraper" type="addon" label="20194" help="36258">
           <level>1</level>
-          <default>metadata.artists.universal</default>
+          <default>metadata.artists.naver.com</default>
           <constraints>
             <addontype>xbmc.metadata.scraper.artists</addontype>
           </constraints>
