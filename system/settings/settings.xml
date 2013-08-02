@@ -91,7 +91,7 @@
       <group id="1">
         <setting id="locale.language" type="string" label="248" help="36114">
           <level>0</level>
-          <default>English</default>
+          <default>Korean</default>
           <constraints>
             <options>languages</options>
           </constraints>
@@ -99,7 +99,7 @@
         </setting>
         <setting id="locale.country" type="string" label="20026" help="36115">
           <level>0</level>
-          <default>USA (12h)</default>
+          <default>Korea</default>
           <constraints>
             <options>regions</options>
           </constraints>
@@ -590,7 +590,7 @@
       <group id="1">
         <setting id="subtitles.font" type="string" label="14089" help="36185">
           <level>1</level>
-          <default>arial.ttf</default>
+          <default>NanumGothic.ttf</default>
           <constraints>
             <options>fonts</options>
           </constraints>
@@ -598,7 +598,7 @@
         </setting>
         <setting id="subtitles.height" type="integer" parent="subtitles.font" label="289" help="36186">
           <level>1</level>
-          <default>28</default>
+          <default>36</default>
           <constraints>
             <minimum>16</minimum>
             <step>2</step>
@@ -611,7 +611,7 @@
         </setting>
         <setting id="subtitles.style" type="integer" parent="subtitles.font" label="736" help="36187">
           <level>1</level>
-          <default>1</default> <!-- FONT_STYLE_BOLD -->
+          <default>0</default> <!-- FONT_STYLE_BOLD -->
           <constraints>
             <options>
               <option label="738">0</option> <!-- FONT_STYLE_NORMAL -->
@@ -719,14 +719,14 @@
       <group id="1">
         <setting id="scrapers.moviesdefault" type="addon" label="21413" help="36198">
           <level>4</level>
-          <default>metadata.themoviedb.org</default>
+          <default>metadata.movie.daum.net</default>
           <constraints>
             <addontype>xbmc.metadata.scraper.movies</addontype>
           </constraints>
         </setting>
         <setting id="scrapers.tvshowsdefault" type="addon" label="21414" help="36199">
           <level>4</level>
-          <default>metadata.tvdb.com</default>
+          <default>metadata.tv.daum.net</default>
           <constraints>
             <addontype>xbmc.metadata.scraper.tvshows</addontype>
           </constraints>
