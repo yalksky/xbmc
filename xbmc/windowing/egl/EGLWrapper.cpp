@@ -378,5 +378,24 @@ bool CEGLWrapper::GetConfigAttrib(EGLDisplay display, EGLConfig config, EGLint a
     return eglGetConfigAttrib(display, config, attribute, value);
   return false;
 }
+
+void* CEGLWrapper::GetProcAddress(const char* function)
+{
+  void* ext = (void*) eglGetProcAddress(function);
+  if (!ext)
+  {
+    CLog::Log(LOGERROR, "EGL error in %s - cannot get proc addr of %s", __FUNCTION__, function);
+    return NULL;
+  }
+  
+  return ext;
+}
+
+bool CEGLWrapper::SurfaceAttrib(EGLDisplay display, EGLSurface surface, EGLint attribute, EGLint value)
+{
+  if ((display == EGL_NO_DISPLAY) || (surface == EGL_NO_SURFACE))
+    return false;
+  return eglSurfaceAttrib(display, surface, attribute, value);
+}
 #endif
 

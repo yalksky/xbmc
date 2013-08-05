@@ -338,7 +338,7 @@ bool CGUIWindowPictures::ShowPicture(int iItem, bool startSlideShow)
   CGUIWindowSlideShow *pSlideShow = (CGUIWindowSlideShow *)g_windowManager.GetWindow(WINDOW_SLIDESHOW);
   if (!pSlideShow)
     return false;
-  if (g_application.IsPlayingVideo())
+  if (g_application.m_pPlayer->IsPlayingVideo())
     g_application.StopPlaying();
 
   pSlideShow->Reset();
@@ -381,11 +381,12 @@ void CGUIWindowPictures::OnShowPictureRecursive(const CStdString& strPath)
   if (pSlideShow)
   {
     // stop any video
-    if (g_application.IsPlayingVideo())
+    if (g_application.m_pPlayer->IsPlayingVideo())
       g_application.StopPlaying();
+
+    SortDescription sorting = m_guiState->GetSortMethod();
     pSlideShow->AddFromPath(strPath, true,
-                            m_guiState->GetSortMethod(),
-                            m_guiState->GetSortOrder());
+                            sorting.sortBy, sorting.sortOrder, sorting.sortAttributes);
     if (pSlideShow->NumSlides())
     {
       m_slideShowStarted = true;
@@ -408,11 +409,12 @@ void CGUIWindowPictures::OnSlideShowRecursive(const CStdString &strPicture)
       delete viewState;
     }
     m_slideShowStarted = true;
+
+    SortDescription sorting = m_guiState->GetSortMethod();
     pSlideShow->RunSlideShow(strPicture, true,
                              CSettings::Get().GetBool("slideshow.shuffle"),false,
                              "", true,
-                             m_guiState->GetSortMethod(),
-                             m_guiState->GetSortOrder(),
+                             sorting.sortBy, sorting.sortOrder, sorting.sortAttributes,
                              strExtensions);
   }
 }
@@ -442,10 +444,11 @@ void CGUIWindowPictures::OnSlideShow(const CStdString &strPicture)
       delete viewState;
     }
     m_slideShowStarted = true;
+
+    SortDescription sorting = m_guiState->GetSortMethod();
     pSlideShow->RunSlideShow(strPicture, false ,false, false,
                              "", true,
-                             m_guiState->GetSortMethod(),
-                             m_guiState->GetSortOrder(),
+                             sorting.sortBy, sorting.sortOrder, sorting.sortAttributes,
                              strExtensions);
   }
 }
@@ -581,7 +584,7 @@ void CGUIWindowPictures::LoadPlayList(const CStdString& strPlayList)
     CGUIWindowSlideShow *pSlideShow = (CGUIWindowSlideShow *)g_windowManager.GetWindow(WINDOW_SLIDESHOW);
     if (!pSlideShow)
       return;
-    if (g_application.IsPlayingVideo())
+    if (g_application.m_pPlayer->IsPlayingVideo())
       g_application.StopPlaying();
 
     // convert playlist items into slideshow items

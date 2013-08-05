@@ -98,8 +98,18 @@ void CGUITextLayout::Render(float x, float y, float angle, color_t color, color_
     g_graphicsContext.RemoveTransform();
 }
 
+bool CGUITextLayout::UpdateScrollinfo(CScrollInfo &scrollInfo)
+{
+  if (!m_font)
+    return false;
+  if (m_lines.empty())
+    return false;
 
-void CGUITextLayout::RenderScrolling(float x, float y, float angle, color_t color, color_t shadowColor, uint32_t alignment, float maxWidth, CScrollInfo &scrollInfo)
+  return m_font->UpdateScrollInfo(m_lines[0].m_text, scrollInfo);
+}
+
+
+void CGUITextLayout::RenderScrolling(float x, float y, float angle, color_t color, color_t shadowColor, uint32_t alignment, float maxWidth, const CScrollInfo &scrollInfo)
 {
   if (!m_font)
     return;
@@ -127,15 +137,12 @@ void CGUITextLayout::RenderScrolling(float x, float y, float angle, color_t colo
   //       any difference to the smoothness of scrolling though which will be
   //       jumpy with this sort of thing.  It's not exactly a well used situation
   //       though, so this hack is probably OK.
-  float speed = scrollInfo.pixelSpeed;
   for (vector<CGUIString>::iterator i = m_lines.begin(); i != m_lines.end(); i++)
   {
     const CGUIString &string = *i;
     m_font->DrawScrollingText(x, y, m_colors, shadowColor, string.m_text, alignment, maxWidth, scrollInfo);
     y += m_font->GetLineHeight();
-    scrollInfo.pixelSpeed = 0;
   }
-  scrollInfo.pixelSpeed = speed;
   m_font->End();
   if (angle)
     g_graphicsContext.RemoveTransform();

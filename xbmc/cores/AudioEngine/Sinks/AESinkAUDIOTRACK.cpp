@@ -170,7 +170,7 @@ void CAESinkAUDIOTRACK::Deinitialize()
     _aligned_free(m_alignedS16), m_alignedS16 = NULL;
 }
 
-bool CAESinkAUDIOTRACK::IsCompatible(const AEAudioFormat format, const std::string &device)
+bool CAESinkAUDIOTRACK::IsCompatible(const AEAudioFormat &format, const std::string &device)
 {
   return ((m_format.m_sampleRate    == format.m_sampleRate) &&
           (m_format.m_dataFormat    == format.m_dataFormat) &&
@@ -212,7 +212,7 @@ double CAESinkAUDIOTRACK::GetCacheTotal()
   return m_sinkbuffer_sec + m_audiotrackbuffer_sec;
 }
 
-unsigned int CAESinkAUDIOTRACK::AddPackets(uint8_t *data, unsigned int frames, bool hasAudio)
+unsigned int CAESinkAUDIOTRACK::AddPackets(uint8_t *data, unsigned int frames, bool hasAudio, bool blocking)
 {
   // write as many frames of audio as we can fit into our internal buffer.
 
@@ -243,6 +243,11 @@ unsigned int CAESinkAUDIOTRACK::AddPackets(uint8_t *data, unsigned int frames, b
         break;
     }
   }
+  // AddPackets runs under a non-idled AE thread we must block or sleep.
+  // Trying to calc the optimal sleep is tricky so just a minimal sleep.
+  if(blocking)
+    Sleep(10);
+
   return hasAudio ? write_frames:frames;
 }
 

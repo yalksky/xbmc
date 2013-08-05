@@ -49,7 +49,7 @@ public:
   /*
     Return true if the supplied format and device are compatible with the current open sink
   */
-  virtual bool IsCompatible(const AEAudioFormat format, const std::string &device) = 0;
+  virtual bool IsCompatible(const AEAudioFormat &format, const std::string &device) = 0;
 
   /*
     This method returns the time in seconds that it will take
@@ -71,7 +71,7 @@ public:
   /*
     Adds packets to be sent out, this routine MUST block or sleep.
   */
-  virtual unsigned int AddPackets(uint8_t *data, unsigned int frames, bool hasAudio) = 0;
+  virtual unsigned int AddPackets(uint8_t *data, unsigned int frames, bool hasAudio, bool blocking = false) = 0;
 
   /*
     Drain the sink

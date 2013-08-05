@@ -62,11 +62,11 @@ bool KaraokeVideoBackground::openVideoFile( const CStdString& filename )
   m_curVideoFile = filename;
   
   // Find out the necessary aspect ratio for height (assuming fit by width) and width (assuming fit by height)
-  RESOLUTION res = g_graphicsContext.GetVideoResolution();
-  m_displayLeft = CDisplaySettings::Get().GetResolutionInfo(res).Overscan.left;
-  m_displayRight = CDisplaySettings::Get().GetResolutionInfo(res).Overscan.right;
-  m_displayTop = CDisplaySettings::Get().GetResolutionInfo(res).Overscan.top;
-  m_displayBottom = CDisplaySettings::Get().GetResolutionInfo(res).Overscan.bottom;
+  const RESOLUTION_INFO info = g_graphicsContext.GetResInfo();
+  m_displayLeft   = info.Overscan.left;
+  m_displayRight  = info.Overscan.right;
+  m_displayTop    = info.Overscan.top;
+  m_displayBottom = info.Overscan.bottom;
   
   int screen_width = m_displayRight - m_displayLeft;
   int screen_height = m_displayBottom - m_displayTop;
@@ -74,8 +74,9 @@ bool KaraokeVideoBackground::openVideoFile( const CStdString& filename )
   // Do we need to modify the output video size? This could happen in two cases:
   // 1. Either video dimension is larger than the screen - video needs to be downscaled
   // 2. Both video dimensions are smaller than the screen - video needs to be upscaled
-  if ( (m_videoWidth > screen_width || m_videoHeight > screen_height )
-  || (  m_videoWidth < screen_width && m_videoHeight < screen_height ) )
+  if ( ( m_videoWidth > 0 && m_videoHeight > 0 )
+  && ( ( m_videoWidth > screen_width || m_videoHeight > screen_height )
+  || ( m_videoWidth < screen_width && m_videoHeight < screen_height ) ) )
   {
     // Calculate the scale coefficients for width/height separately
     double scale_width = (double) screen_width / (double) m_videoWidth;

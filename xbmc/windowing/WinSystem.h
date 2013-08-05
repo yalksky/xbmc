@@ -40,7 +40,7 @@ struct RESOLUTION_WHR
 {
   int width;
   int height;
-  int interlaced;
+  int flags; //< only D3DPRESENTFLAG_MODEMASK flags
   int ResInfo_Index;
 };
 
@@ -107,6 +107,8 @@ public:
   // text input interface
   virtual void EnableTextInput(bool bEnable) {}
   virtual bool IsTextInputEnabled() { return false; }
+
+  CStdStringW GetClipboard(void);
 
 protected:
   void UpdateDesktopResolution(RESOLUTION_INFO& newRes, int screen, int width, int height, float refreshRate, uint32_t dwFlags = 0);
