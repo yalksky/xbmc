@@ -262,7 +262,7 @@ bool CGUIWindowFullScreen::OnAction(const CAction &action)
           if (!channel || !channel->HasPVRChannelInfoTag())
             return false;
 
-          OnAction(CAction(ACTION_CHANNEL_SWITCH, (float)iChannelNumber));
+          g_application.OnAction(CAction(ACTION_CHANNEL_SWITCH, (float)iChannelNumber));
         }
       }
       else
@@ -374,7 +374,7 @@ bool CGUIWindowFullScreen::OnMessage(CGUIMessage& message)
     {
       // check whether we've come back here from a window during which time we've actually
       // stopped playing videos
-      if (message.GetParam1() == WINDOW_INVALID && !g_application.IsPlayingVideo())
+      if (message.GetParam1() == WINDOW_INVALID && !g_application.m_pPlayer->IsPlayingVideo())
       { // why are we here if nothing is playing???
         g_windowManager.PreviousWindow();
         return true;
@@ -487,7 +487,7 @@ bool CGUIWindowFullScreen::OnMessage(CGUIMessage& message)
               CFileItemPtr switchChannel = selectedGroup->GetByChannelNumber(1);
 
               if (switchChannel && switchChannel->HasPVRChannelInfoTag())
-                OnAction(CAction(ACTION_CHANNEL_SWITCH, (float) switchChannel->GetPVRChannelInfoTag()->ChannelNumber()));
+                g_application.OnAction(CAction(ACTION_CHANNEL_SWITCH, (float) switchChannel->GetPVRChannelInfoTag()->ChannelNumber()));
               else
               {
                 CLog::Log(LOGERROR, "%s - cannot find channel '1' in group %s", __FUNCTION__, selectedGroup->GroupName().c_str());
@@ -558,12 +558,12 @@ EVENT_RESULT CGUIWindowFullScreen::OnMouseEvent(const CPoint &point, const CMous
 
 void CGUIWindowFullScreen::FrameMove()
 {
-  if (g_application.GetPlaySpeed() != 1)
+  if (g_application.m_pPlayer->GetPlaySpeed() != 1)
     g_infoManager.SetDisplayAfterSeek();
   if (m_bShowCurrentTime)
     g_infoManager.SetDisplayAfterSeek();
 
-  if (!g_application.m_pPlayer) return;
+  if (!g_application.m_pPlayer->HasPlayer()) return;
 
   if( g_application.m_pPlayer->IsCaching() )
   {
@@ -751,7 +751,7 @@ void CGUIWindowFullScreen::Process(unsigned int currentTime, CDirtyRegionList &d
 
 void CGUIWindowFullScreen::Render()
 {
-  if (g_application.m_pPlayer)
+  if (g_application.m_pPlayer->HasPlayer())
     RenderTTFSubtitles();
   CGUIWindow::Render();
 }

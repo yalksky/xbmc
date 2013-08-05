@@ -966,10 +966,9 @@ void CDVDPlayer::Process()
   // look for any EDL files
   m_Edl.Clear();
   m_EdlAutoSkipMarkers.Clear();
-  float fFramesPerSecond;
   if (m_CurrentVideo.id >= 0 && m_CurrentVideo.hint.fpsrate > 0 && m_CurrentVideo.hint.fpsscale > 0)
   {
-    fFramesPerSecond = (float)m_CurrentVideo.hint.fpsrate / (float)m_CurrentVideo.hint.fpsscale;
+    float fFramesPerSecond = (float)m_CurrentVideo.hint.fpsrate / (float)m_CurrentVideo.hint.fpsscale;
     m_Edl.ReadEditDecisionLists(m_filename, fFramesPerSecond, m_CurrentVideo.hint.height);
   }
 
@@ -1287,6 +1286,7 @@ void CDVDPlayer::ProcessAudioData(CDemuxStream* pStream, DemuxPacket* pPacket)
       OpenAudioStream( pPacket->iStreamId, pStream->source );
 
     m_CurrentAudio.stream = (void*)pStream;
+    m_CurrentAudio.changes = pStream->changes;
   }
 
   // check if we are too slow and need to recache
@@ -1336,6 +1336,7 @@ void CDVDPlayer::ProcessVideoData(CDemuxStream* pStream, DemuxPacket* pPacket)
       OpenVideoStream(pPacket->iStreamId, pStream->source);
 
     m_CurrentVideo.stream = (void*)pStream;
+    m_CurrentVideo.changes = pStream->changes;
   }
 
   // check if we are too slow and need to recache
@@ -1369,6 +1370,7 @@ void CDVDPlayer::ProcessSubData(CDemuxStream* pStream, DemuxPacket* pPacket)
       OpenSubtitleStream(pPacket->iStreamId, pStream->source);
 
     m_CurrentSubtitle.stream = (void*)pStream;
+    m_CurrentSubtitle.changes = pStream->changes;
   }
 
   UpdateTimestamps(m_CurrentSubtitle, pPacket);
@@ -1397,6 +1399,7 @@ void CDVDPlayer::ProcessTeletextData(CDemuxStream* pStream, DemuxPacket* pPacket
       OpenTeletextStream( pPacket->iStreamId, pStream->source );
 
     m_CurrentTeletext.stream = (void*)pStream;
+    m_CurrentTeletext.changes = pStream->changes;
   }
   UpdateTimestamps(m_CurrentTeletext, pPacket);
 
