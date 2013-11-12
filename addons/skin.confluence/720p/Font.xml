@@ -75,11 +75,6 @@
 			<filename>NanumGothicBold.ttf</filename>
 			<size>35</size>
 		</font>
-	 	<font>
-			<name>font45caps_title</name>
-			<filename>NanumGothicBold.ttf</filename>
-			<size>45</size>
-		</font>
 
 	 	<font>
 			<name>font_MainMenu</name>
