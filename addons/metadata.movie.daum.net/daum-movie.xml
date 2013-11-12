@@ -54,8 +54,8 @@
 				</RegExp>
 				<expression repeat="yes">"countryKo":"(.*?)"</expression>
 			</RegExp>
-			<RegExp input="$$1" output="&lt;premiered&gt;\1&lt;/premiered&gt;" dest="5+">
-				<expression>"releaseDate":(\d+)</expression>
+			<RegExp input="$$1" output="&lt;premiered&gt;\1-\2-\3&lt;/premiered&gt;" dest="5+">
+				<expression>"releaseDate":"(\d{4})(\d{2})(\d{2})"</expression>
 			</RegExp>
 			<RegExp input="$$1" output="&lt;tagline&gt;\1&lt;/tagline&gt;" dest="5+">
 				<expression>"mainCopy":"(.*?)"</expression>
