@@ -51,6 +51,7 @@
 #include "settings/Settings.h"
 #include "settings/SkinSettings.h"
 #include "guilib/LocalizeStrings.h"
+#include "guilib/StereoscopicsManager.h"
 #include "utils/CharsetConverter.h"
 #include "utils/CPUInfo.h"
 #include "utils/StringUtils.h"
@@ -84,6 +85,12 @@
 #include "cores/IPlayer.h"
 #include "cores/AudioEngine/Utils/AEUtil.h"
 #include "cores/VideoRenderers/BaseRenderer.h"
+
+#if defined(TARGET_DARWIN_OSX)
+#include "osx/smc.h"
+#include "linux/LinuxResourceCounter.h"
+static CLinuxResourceCounter m_resourceCounter;
+#endif
 
 #define SYSHEATUPDATEINTERVAL 60000
 
@@ -202,6 +209,7 @@ const infomap player_labels[] =  {{ "hasmedia",         PLAYER_HAS_MEDIA },     
                                   { "starrating",       PLAYER_STAR_RATING },
                                   { "folderpath",       PLAYER_PATH },
                                   { "filenameandpath",  PLAYER_FILEPATH },
+                                  { "filename",         PLAYER_FILENAME },
                                   { "isinternetstream", PLAYER_ISINTERNETSTREAM },
                                   { "pauseenabled",     PLAYER_CAN_PAUSE },
                                   { "seekenabled",      PLAYER_CAN_SEEK }};
@@ -293,7 +301,6 @@ const infomap network_labels[] = {{ "isdhcp",            NETWORK_IS_DHCP },
                                   { "ipaddress",         NETWORK_IP_ADDRESS }, //labels from here
                                   { "linkstate",         NETWORK_LINK_STATE },
                                   { "macaddress",        NETWORK_MAC_ADDRESS },
-                                  { "subnetaddress",     NETWORK_SUBNET_MASK }, //subnetaddress is misleading/wrong. should be deprecated. use subnetmask in stead
                                   { "subnetmask",        NETWORK_SUBNET_MASK },
                                   { "gatewayaddress",    NETWORK_GATEWAY_ADDRESS },
                                   { "dns1address",       NETWORK_DNS1_ADDRESS },
@@ -376,11 +383,13 @@ const infomap videoplayer[] =    {{ "title",            VIDEOPLAYER_TITLE },
                                   { "videoaspect",      VIDEOPLAYER_VIDEO_ASPECT },
                                   { "audiocodec",       VIDEOPLAYER_AUDIO_CODEC },
                                   { "audiochannels",    VIDEOPLAYER_AUDIO_CHANNELS },
+                                  { "audiolanguage",    VIDEOPLAYER_AUDIO_LANG },
                                   { "hasteletext",      VIDEOPLAYER_HASTELETEXT },
                                   { "lastplayed",       VIDEOPLAYER_LASTPLAYED },
                                   { "playcount",        VIDEOPLAYER_PLAYCOUNT },
                                   { "hassubtitles",     VIDEOPLAYER_HASSUBTITLES },
                                   { "subtitlesenabled", VIDEOPLAYER_SUBTITLESENABLED },
+                                  { "subtitleslanguage",VIDEOPLAYER_SUBTITLES_LANG },
                                   { "endtime",          VIDEOPLAYER_ENDTIME },
                                   { "nexttitle",        VIDEOPLAYER_NEXT_TITLE },
                                   { "nextgenre",        VIDEOPLAYER_NEXT_GENRE },
@@ -395,7 +404,7 @@ const infomap videoplayer[] =    {{ "title",            VIDEOPLAYER_TITLE },
                                   { "hasepg",           VIDEOPLAYER_HAS_EPG },
                                   { "parentalrating",   VIDEOPLAYER_PARENTAL_RATING },
                                   { "isstereoscopic",   VIDEOPLAYER_IS_STEREOSCOPIC },
-                                  { "stereoscopicmode", VIDEOPLAYER_STEREOSCOPIC_MODE },
+                                  { "stereoscopicmode", VIDEOPLAYER_STEREOSCOPIC_MODE }
 };
 
 const infomap mediacontainer[] = {{ "hasfiles",         CONTAINER_HASFILES },
@@ -573,7 +582,9 @@ const infomap listitem_labels[]= {{ "thumb",            LISTITEM_THUMB },
                                   { "progress",         LISTITEM_PROGRESS },
                                   { "dateadded",        LISTITEM_DATE_ADDED },
                                   { "dbtype",           LISTITEM_DBTYPE },
-                                  { "dbid",             LISTITEM_DBID }};
+                                  { "dbid",             LISTITEM_DBID },
+                                  { "stereoscopicmode", LISTITEM_STEREOSCOPIC_MODE },
+                                  { "isstereoscopic",   LISTITEM_IS_STEREOSCOPIC }};
 
 const infomap visualisation[] =  {{ "locked",           VISUALISATION_LOCKED },
                                   { "preset",           VISUALISATION_PRESET },
@@ -654,7 +665,10 @@ const infomap pvr[] =            {{ "isrecording",              PVR_IS_RECORDING
                                   { "actstreamprogrsignal",     PVR_ACTUAL_STREAM_SIG_PROGR },
                                   { "actstreamprogrsnr",        PVR_ACTUAL_STREAM_SNR_PROGR },
                                   { "actstreamisencrypted",     PVR_ACTUAL_STREAM_ENCRYPTED },
-                                  { "actstreamencryptionname",  PVR_ACTUAL_STREAM_CRYPTION }};
+                                  { "actstreamencryptionname",  PVR_ACTUAL_STREAM_CRYPTION },
+                                  { "actstreamservicename",     PVR_ACTUAL_STREAM_SERVICE },
+                                  { "actstreammux",             PVR_ACTUAL_STREAM_MUX },
+                                  { "actstreamprovidername",    PVR_ACTUAL_STREAM_PROVIDER }};
 
 const infomap slideshow[] =      {{ "ispaused",         SLIDESHOW_ISPAUSED },
                                   { "isactive",         SLIDESHOW_ISACTIVE },
@@ -923,6 +937,14 @@ int CGUIInfoManager::TranslateSingleString(const CStdString &strCondition)
           CStdString label = CGUIInfoLabel::GetLabel(param).ToLower();
           return AddMultiInfo(GUIInfo(SYSTEM_ADDON_ICON, ConditionalStringParameter(label), 1));
         }
+        else if (prop.name == "addonversion")
+        {
+          int infoLabel = TranslateSingleString(param);
+          if (infoLabel > 0)
+            return AddMultiInfo(GUIInfo(SYSTEM_ADDON_VERSION, infoLabel, 0));
+          CStdString label = CGUIInfoLabel::GetLabel(param).ToLower();
+          return AddMultiInfo(GUIInfo(SYSTEM_ADDON_VERSION, ConditionalStringParameter(label), 1));
+        }
         else if (prop.name == "idletime")
           return AddMultiInfo(GUIInfo(SYSTEM_IDLE_TIME, atoi(param.c_str())));
       }
@@ -1054,7 +1076,7 @@ int CGUIInfoManager::TranslateSingleString(const CStdString &strCondition)
     {
       int offset = atoi(cat.param().c_str());
       int ret = TranslateListItem(prop);
-      if (offset || ret == LISTITEM_ISSELECTED || ret == LISTITEM_ISPLAYING || ret == LISTITEM_IS_FOLDER)
+      if (offset)
         return AddMultiInfo(GUIInfo(ret, 0, offset, INFOFLAG_LISTITEM_WRAP));
       return ret;
     }
@@ -1062,7 +1084,7 @@ int CGUIInfoManager::TranslateSingleString(const CStdString &strCondition)
     {
       int offset = atoi(cat.param().c_str());
       int ret = TranslateListItem(prop);
-      if (offset || ret == LISTITEM_ISSELECTED || ret == LISTITEM_ISPLAYING || ret == LISTITEM_IS_FOLDER)
+      if (offset)
         return AddMultiInfo(GUIInfo(ret, 0, offset, INFOFLAG_LISTITEM_POSITION));
       return ret;
     }
@@ -1070,7 +1092,7 @@ int CGUIInfoManager::TranslateSingleString(const CStdString &strCondition)
     {
       int offset = atoi(cat.param().c_str());
       int ret = TranslateListItem(prop);
-      if (offset || ret == LISTITEM_ISSELECTED || ret == LISTITEM_ISPLAYING || ret == LISTITEM_IS_FOLDER)
+      if (offset)
         return AddMultiInfo(GUIInfo(ret, 0, offset));
       return ret;
     }
@@ -1154,10 +1176,30 @@ int CGUIInfoManager::TranslateSingleString(const CStdString &strCondition)
     }
     else if (cat.name == "playlist")
     {
+      int ret = -1;
       for (size_t i = 0; i < sizeof(playlist) / sizeof(infomap); i++)
       {
         if (prop.name == playlist[i].str)
-          return playlist[i].val;
+        {
+          ret = playlist[i].val;
+          break;
+        }
+      }
+      if (ret >= 0)
+      {
+        if (prop.num_params() <= 0)
+          return ret;
+        else
+        {
+          int playlistid = PLAYLIST_NONE;
+          if (prop.param().Equals("video"))
+            playlistid = PLAYLIST_VIDEO;
+          else if (prop.param().Equals("music"))
+            playlistid = PLAYLIST_MUSIC;
+
+          if (playlistid > PLAYLIST_NONE)
+            return AddMultiInfo(GUIInfo(ret, playlistid));
+        }
       }
     }
     else if (cat.name == "pvr")
@@ -1169,12 +1211,20 @@ int CGUIInfoManager::TranslateSingleString(const CStdString &strCondition)
       }
     }
   }
-  else if (info.size() == 3)
+  else if (info.size() == 3 || info.size() == 4)
   {
     if (info[0].name == "system" && info[1].name == "platform")
     { // TODO: replace with a single system.platform
       CStdString platform = info[2].name;
-      if (platform == "linux") return SYSTEM_PLATFORM_LINUX;
+      if (platform == "linux")
+      {
+        if (info.size() == 4)
+        {
+          CStdString device = info[3].name;
+          if (device == "raspberrypi") return SYSTEM_PLATFORM_LINUX_RASPBERRY_PI;
+        }
+        else return SYSTEM_PLATFORM_LINUX;
+      }
       else if (platform == "windows") return SYSTEM_PLATFORM_WINDOWS;
       else if (platform == "darwin")  return SYSTEM_PLATFORM_DARWIN;
       else if (platform == "osx")  return SYSTEM_PLATFORM_DARWIN_OSX;
@@ -1328,6 +1378,9 @@ CStdString CGUIInfoManager::GetLabel(int info, int contextWindow, CStdString *fa
   case PVR_ACTUAL_STREAM_AUDIO_BR:
   case PVR_ACTUAL_STREAM_DOLBY_BR:
   case PVR_ACTUAL_STREAM_CRYPTION:
+  case PVR_ACTUAL_STREAM_SERVICE:
+  case PVR_ACTUAL_STREAM_MUX:
+  case PVR_ACTUAL_STREAM_PROVIDER:
     g_PVRManager.TranslateCharInfo(info, strLabel);
     break;
   case WEATHER_CONDITIONS:
@@ -1390,6 +1443,7 @@ CStdString CGUIInfoManager::GetLabel(int info, int contextWindow, CStdString *fa
       strLabel = GetDuration(TIME_FORMAT_HH_MM);
     break;
   case PLAYER_PATH:
+  case PLAYER_FILENAME:
   case PLAYER_FILEPATH:
     if (m_currentFile)
     {
@@ -1408,6 +1462,8 @@ CStdString CGUIInfoManager::GetLabel(int info, int contextWindow, CStdString *fa
         strLabel = URIUtils::GetParentPath(strLabel);
       strLabel = URIUtils::GetParentPath(strLabel);
     }
+    else if (info == PLAYER_FILENAME)
+      strLabel = URIUtils::GetFileName(strLabel);
     break;
   case PLAYER_TITLE:
     {
@@ -1542,11 +1598,33 @@ CStdString CGUIInfoManager::GetLabel(int info, int contextWindow, CStdString *fa
       strLabel.Format("%i", m_audioInfo.channels);
     }
     break;
+  case VIDEOPLAYER_AUDIO_LANG:
+    if(g_application.m_pPlayer->IsPlaying())
+    {
+      SPlayerAudioStreamInfo info;
+      g_application.m_pPlayer->GetAudioStreamInfo(CMediaSettings::Get().GetCurrentVideoSettings().m_AudioStream, info);
+      strLabel = info.language;
+    }
+    break;
   case VIDEOPLAYER_STEREOSCOPIC_MODE:
     if(g_application.m_pPlayer->IsPlaying())
     {
       UpdateAVInfo();
       strLabel = m_videoInfo.stereoMode;
+    }
+    break;
+  case VIDEOPLAYER_SUBTITLES_LANG:
+    // use g_settings.m_currentVideoSettings.m_SubtitleOn and g_settings.m_currentVideoSettings.m_SubtitleStream
+    // instead of g_application.m_pPlayer->GetSubtitleVisible and g_application.m_pPlayer->GetSubtitle()
+    // because when we switch subtitles there is few frames when weird things happen on subtitles switch with latter:
+    //  - when we switch from one sub to another, for few frames (time to handle message, close old and open new subs)
+    //    g_application.m_pPlayer->GetSubtitle() will return last of sub streams (that's how CSelectionStreams::IndexOf work for -1 index)
+    //  - when we toggle disable/enable subs there will be few frames before message will be handled
+    if(g_application.m_pPlayer && g_application.m_pPlayer->IsPlaying() && CMediaSettings::Get().GetCurrentVideoSettings().m_SubtitleOn)
+    {
+      SPlayerSubtitleStreamInfo info;
+      g_application.m_pPlayer->GetSubtitleStreamInfo(CMediaSettings::Get().GetCurrentVideoSettings().m_SubtitleStream, info);
+      strLabel = info.language;
     }
     break;
   case PLAYLIST_LENGTH:
@@ -2093,8 +2171,20 @@ bool CGUIInfoManager::GetBool(int condition1, int contextWindow, const CGUIListI
   bool bReturn = false;
   int condition = abs(condition1);
 
-  if (item && condition >= LISTITEM_START && condition < LISTITEM_END)
-    bReturn = GetItemBool(item, condition);
+  if (condition >= LISTITEM_START && condition < LISTITEM_END)
+  {
+    if (item)
+      bReturn = GetItemBool(item, condition);
+    else
+    {
+      CGUIWindow *window = GetWindowWithCondition(contextWindow, WINDOW_CONDITION_HAS_LIST_ITEMS); // true for has list items
+      if (window)
+      {
+        CFileItemPtr item = window->GetCurrentListItem();
+        bReturn = GetItemBool(item.get(), condition);
+      }
+    }
+  }
   // Ethernet Link state checking
   // Will check if system has a Ethernet Link connection! [Cable in!]
   // This can used for the skinner to switch off Network or Inter required functions
@@ -2166,6 +2256,12 @@ bool CGUIInfoManager::GetBool(int condition1, int contextWindow, const CGUIListI
 #endif
   else if (condition == SYSTEM_PLATFORM_ANDROID)
 #if defined(TARGET_ANDROID)
+    bReturn = true;
+#else
+    bReturn = false;
+#endif
+  else if (condition == SYSTEM_PLATFORM_LINUX_RASPBERRY_PI)
+#if defined(TARGET_RASPBERRY_PI)
     bReturn = true;
 #else
     bReturn = false;
@@ -2923,6 +3019,30 @@ bool CGUIInfoManager::GetMultiInfoBool(const GUIInfo &info, int contextWindow, c
           bReturn = (index >= 0 && index < g_playlistPlayer.GetPlaylist(PLAYLIST_MUSIC).size());
         }
         break;
+
+      case PLAYLIST_ISRANDOM:
+        {
+          int playlistid = info.GetData1();
+          if (playlistid > PLAYLIST_NONE)
+            bReturn = g_playlistPlayer.IsShuffled(playlistid);
+        }
+        break;
+
+      case PLAYLIST_ISREPEAT:
+        {
+          int playlistid = info.GetData1();
+          if (playlistid > PLAYLIST_NONE)
+            bReturn = g_playlistPlayer.GetRepeat(playlistid) == PLAYLIST::REPEAT_ALL;
+        }
+        break;
+
+      case PLAYLIST_ISREPEATONE:
+        {
+          int playlistid = info.GetData1();
+          if (playlistid > PLAYLIST_NONE)
+            bReturn = g_playlistPlayer.GetRepeat(playlistid) == PLAYLIST::REPEAT_ONE;
+        }
+        break;
     }
   }
   return (info.m_info < 0) ? !bReturn : bReturn;
@@ -3143,7 +3263,8 @@ CStdString CGUIInfoManager::GetMultiInfoLabel(const GUIInfo &info, int contextWi
       return window->GetProperty(m_stringParameters[info.GetData2()]).asString();
   }
   else if (info.m_info == SYSTEM_ADDON_TITLE ||
-           info.m_info == SYSTEM_ADDON_ICON)
+           info.m_info == SYSTEM_ADDON_ICON ||
+           info.m_info == SYSTEM_ADDON_VERSION)
   {
     // This logic does not check/care whether an addon has been disabled/marked as broken,
     // it simply retrieves it's name or icon that means if an addon is placed on the home screen it
@@ -3158,6 +3279,17 @@ CStdString CGUIInfoManager::GetMultiInfoLabel(const GUIInfo &info, int contextWi
       return addon->Name();
     if (addon && info.m_info == SYSTEM_ADDON_ICON)
       return addon->Icon();
+    if (addon && info.m_info == SYSTEM_ADDON_VERSION)
+      return addon->Version().c_str();
+  }
+  else if (info.m_info == PLAYLIST_LENGTH ||
+           info.m_info == PLAYLIST_POSITION ||
+           info.m_info == PLAYLIST_RANDOM ||
+           info.m_info == PLAYLIST_REPEAT)
+  {
+    int playlistid = info.GetData1();
+    if (playlistid > PLAYLIST_NONE)
+      return GetPlaylistLabel(info.m_info, playlistid);
   }
 
   return StringUtils::EmptyString;
@@ -3394,10 +3526,12 @@ const CStdString CGUIInfoManager::GetMusicPlaylistInfo(const GUIInfo& info)
   return GetMusicTagLabel(info.m_info, playlistItem.get());
 }
 
-CStdString CGUIInfoManager::GetPlaylistLabel(int item) const
+CStdString CGUIInfoManager::GetPlaylistLabel(int item, int playlistid /* = PLAYLIST_NONE */) const
 {
-  if (!g_application.m_pPlayer->IsPlaying()) return "";
-  int iPlaylist = g_playlistPlayer.GetCurrentPlaylist();
+  if (playlistid <= PLAYLIST_NONE && !g_application.m_pPlayer->IsPlaying())
+    return "";
+
+  int iPlaylist = playlistid == PLAYLIST_NONE ? g_playlistPlayer.GetCurrentPlaylist() : playlistid;
   switch (item)
   {
   case PLAYLIST_LENGTH:
@@ -3934,7 +4068,7 @@ void CGUIInfoManager::SetCurrentSong(CFileItem &item)
 
 void CGUIInfoManager::SetCurrentMovie(CFileItem &item)
 {
-  CLog::Log(LOGDEBUG,"CGUIInfoManager::SetCurrentMovie(%s)",item.GetPath().c_str());
+  CLog::Log(LOGDEBUG,"CGUIInfoManager::SetCurrentMovie(%s)", CURL::GetRedacted(item.GetPath()).c_str());
   *m_currentFile = item;
 
   /* also call GetMovieInfo() when a VideoInfoTag is already present or additional info won't be present in the tag */
@@ -4009,7 +4143,9 @@ string CGUIInfoManager::GetSystemHeatInfo(int info)
       text.Format("%i%%", m_fanSpeed * 2);
       break;
     case SYSTEM_CPU_USAGE:
-#if defined(TARGET_DARWIN) || defined(TARGET_WINDOWS)
+#if defined(TARGET_DARWIN_OSX)
+      text.Format("%4.2f%%", m_resourceCounter.GetCPUUsage());
+#elif defined(TARGET_DARWIN) || defined(TARGET_WINDOWS)
       text.Format("%d%%", g_cpuInfo.getUsedPercentage());
 #else
       text.Format("%s", g_cpuInfo.GetCoresUsageString());
@@ -4021,10 +4157,15 @@ string CGUIInfoManager::GetSystemHeatInfo(int info)
 
 CTemperature CGUIInfoManager::GetGPUTemperature()
 {
+  int  value = 0;
+  char scale = 0;
+
+#if defined(TARGET_DARWIN_OSX)
+  value = SMCGetTemperature(SMC_KEY_GPU_TEMP);
+  return CTemperature::CreateFromCelsius(value);
+#else
   CStdString  cmd   = g_advancedSettings.m_gpuTempCmd;
-  int         value = 0,
-              ret   = 0;
-  char        scale = 0;
+  int         ret   = 0;
   FILE        *p    = NULL;
 
   if (cmd.IsEmpty() || !(p = popen(cmd.c_str(), "r")))
@@ -4035,6 +4176,7 @@ CTemperature CGUIInfoManager::GetGPUTemperature()
 
   if (ret != 2)
     return CTemperature();
+#endif
 
   if (scale == 'C' || scale == 'c')
     return CTemperature::CreateFromCelsius(value);
@@ -4564,7 +4706,7 @@ CStdString CGUIInfoManager::GetItemLabel(const CFileItem *item, int info, CStdSt
     {
       CStdString path;
       if (item->IsMusicDb() && item->HasMusicInfoTag())
-        URIUtils::GetDirectory(item->GetMusicInfoTag()->GetURL(), path);
+        path = URIUtils::GetDirectory(item->GetMusicInfoTag()->GetURL());
       else if (item->IsVideoDb() && item->HasVideoInfoTag())
       {
         if( item->m_bIsFolder )
@@ -4884,6 +5026,13 @@ CStdString CGUIInfoManager::GetItemLabel(const CFileItem *item, int info, CStdSt
         return dbid;
       }
     break;
+  case LISTITEM_STEREOSCOPIC_MODE:
+    {
+      std::string stereoMode = item->GetProperty("stereomode").asString();
+      if (stereoMode.empty() && item->HasVideoInfoTag())
+        stereoMode = CStereoscopicsManager::Get().NormalizeStereoMode(item->GetVideoInfoTag()->m_streamDetails.GetStereoMode());
+      return stereoMode;
+    }
   }
   return "";
 }
@@ -5017,6 +5166,14 @@ bool CGUIInfoManager::GetItemBool(const CGUIListItem *item, int condition) const
         return pItem->GetEPGInfoTag()->ChannelTag()->IsEncrypted();
       }
     }
+    else if (condition == LISTITEM_IS_STEREOSCOPIC)
+    {
+      std::string stereoMode = pItem->GetProperty("stereomode").asString();
+      if (stereoMode.empty() && pItem->HasVideoInfoTag())
+          stereoMode = CStereoscopicsManager::Get().NormalizeStereoMode(pItem->GetVideoInfoTag()->m_streamDetails.GetStereoMode());
+      if (!stereoMode.empty() && stereoMode != "mono")
+        return true;
+    }
   }
 
   return false;
@@ -5081,8 +5238,7 @@ CStdString CGUIInfoManager::GetPictureLabel(int info)
     return GetItemLabel(m_currentSlide, LISTITEM_FILENAME);
   else if (info == SLIDE_FILE_PATH)
   {
-    CStdString path;
-    URIUtils::GetDirectory(m_currentSlide->GetPath(), path);
+    CStdString path = URIUtils::GetDirectory(m_currentSlide->GetPath());
     return CURL(path).GetWithoutUserDetails();
   }
   else if (info == SLIDE_FILE_SIZE)

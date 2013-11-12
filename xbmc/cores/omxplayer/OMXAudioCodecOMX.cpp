@@ -36,7 +36,6 @@ COMXAudioCodecOMX::COMXAudioCodecOMX()
   m_bOpenedCodec = false;
 
   m_channels = 0;
-  m_layout = 0;
   m_pFrame1 = NULL;
   m_bGotFrame = false;
   m_iSampleFormat = AV_SAMPLE_FMT_NONE;
@@ -175,11 +174,12 @@ int COMXAudioCodecOMX::GetData(BYTE** dst)
 {
   if (!m_bGotFrame)
     return 0;
-
+  int inLineSize, outLineSize;
   /* input audio is aligned */
-  int inputSize = m_dllAvUtil.av_samples_get_buffer_size(NULL, m_pCodecContext->channels, m_pFrame1->nb_samples, m_pCodecContext->sample_fmt, 0);
+  int inputSize = m_dllAvUtil.av_samples_get_buffer_size(&inLineSize, m_pCodecContext->channels, m_pFrame1->nb_samples, m_pCodecContext->sample_fmt, 0);
   /* output audio will be packed */
-  int outputSize = m_dllAvUtil.av_samples_get_buffer_size(NULL, m_pCodecContext->channels, m_pFrame1->nb_samples, m_desiredSampleFormat, 1);
+  int outputSize = m_dllAvUtil.av_samples_get_buffer_size(&outLineSize, m_pCodecContext->channels, m_pFrame1->nb_samples, m_desiredSampleFormat, 1);
+  bool cont = !m_pFrame1->data[1] || (m_pFrame1->data[1] == m_pFrame1->data[0] + inLineSize && inLineSize == outLineSize && inLineSize * m_pCodecContext->channels == inputSize);
 
   if (m_iBufferOutputAlloced < outputSize)
   {
@@ -193,7 +193,10 @@ int COMXAudioCodecOMX::GetData(BYTE** dst)
   if(m_pCodecContext->sample_fmt != m_desiredSampleFormat)
   {
     if(m_pConvert && (m_pCodecContext->sample_fmt != m_iSampleFormat || m_channels != m_pCodecContext->channels))
+    {
       m_dllSwResample.swr_free(&m_pConvert);
+      m_channels = m_pCodecContext->channels;
+    }
 
     if(!m_pConvert)
     {
@@ -224,7 +227,7 @@ int COMXAudioCodecOMX::GetData(BYTE** dst)
   else
   {
     /* if it is already contiguous, just return decoded frame */
-    if (inputSize == outputSize)
+    if (cont)
     {
       *dst = m_pFrame1->data[0];
     }
@@ -242,7 +245,7 @@ int COMXAudioCodecOMX::GetData(BYTE** dst)
 
   if (m_bFirstFrame)
   {
-    CLog::Log(LOGDEBUG, "COMXAudioCodecOMX::GetData size=%d/%d cont=%d buf=%p", inputSize, outputSize, inputSize == outputSize, *dst);
+    CLog::Log(LOGDEBUG, "COMXAudioCodecOMX::GetData size=%d/%d line=%d/%d cont=%d buf=%p", inputSize, outputSize, inLineSize, outLineSize, cont, *dst);
     m_bFirstFrame = false;
   }
   return outputSize;
@@ -290,16 +293,9 @@ static unsigned count_bits(int64_t value)
   return bits;
 }
 
-void COMXAudioCodecOMX::BuildChannelMap()
+uint64_t COMXAudioCodecOMX::GetChannelMap()
 {
-  if (m_channels == m_pCodecContext->channels && m_layout == m_pCodecContext->channel_layout)
-    return; //nothing to do here
-
-  m_channels = m_pCodecContext->channels;
-  m_layout   = m_pCodecContext->channel_layout;
-
-  int64_t layout;
-
+  uint64_t layout;
   int bits = count_bits(m_pCodecContext->channel_layout);
   if (bits == m_pCodecContext->channels)
     layout = m_pCodecContext->channel_layout;
@@ -308,31 +304,5 @@ void COMXAudioCodecOMX::BuildChannelMap()
     CLog::Log(LOGINFO, "COMXAudioCodecOMX::GetChannelMap - FFmpeg reported %d channels, but the layout contains %d ignoring", m_pCodecContext->channels, bits);
     layout = m_dllAvUtil.av_get_default_channel_layout(m_pCodecContext->channels);
   }
-
-  m_channelLayout.Reset();
-
-  if (layout & AV_CH_FRONT_LEFT           ) m_channelLayout += AE_CH_FL  ;
-  if (layout & AV_CH_FRONT_RIGHT          ) m_channelLayout += AE_CH_FR  ;
-  if (layout & AV_CH_FRONT_CENTER         ) m_channelLayout += AE_CH_FC  ;
-  if (layout & AV_CH_LOW_FREQUENCY        ) m_channelLayout += AE_CH_LFE ;
-  if (layout & AV_CH_BACK_LEFT            ) m_channelLayout += AE_CH_BL  ;
-  if (layout & AV_CH_BACK_RIGHT           ) m_channelLayout += AE_CH_BR  ;
-  if (layout & AV_CH_FRONT_LEFT_OF_CENTER ) m_channelLayout += AE_CH_FLOC;
-  if (layout & AV_CH_FRONT_RIGHT_OF_CENTER) m_channelLayout += AE_CH_FROC;
-  if (layout & AV_CH_BACK_CENTER          ) m_channelLayout += AE_CH_BC  ;
-  if (layout & AV_CH_SIDE_LEFT            ) m_channelLayout += AE_CH_SL  ;
-  if (layout & AV_CH_SIDE_RIGHT           ) m_channelLayout += AE_CH_SR  ;
-  if (layout & AV_CH_TOP_CENTER           ) m_channelLayout += AE_CH_TC  ;
-  if (layout & AV_CH_TOP_FRONT_LEFT       ) m_channelLayout += AE_CH_TFL ;
-  if (layout & AV_CH_TOP_FRONT_CENTER     ) m_channelLayout += AE_CH_TFC ;
-  if (layout & AV_CH_TOP_FRONT_RIGHT      ) m_channelLayout += AE_CH_TFR ;
-  if (layout & AV_CH_TOP_BACK_LEFT        ) m_channelLayout += AE_CH_BL  ;
-  if (layout & AV_CH_TOP_BACK_CENTER      ) m_channelLayout += AE_CH_BC  ;
-  if (layout & AV_CH_TOP_BACK_RIGHT       ) m_channelLayout += AE_CH_BR  ;
-}
-
-CAEChannelInfo COMXAudioCodecOMX::GetChannelMap()
-{
-  BuildChannelMap();
-  return m_channelLayout;
+  return layout;
 }

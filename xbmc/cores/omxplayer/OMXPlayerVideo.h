@@ -32,7 +32,6 @@
 #include "threads/Thread.h"
 
 #include "DVDDemuxers/DVDDemux.h"
-#include "DVDStreamInfo.h"
 #include "DVDCodecs/Video/DVDVideoCodec.h"
 #include "DVDOverlayContainer.h"
 #include "DVDMessageQueue.h"
@@ -114,6 +113,7 @@ public:
   void SetSpeed(int iSpeed);
   std::string GetPlayerInfo();
   int GetVideoBitrate();
+  std::string GetStereoMode();
   double GetOutputDelay();
   double GetSubtitleDelay()                         { return m_iSubtitleDelay; }
   void SetSubtitleDelay(double delay)               { m_iSubtitleDelay = delay; }

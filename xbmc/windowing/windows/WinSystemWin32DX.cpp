@@ -22,6 +22,7 @@
 #include "WinSystemWin32DX.h"
 #include "settings/Settings.h"
 #include "guilib/gui3d.h"
+#include "utils/CharsetConverter.h"
 
 #ifdef HAS_DX
 
@@ -43,9 +44,7 @@ bool CWinSystemWin32DX::UseWindowedDX(bool fullScreen)
 
 bool CWinSystemWin32DX::CreateNewWindow(CStdString name, bool fullScreen, RESOLUTION_INFO& res, PHANDLE_EVENT_FUNC userFunction)
 {
-  CWinSystemWin32::CreateNewWindow(name, fullScreen, res, userFunction);
-
-  if(m_hWnd == NULL)
+  if(!CWinSystemWin32::CreateNewWindow(name, fullScreen, res, userFunction))
     return false;
 
   SetFocusWnd(m_hWnd);
@@ -98,9 +97,10 @@ bool CWinSystemWin32DX::SetFullScreen(bool fullScreen, RESOLUTION_INFO& res, boo
   return true;
 }
 
-CStdStringW CWinSystemWin32DX::GetClipboard(void)
+std::string CWinSystemWin32DX::GetClipboardText(void)
 {
-  CStdStringW pasted_text;
+  CStdStringW unicode_text;
+  CStdStringA utf8_text;
 
   if (OpenClipboard(NULL))
   {
@@ -110,14 +110,16 @@ CStdStringW CWinSystemWin32DX::GetClipboard(void)
       LPWSTR lpwstr = (LPWSTR) GlobalLock(hglb);
       if (lpwstr != NULL)
       {
-        pasted_text = lpwstr;
+        unicode_text = lpwstr;
         GlobalUnlock(hglb);
       }
     }
     CloseClipboard();
   }
 
-  return pasted_text;
+  g_charsetConverter.wToUTF8(unicode_text, utf8_text);
+
+  return utf8_text;
 }
 
 #endif

@@ -82,7 +82,7 @@ CGUIViewState* CGUIViewState::GetViewState(int windowId, const CFileItemList& it
     return new CGUIViewStateMusicSearch(items);
 
   if (items.IsSmartPlayList() || url.GetProtocol() == "upnp" ||
-      items.GetProperty("library.filter").asBoolean())
+      items.IsLibraryFolder())
   {
     if (items.GetContent() == "songs" ||
         items.GetContent() == "albums" ||
@@ -220,6 +220,11 @@ SortDescription CGUIViewState::GetSortMethod() const
   return sorting;
 }
 
+bool CGUIViewState::HasMultipleSortMethods() const
+{
+  return m_sortMethods.size() > 1;
+}
+
 int CGUIViewState::GetSortMethodLabel() const
 {
   if (m_currentSortMethod>=0 && m_currentSortMethod<(int)m_sortMethods.size())
@@ -293,6 +298,7 @@ void CGUIViewState::SetSortMethod(SortBy sortBy, SortAttribute sortAttributes /*
       break;
     }
   }
+  SetSortOrder(m_sortOrder);
 }
 
 void CGUIViewState::SetSortMethod(SortDescription sortDescription)
@@ -308,6 +314,7 @@ SortDescription CGUIViewState::SetNextSortMethod(int direction /* = 1 */)
     m_currentSortMethod = 0;
   if (m_currentSortMethod < 0)
     m_currentSortMethod = m_sortMethods.size() ? (int)m_sortMethods.size() - 1 : 0;
+  SetSortOrder(m_sortOrder);
 
   SaveViewState();
 

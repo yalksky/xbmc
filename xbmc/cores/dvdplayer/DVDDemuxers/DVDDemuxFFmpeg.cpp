@@ -42,6 +42,7 @@
 #include "settings/AdvancedSettings.h"
 #include "settings/Settings.h"
 #include "filesystem/File.h"
+#include "filesystem/CurlFile.h"
 #include "filesystem/Directory.h"
 #include "utils/log.h"
 #include "threads/Thread.h"
@@ -307,7 +308,7 @@ bool CDVDDemuxFFmpeg::Open(CDVDInputStream* pInput)
     }
     if (result < 0 && m_dllAvFormat.avformat_open_input(&m_pFormatContext, strFile.c_str(), iformat, &options) < 0 )
     {
-      CLog::Log(LOGDEBUG, "Error, could not open file %s", strFile.c_str());
+      CLog::Log(LOGDEBUG, "Error, could not open file %s", CURL::GetRedacted(strFile).c_str());
       Dispose();
       m_dllAvUtil.av_dict_free(&options);
       return false;
@@ -352,7 +353,7 @@ bool CDVDDemuxFFmpeg::Open(CDVDInputStream* pInput)
         pd.buf_size = m_dllAvFormat.avio_read(m_ioContext, pd.buf, m_ioContext->max_packet_size ? m_ioContext->max_packet_size : m_ioContext->buffer_size);
         if (pd.buf_size <= 0)
         {
-          CLog::Log(LOGERROR, "%s - error reading from input stream, %s", __FUNCTION__, strFile.c_str());
+          CLog::Log(LOGERROR, "%s - error reading from input stream, %s", __FUNCTION__, CURL::GetRedacted(strFile).c_str());
           return false;
         }
         memset(pd.buf+pd.buf_size, 0, AVPROBE_PADDING_SIZE);
@@ -415,7 +416,7 @@ bool CDVDDemuxFFmpeg::Open(CDVDInputStream* pInput)
 
       if (!iformat)
       {
-        CLog::Log(LOGERROR, "%s - error probing input format, %s", __FUNCTION__, strFile.c_str());
+        CLog::Log(LOGERROR, "%s - error probing input format, %s", __FUNCTION__, CURL::GetRedacted(strFile).c_str());
         return false;
       }
       else
@@ -432,7 +433,7 @@ bool CDVDDemuxFFmpeg::Open(CDVDInputStream* pInput)
 
     if (m_dllAvFormat.avformat_open_input(&m_pFormatContext, strFile.c_str(), iformat, NULL) < 0)
     {
-      CLog::Log(LOGERROR, "%s - Error, could not open file %s", __FUNCTION__, strFile.c_str());
+      CLog::Log(LOGERROR, "%s - Error, could not open file %s", __FUNCTION__, CURL::GetRedacted(strFile).c_str());
       Dispose();
       return false;
     }
@@ -461,7 +462,7 @@ bool CDVDDemuxFFmpeg::Open(CDVDInputStream* pInput)
     int iErr = m_dllAvFormat.avformat_find_stream_info(m_pFormatContext, NULL);
     if (iErr < 0)
     {
-      CLog::Log(LOGWARNING,"could not find codec parameters for %s", strFile.c_str());
+      CLog::Log(LOGWARNING,"could not find codec parameters for %s", CURL::GetRedacted(strFile).c_str());
       if (m_pInput->IsStreamType(DVDSTREAM_TYPE_DVD)
       ||  m_pInput->IsStreamType(DVDSTREAM_TYPE_BLURAY)
       || (m_pFormatContext->nb_streams == 1 && m_pFormatContext->streams[0]->codec->codec_id == AV_CODEC_ID_AC3))
@@ -620,6 +621,11 @@ AVDictionary *CDVDDemuxFFmpeg::GetFFMpegOptionsFromURL(const CURL &url)
 
     if (!headers.empty())
       m_dllAvUtil.av_dict_set(&options, "headers", headers.c_str(), 0);
+
+    std::string cookies;
+    if (XFILE::CCurlFile::GetCookies(url, cookies))
+      m_dllAvUtil.av_dict_set(&options, "cookies", cookies.c_str(), 0);
+
   }
   return options;
 }
@@ -1093,16 +1099,22 @@ CDemuxStream* CDVDDemuxFFmpeg::AddStream(int iId)
         if (m_bAVI && pStream->codec->codec_id == AV_CODEC_ID_H264)
           st->bPTSInvalid = true;
 
+#if defined(AVFORMAT_HAS_STREAM_GET_R_FRAME_RATE)
+        AVRational r_frame_rate = m_dllAvFormat.av_stream_get_r_frame_rate(pStream);
+#else
+        AVRational r_frame_rate = pStream->r_frame_rate;
+#endif
+
         //average fps is more accurate for mkv files
         if (m_bMatroska && pStream->avg_frame_rate.den && pStream->avg_frame_rate.num)
         {
           st->iFpsRate = pStream->avg_frame_rate.num;
           st->iFpsScale = pStream->avg_frame_rate.den;
         }
-        else if(pStream->r_frame_rate.den && pStream->r_frame_rate.num)
+        else if(r_frame_rate.den && r_frame_rate.num)
         {
-          st->iFpsRate = pStream->r_frame_rate.num;
-          st->iFpsScale = pStream->r_frame_rate.den;
+          st->iFpsRate = r_frame_rate.num;
+          st->iFpsScale = r_frame_rate.den;
         }
         else
         {
@@ -1111,10 +1123,10 @@ CDemuxStream* CDVDDemuxFFmpeg::AddStream(int iId)
         }
 
         // added for aml hw decoder, mkv frame-rate can be wrong.
-        if (pStream->r_frame_rate.den && pStream->r_frame_rate.num)
+        if (r_frame_rate.den && r_frame_rate.num)
         {
-          st->irFpsRate = pStream->r_frame_rate.num;
-          st->irFpsScale = pStream->r_frame_rate.den;
+          st->irFpsRate = r_frame_rate.num;
+          st->irFpsScale = r_frame_rate.den;
         }
         else
         {

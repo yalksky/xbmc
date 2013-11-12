@@ -1,7 +1,7 @@
 /*
  *      Copyright (C) 2012 Denis Yantarev
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -38,6 +38,8 @@
 
 CLogindUPowerSyscall::CLogindUPowerSyscall()
 {
+  m_delayLockFd = -1;
+
   CLog::Log(LOGINFO, "Selected Logind/UPower as PowerSyscall");
 
   // Check if we have UPower. If not, we avoid any battery related operations.
@@ -264,6 +266,7 @@ bool CLogindUPowerSyscall::PumpPowerEvents(IPowerEventsCallback *callback)
 
 void CLogindUPowerSyscall::InhibitDelayLock()
 {
+#ifdef DBUS_TYPE_UNIX_FD
   CDBusMessage message("org.freedesktop.login1", "/org/freedesktop/login1", "org.freedesktop.login1.Manager", "Inhibit");
   message.AppendArgument("sleep"); // what to inhibit
   message.AppendArgument("XBMC"); // who
@@ -287,6 +290,9 @@ void CLogindUPowerSyscall::InhibitDelayLock()
   }
 
     CLog::Log(LOGDEBUG, "LogindUPowerSyscall - inhibit lock taken, fd %i", m_delayLockFd);
+#else
+    CLog::Log(LOGWARNING, "LogindUPowerSyscall - inhibit lock support not compiled in");
+#endif
 }
 
 void CLogindUPowerSyscall::ReleaseDelayLock()

@@ -1,6 +1,6 @@
 #pragma once
 /*
- *      Copyright (C) 2005-2012 Team XBMC
+ *      Copyright (C) 2005-2013 Team XBMC
  *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -124,8 +124,9 @@ public:
   virtual void Update();
   virtual void Clear() { m_pButton = NULL; }
 private:
-  static bool GetItems(CSetting *setting, CFileItemList &items);
-  static bool GetIntegerItems(CSetting *setting, CFileItemList &items);
+  static bool GetItems(const CSetting *setting, CFileItemList &items);
+  static bool GetIntegerItems(const CSetting *setting, CFileItemList &items);
+  static bool GetStringItems(const CSetting *setting, CFileItemList &items);
 
   CGUIButtonControl *m_pButton;
 };
@@ -157,6 +158,8 @@ public:
   virtual void Update();
   virtual void Clear() { m_pEdit = NULL; }
 private:
+  static bool InputValidation(const std::string &input, void *data);
+
   CGUIEditControl *m_pEdit;
 };
 

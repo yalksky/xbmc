@@ -28,6 +28,7 @@
 		0E3036EC1760F68A00D93596 /* FavouritesDirectory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0E3036EA1760F68A00D93596 /* FavouritesDirectory.cpp */; };
 		0E3036ED1760F68A00D93596 /* FavouritesDirectory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0E3036EA1760F68A00D93596 /* FavouritesDirectory.cpp */; };
 		0E3036EE1760F68A00D93596 /* FavouritesDirectory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0E3036EA1760F68A00D93596 /* FavouritesDirectory.cpp */; };
+		180F6C8117CE9A5700127892 /* smc.c in Sources */ = {isa = PBXBuildFile; fileRef = 180F6C8017CE9A5700127892 /* smc.c */; };
 		183FDF8A11AF0B0500B81E9C /* PluginSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 183FDF8811AF0B0500B81E9C /* PluginSource.cpp */; };
 		18404DA61396C31B00863BBA /* SlingboxLib.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 18404DA51396C31B00863BBA /* SlingboxLib.a */; };
 		1840B74D13993D8A007C848B /* JSONVariantParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1840B74B13993D8A007C848B /* JSONVariantParser.cpp */; };
@@ -248,11 +249,21 @@
 		5538433415F3685C00CE061B /* NptAppleAutoreleasePool.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5538433315F3685C00CE061B /* NptAppleAutoreleasePool.mm */; settings = {COMPILER_FLAGS = "-I$SRCROOT/lib/libUPnP/Platinum/Source/Core -I$SRCROOT/lib/libUPnP/Platinum/Source/Platinum -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaConnect -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaRenderer -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaServer -I$SRCROOT/lib/libUPnP/Platinum/Source/Extras -I$SRCROOT/lib/libUPnP/Neptune/Source/System/Posix -I$SRCROOT/lib/libUPnP/Neptune/Source/Core"; }; };
 		5558ED10176396CD00118C35 /* StereoscopicsManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5558ED0E176396CD00118C35 /* StereoscopicsManager.cpp */; };
 		55611BA31766672F00754072 /* RenderFlags.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 55611BA21766672F00754072 /* RenderFlags.cpp */; };
+		55D3604E1826CAB900DA66D2 /* OverlayRendererGUI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 55D3604C1826CAB900DA66D2 /* OverlayRendererGUI.cpp */; };
 		7C0B98A4154B79C30065A238 /* AEDeviceInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C0B98A1154B79C30065A238 /* AEDeviceInfo.cpp */; };
 		7C1A492315A962EE004AF4A4 /* SeekHandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C1A492115A962EE004AF4A4 /* SeekHandler.cpp */; };
 		7C1A85661520522500C63311 /* TextureCacheJob.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C1A85631520522500C63311 /* TextureCacheJob.cpp */; };
 		7C1D682915A7D2FD00658B65 /* DatabaseManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C1D682715A7D2FD00658B65 /* DatabaseManager.cpp */; };
 		7C1F6EBB13ECCFA7001726AB /* LibraryDirectory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C1F6EB913ECCFA7001726AB /* LibraryDirectory.cpp */; };
+		7C2612711825B6340086E04D /* DatabaseQuery.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C26126F1825B6340086E04D /* DatabaseQuery.cpp */; };
+		7C2612721825B6340086E04D /* DatabaseQuery.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C26126F1825B6340086E04D /* DatabaseQuery.cpp */; };
+		7C2612731825B6340086E04D /* DatabaseQuery.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C26126F1825B6340086E04D /* DatabaseQuery.cpp */; };
+		7C2612671820667C0086E04D /* ISettingControl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C2612631820667C0086E04D /* ISettingControl.cpp */; };
+		7C2612681820667C0086E04D /* ISettingControl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C2612631820667C0086E04D /* ISettingControl.cpp */; };
+		7C2612691820667C0086E04D /* ISettingControl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C2612631820667C0086E04D /* ISettingControl.cpp */; };
+		7C26126C182068660086E04D /* SettingsOperations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C26126A182068660086E04D /* SettingsOperations.cpp */; };
+		7C26126D182068660086E04D /* SettingsOperations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C26126A182068660086E04D /* SettingsOperations.cpp */; };
+		7C26126E182068660086E04D /* SettingsOperations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C26126A182068660086E04D /* SettingsOperations.cpp */; };
 		7C2D6AE40F35453E00DD2E85 /* SpecialProtocol.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C2D6AE20F35453E00DD2E85 /* SpecialProtocol.cpp */; };
 		7C4458BD161E203800A905F6 /* Screenshot.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C4458BB161E203800A905F6 /* Screenshot.cpp */; };
 		7C45DBE910F325C400D4BBF3 /* DAVDirectory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C45DBE710F325C400D4BBF3 /* DAVDirectory.cpp */; };
@@ -270,6 +281,12 @@
 		7C779E3F104A57E500F444C4 /* WinSystemOSXGL.mm in Sources */ = {isa = PBXBuildFile; fileRef = 7C779E2D104A57E500F444C4 /* WinSystemOSXGL.mm */; };
 		7C779E54104A58F900F444C4 /* GUIWindowTestPatternGL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C779E50104A58F900F444C4 /* GUIWindowTestPatternGL.cpp */; };
 		7C7B2B301134F36400713D6D /* mysqldataset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C7B2B2E1134F36400713D6D /* mysqldataset.cpp */; };
+		7C7BCDC517727951004842FB /* IListProvider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C7BCDBF17727951004842FB /* IListProvider.cpp */; };
+		7C7BCDC717727951004842FB /* StaticProvider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C7BCDC317727951004842FB /* StaticProvider.cpp */; };
+		7C7BCDC817727951004842FB /* IListProvider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C7BCDBF17727951004842FB /* IListProvider.cpp */; };
+		7C7BCDCA17727951004842FB /* StaticProvider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C7BCDC317727951004842FB /* StaticProvider.cpp */; };
+		7C7BCDCB17727951004842FB /* IListProvider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C7BCDBF17727951004842FB /* IListProvider.cpp */; };
+		7C7BCDCD17727952004842FB /* StaticProvider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C7BCDC317727951004842FB /* StaticProvider.cpp */; };
 		7C7CEAF1165629530059C9EB /* AELimiter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C7CEAEF165629530059C9EB /* AELimiter.cpp */; };
 		7C84A59E12FA3C1600CD1714 /* SourcesDirectory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C84A59C12FA3C1600CD1714 /* SourcesDirectory.cpp */; };
 		7C87B2CE162CE39600EF897D /* PlayerController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C87B2CC162CE39600EF897D /* PlayerController.cpp */; };
@@ -277,6 +294,12 @@
 		7C89674613C03B22003631FE /* InfoBool.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C89674313C03B22003631FE /* InfoBool.cpp */; };
 		7C8A14571154CB2600E5FCFA /* TextureCache.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8A14541154CB2600E5FCFA /* TextureCache.cpp */; };
 		7C8A187D115B2A8200E5FCFA /* TextureDatabase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8A187A115B2A8200E5FCFA /* TextureDatabase.cpp */; };
+		7C8FC6EE1829A4580045153D /* DirectoryProvider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8FC6EC1829A4580045153D /* DirectoryProvider.cpp */; };
+		7C8FC6EF1829A4580045153D /* DirectoryProvider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8FC6EC1829A4580045153D /* DirectoryProvider.cpp */; };
+		7C8FC6F01829A4580045153D /* DirectoryProvider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C8FC6EC1829A4580045153D /* DirectoryProvider.cpp */; };
+		7C920CF9181669FF00DA1477 /* TextureOperations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C920CF7181669FF00DA1477 /* TextureOperations.cpp */; };
+		7C920CFA181669FF00DA1477 /* TextureOperations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C920CF7181669FF00DA1477 /* TextureOperations.cpp */; };
+		7C920CFB181669FF00DA1477 /* TextureOperations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C920CF7181669FF00DA1477 /* TextureOperations.cpp */; };
 		7C99B6A4133D342100FC2B16 /* CircularCache.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C99B6A2133D342100FC2B16 /* CircularCache.cpp */; };
 		7C99B7951340723F00FC2B16 /* GUIDialogPlayEject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C99B7931340723F00FC2B16 /* GUIDialogPlayEject.cpp */; };
 		7CAA20511079C8160096DE39 /* BaseRenderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CAA204F1079C8160096DE39 /* BaseRenderer.cpp */; };
@@ -285,6 +308,9 @@
 		7CC30DB116291A5C003E7579 /* MusicThumbLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CC30DAF16291A5C003E7579 /* MusicThumbLoader.cpp */; };
 		7CC30DC016291C2C003E7579 /* VideoThumbLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CC30DBE16291C2C003E7579 /* VideoThumbLoader.cpp */; };
 		7CC30E8A16296078003E7579 /* EdenVideoArtUpdater.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CC30E8816296078003E7579 /* EdenVideoArtUpdater.cpp */; };
+		7CC82C9318284F9F0010DF30 /* CharsetDetection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CC82C9118284F9F0010DF30 /* CharsetDetection.cpp */; };
+		7CC82C9418284F9F0010DF30 /* CharsetDetection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CC82C9118284F9F0010DF30 /* CharsetDetection.cpp */; };
+		7CC82C9518284F9F0010DF30 /* CharsetDetection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CC82C9118284F9F0010DF30 /* CharsetDetection.cpp */; };
 		7CCF7F1D1069F3AE00992676 /* Builtins.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CCF7F1B1069F3AE00992676 /* Builtins.cpp */; };
 		7CCF7FC9106A0DF500992676 /* TimeUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CCF7FC7106A0DF500992676 /* TimeUtils.cpp */; };
 		7CCFD98D151494E100211D82 /* PCMCodec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CCFD98A151494E100211D82 /* PCMCodec.cpp */; };
@@ -379,12 +405,18 @@
 		DF2345E315FA639500A934F6 /* UPnPRenderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DF2345DD15FA639500A934F6 /* UPnPRenderer.cpp */; settings = {COMPILER_FLAGS = "-I$SRCROOT/lib/libUPnP/Platinum/Source/Core -I$SRCROOT/lib/libUPnP/Platinum/Source/Platinum -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaConnect -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaRenderer -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaServer -I$SRCROOT/lib/libUPnP/Platinum/Source/Extras -I$SRCROOT/lib/libUPnP/Neptune/Source/System/Posix -I$SRCROOT/lib/libUPnP/Neptune/Source/Core"; }; };
 		DF2345E415FA639500A934F6 /* UPnPServer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DF2345DF15FA639500A934F6 /* UPnPServer.cpp */; settings = {COMPILER_FLAGS = "-I$SRCROOT/lib/libUPnP/Platinum/Source/Core -I$SRCROOT/lib/libUPnP/Platinum/Source/Platinum -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaConnect -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaRenderer -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaServer -I$SRCROOT/lib/libUPnP/Platinum/Source/Extras -I$SRCROOT/lib/libUPnP/Neptune/Source/System/Posix -I$SRCROOT/lib/libUPnP/Neptune/Source/Core"; }; };
 		DF24A6B41406C7C500C7721E /* AFPDirectory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DF24A6B01406C7C500C7721E /* AFPDirectory.cpp */; };
+		DF28DF4D17B8379E0077F41A /* ProfilesOperations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DF28DF4B17B8379E0077F41A /* ProfilesOperations.cpp */; };
+		DF28DF4E17B8379E0077F41A /* ProfilesOperations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DF28DF4B17B8379E0077F41A /* ProfilesOperations.cpp */; };
+		DF28DF4F17B8379E0077F41A /* ProfilesOperations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DF28DF4B17B8379E0077F41A /* ProfilesOperations.cpp */; };
 		DF28EDA2170E1A11005FA9D2 /* GUIDialogLockSettings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DF28ED94170E1A11005FA9D2 /* GUIDialogLockSettings.cpp */; };
 		DF28EDA3170E1A11005FA9D2 /* GUIDialogProfileSettings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DF28ED96170E1A11005FA9D2 /* GUIDialogProfileSettings.cpp */; };
 		DF28EDA6170E1A11005FA9D2 /* Profile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DF28ED9A170E1A11005FA9D2 /* Profile.cpp */; };
 		DF28EDA7170E1A11005FA9D2 /* ProfilesManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DF28ED9C170E1A11005FA9D2 /* ProfilesManager.cpp */; };
 		DF28EDA8170E1A11005FA9D2 /* GUIWindowSettingsProfile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DF28ED9F170E1A11005FA9D2 /* GUIWindowSettingsProfile.cpp */; };
 		DF28EE03170E1E51005FA9D2 /* DisplaySettings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DF28EE01170E1E51005FA9D2 /* DisplaySettings.cpp */; };
+		DF29668017B2B04300DF10F9 /* SettingRequirement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DF29667E17B2B04300DF10F9 /* SettingRequirement.cpp */; };
+		DF29668117B2B04300DF10F9 /* SettingRequirement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DF29667E17B2B04300DF10F9 /* SettingRequirement.cpp */; };
+		DF29668217B2B04300DF10F9 /* SettingRequirement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DF29667E17B2B04300DF10F9 /* SettingRequirement.cpp */; };
 		DF3488E713FD958F0026A711 /* GUIAction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DF3488E513FD958F0026A711 /* GUIAction.cpp */; };
 		DF34892A13FD9C780026A711 /* AirPlayServer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DF34892813FD9C780026A711 /* AirPlayServer.cpp */; };
 		DF34898213FDAAF60026A711 /* HttpParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DF34898113FDAAF60026A711 /* HttpParser.cpp */; };
@@ -425,6 +457,8 @@
 		DF64FE3E16C07AAA00D028FB /* GUIViewState.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DF64FE3716C07AAA00D028FB /* GUIViewState.cpp */; };
 		DF64FE4016C07AAA00D028FB /* ViewDatabase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DF64FE3A16C07AAA00D028FB /* ViewDatabase.cpp */; };
 		DF673AA51443819600A5A509 /* AddonManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18B49FF41152BFA5001AF8A6 /* AddonManager.cpp */; };
+		DF6D1DFE18312525009DB64F /* OverlayRendererGUI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 55D3604C1826CAB900DA66D2 /* OverlayRendererGUI.cpp */; };
+		DF6D1DFF18312525009DB64F /* OverlayRendererGUI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 55D3604C1826CAB900DA66D2 /* OverlayRendererGUI.cpp */; };
 		DF830D0C15BB260C00602BE6 /* GUIDialogKeyboardGeneric.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DF830D0A15BB260C00602BE6 /* GUIDialogKeyboardGeneric.cpp */; };
 		DF830D1215BB262700602BE6 /* GUIKeyboardFactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DF830D0F15BB262700602BE6 /* GUIKeyboardFactory.cpp */; };
 		DF89901C1709BB2D00B35C21 /* MediaSettings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DF8990161709BB2D00B35C21 /* MediaSettings.cpp */; };
@@ -526,6 +560,12 @@
 		DFCA6ACB152245CD000BFAAE /* IHTTPRequestHandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DFCA6AC3152245CD000BFAAE /* IHTTPRequestHandler.cpp */; };
 		DFD5812516C828500008EEA0 /* DAVCommon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DFD5812116C8284F0008EEA0 /* DAVCommon.cpp */; };
 		DFD5812616C828500008EEA0 /* DAVFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DFD5812316C828500008EEA0 /* DAVFile.cpp */; };
+		DFD882E717DD189E001516FE /* StringValidation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DFD882E517DD189E001516FE /* StringValidation.cpp */; };
+		DFD882E817DD189E001516FE /* StringValidation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DFD882E517DD189E001516FE /* StringValidation.cpp */; };
+		DFD882E917DD189E001516FE /* StringValidation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DFD882E517DD189E001516FE /* StringValidation.cpp */; };
+		DFD882F617DD1A5B001516FE /* AddonPythonInvoker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DFD882F417DD1A5B001516FE /* AddonPythonInvoker.cpp */; };
+		DFD882F717DD1A5B001516FE /* AddonPythonInvoker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DFD882F417DD1A5B001516FE /* AddonPythonInvoker.cpp */; };
+		DFD882F817DD1A5B001516FE /* AddonPythonInvoker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DFD882F417DD1A5B001516FE /* AddonPythonInvoker.cpp */; };
 		DFD928F316384B6800709DAE /* Timer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DFD928F116384B6800709DAE /* Timer.cpp */; };
 		DFDA3153160E34230047A626 /* DVDOverlayCodec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DFDA3152160E34230047A626 /* DVDOverlayCodec.cpp */; };
 		DFE4095B17417FDF00473BD9 /* LegacyPathTranslation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DFE4095917417FDF00473BD9 /* LegacyPathTranslation.cpp */; };
@@ -541,9 +581,14 @@
 		DFECFB0F172D9CAB00A43CF7 /* SettingSection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DFECFB00172D9CAB00A43CF7 /* SettingSection.cpp */; };
 		DFECFB10172D9CAB00A43CF7 /* SettingsManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DFECFB02172D9CAB00A43CF7 /* SettingsManager.cpp */; };
 		DFECFB11172D9CAB00A43CF7 /* SettingUpdate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DFECFB03172D9CAB00A43CF7 /* SettingUpdate.cpp */; };
-		DFECFB12172D9CAB00A43CF7 /* SettingVisibility.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DFECFB05172D9CAB00A43CF7 /* SettingVisibility.cpp */; };
 		DFECFB1C172D9D0100A43CF7 /* BooleanLogic.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DFECFB1A172D9D0100A43CF7 /* BooleanLogic.cpp */; };
 		DFECFB4C172D9D6D00A43CF7 /* NetworkServices.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DFECFB4A172D9D6D00A43CF7 /* NetworkServices.cpp */; };
+		DFEF0BAC180ADE6400AEAED1 /* FileItemListModification.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DFEF0BA9180ADE6400AEAED1 /* FileItemListModification.cpp */; };
+		DFEF0BAD180ADE6400AEAED1 /* FileItemListModification.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DFEF0BA9180ADE6400AEAED1 /* FileItemListModification.cpp */; };
+		DFEF0BAE180ADE6400AEAED1 /* FileItemListModification.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DFEF0BA9180ADE6400AEAED1 /* FileItemListModification.cpp */; };
+		DFEF0BC1180ADEDA00AEAED1 /* SmartPlaylistFileItemListModifier.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DFEF0BBF180ADEDA00AEAED1 /* SmartPlaylistFileItemListModifier.cpp */; };
+		DFEF0BC2180ADEDA00AEAED1 /* SmartPlaylistFileItemListModifier.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DFEF0BBF180ADEDA00AEAED1 /* SmartPlaylistFileItemListModifier.cpp */; };
+		DFEF0BC3180ADEDA00AEAED1 /* SmartPlaylistFileItemListModifier.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DFEF0BBF180ADEDA00AEAED1 /* SmartPlaylistFileItemListModifier.cpp */; };
 		DFF0EB54175280D1002DA3A4 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = F56C8CE6131F5DC6000AD0F6 /* libz.dylib */; };
 		DFF0EB55175280E5002DA3A4 /* libiconv.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = F56C8CF2131F5DFD000AD0F6 /* libiconv.dylib */; };
 		DFF0EBB3175281CE002DA3A4 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E49910EC174E54D200741B6D /* AudioToolbox.framework */; };
@@ -648,48 +693,48 @@
 		DFF0F0EC17528350002DA3A4 /* NptUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 43BF08E41080C6BA00E25290 /* NptUtils.cpp */; };
 		DFF0F0ED17528350002DA3A4 /* NptXml.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 43BF08E71080C6BA00E25290 /* NptXml.cpp */; };
 		DFF0F0EE17528350002DA3A4 /* NptZip.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 43BF08E91080C6BA00E25290 /* NptZip.cpp */; };
-		DFF0F0EF17528350002DA3A4 /* archive.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1CE60D25F9FC00618676 /* archive.cpp */; };
-		DFF0F0F017528350002DA3A4 /* arcread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1CE80D25F9FC00618676 /* arcread.cpp */; };
-		DFF0F0F117528350002DA3A4 /* cmddata.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1CEA0D25F9FC00618676 /* cmddata.cpp */; };
-		DFF0F0F217528350002DA3A4 /* consio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1CEF0D25F9FC00618676 /* consio.cpp */; };
-		DFF0F0F317528350002DA3A4 /* crc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1CF10D25F9FC00618676 /* crc.cpp */; };
-		DFF0F0F417528350002DA3A4 /* crypt.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1CF40D25F9FC00618676 /* crypt.cpp */; };
-		DFF0F0F517528350002DA3A4 /* encname.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1CF80D25F9FC00618676 /* encname.cpp */; };
-		DFF0F0F617528350002DA3A4 /* errhnd.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1CFA0D25F9FC00618676 /* errhnd.cpp */; };
-		DFF0F0F717528350002DA3A4 /* extinfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1CFC0D25F9FC00618676 /* extinfo.cpp */; };
-		DFF0F0F817528350002DA3A4 /* extract.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1CFE0D25F9FC00618676 /* extract.cpp */; };
-		DFF0F0F917528350002DA3A4 /* filcreat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1D000D25F9FC00618676 /* filcreat.cpp */; };
-		DFF0F0FA17528350002DA3A4 /* file.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1D020D25F9FC00618676 /* file.cpp */; };
-		DFF0F0FB17528350002DA3A4 /* filefn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1D040D25F9FC00618676 /* filefn.cpp */; };
-		DFF0F0FC17528350002DA3A4 /* filestr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1D060D25F9FC00618676 /* filestr.cpp */; };
-		DFF0F0FD17528350002DA3A4 /* find.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1D080D25F9FC00618676 /* find.cpp */; };
-		DFF0F0FE17528350002DA3A4 /* getbits.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1D0A0D25F9FC00618676 /* getbits.cpp */; };
-		DFF0F0FF17528350002DA3A4 /* global.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1D0C0D25F9FC00618676 /* global.cpp */; };
-		DFF0F10017528350002DA3A4 /* int64.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1D0F0D25F9FC00618676 /* int64.cpp */; };
-		DFF0F10117528350002DA3A4 /* isnt.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1D110D25F9FC00618676 /* isnt.cpp */; };
-		DFF0F10217528350002DA3A4 /* log.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1D160D25F9FC00618676 /* log.cpp */; };
-		DFF0F10317528350002DA3A4 /* match.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1D1A0D25F9FC00618676 /* match.cpp */; };
-		DFF0F10417528350002DA3A4 /* options.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1D1E0D25F9FC00618676 /* options.cpp */; };
-		DFF0F10517528350002DA3A4 /* pathfn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1D210D25F9FC00618676 /* pathfn.cpp */; };
-		DFF0F10617528350002DA3A4 /* rar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E257B0D263C4400618676 /* rar.cpp */; };
-		DFF0F10717528350002DA3A4 /* rarvm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1D2A0D25F9FC00618676 /* rarvm.cpp */; };
-		DFF0F10817528350002DA3A4 /* rawread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1D2D0D25F9FC00618676 /* rawread.cpp */; };
-		DFF0F10917528350002DA3A4 /* rdwrfn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1D2F0D25F9FC00618676 /* rdwrfn.cpp */; };
-		DFF0F10A17528350002DA3A4 /* recvol.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1D330D25F9FC00618676 /* recvol.cpp */; };
-		DFF0F10B17528350002DA3A4 /* resource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1D350D25F9FC00618676 /* resource.cpp */; };
-		DFF0F10C17528350002DA3A4 /* rijndael.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1D370D25F9FC00618676 /* rijndael.cpp */; };
-		DFF0F10D17528350002DA3A4 /* rs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1D390D25F9FC00618676 /* rs.cpp */; };
-		DFF0F10E17528350002DA3A4 /* savepos.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1D3B0D25F9FC00618676 /* savepos.cpp */; };
-		DFF0F10F17528350002DA3A4 /* scantree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1D3D0D25F9FC00618676 /* scantree.cpp */; };
-		DFF0F11017528350002DA3A4 /* sha1.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1D3F0D25F9FC00618676 /* sha1.cpp */; };
-		DFF0F11117528350002DA3A4 /* strfn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1D460D25F9FC00618676 /* strfn.cpp */; };
-		DFF0F11217528350002DA3A4 /* strlist.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1D480D25F9FC00618676 /* strlist.cpp */; };
-		DFF0F11317528350002DA3A4 /* system.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1D4C0D25F9FC00618676 /* system.cpp */; };
-		DFF0F11417528350002DA3A4 /* timefn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1D4E0D25F9FC00618676 /* timefn.cpp */; };
-		DFF0F11517528350002DA3A4 /* ulinks.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1D500D25F9FC00618676 /* ulinks.cpp */; };
-		DFF0F11617528350002DA3A4 /* unicode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1D520D25F9FC00618676 /* unicode.cpp */; };
-		DFF0F11717528350002DA3A4 /* unpack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E25770D263BF600618676 /* unpack.cpp */; };
-		DFF0F11817528350002DA3A4 /* volume.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1D5E0D25F9FC00618676 /* volume.cpp */; };
+		DFF0F0EF17528350002DA3A4 /* archive.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1CE60D25F9FC00618676 /* archive.cpp */; settings = {COMPILER_FLAGS = "-DSILENT"; }; };
+		DFF0F0F017528350002DA3A4 /* arcread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1CE80D25F9FC00618676 /* arcread.cpp */; settings = {COMPILER_FLAGS = "-DSILENT"; }; };
+		DFF0F0F117528350002DA3A4 /* cmddata.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1CEA0D25F9FC00618676 /* cmddata.cpp */; settings = {COMPILER_FLAGS = "-DSILENT"; }; };
+		DFF0F0F217528350002DA3A4 /* consio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1CEF0D25F9FC00618676 /* consio.cpp */; settings = {COMPILER_FLAGS = "-DSILENT"; }; };
+		DFF0F0F317528350002DA3A4 /* crc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1CF10D25F9FC00618676 /* crc.cpp */; settings = {COMPILER_FLAGS = "-DSILENT"; }; };
+		DFF0F0F417528350002DA3A4 /* crypt.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1CF40D25F9FC00618676 /* crypt.cpp */; settings = {COMPILER_FLAGS = "-DSILENT"; }; };
+		DFF0F0F517528350002DA3A4 /* encname.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1CF80D25F9FC00618676 /* encname.cpp */; settings = {COMPILER_FLAGS = "-DSILENT"; }; };
+		DFF0F0F617528350002DA3A4 /* errhnd.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1CFA0D25F9FC00618676 /* errhnd.cpp */; settings = {COMPILER_FLAGS = "-DSILENT"; }; };
+		DFF0F0F717528350002DA3A4 /* extinfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1CFC0D25F9FC00618676 /* extinfo.cpp */; settings = {COMPILER_FLAGS = "-DSILENT"; }; };
+		DFF0F0F817528350002DA3A4 /* extract.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1CFE0D25F9FC00618676 /* extract.cpp */; settings = {COMPILER_FLAGS = "-DSILENT"; }; };
+		DFF0F0F917528350002DA3A4 /* filcreat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1D000D25F9FC00618676 /* filcreat.cpp */; settings = {COMPILER_FLAGS = "-DSILENT"; }; };
+		DFF0F0FA17528350002DA3A4 /* file.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1D020D25F9FC00618676 /* file.cpp */; settings = {COMPILER_FLAGS = "-DSILENT"; }; };
+		DFF0F0FB17528350002DA3A4 /* filefn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1D040D25F9FC00618676 /* filefn.cpp */; settings = {COMPILER_FLAGS = "-DSILENT"; }; };
+		DFF0F0FC17528350002DA3A4 /* filestr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1D060D25F9FC00618676 /* filestr.cpp */; settings = {COMPILER_FLAGS = "-DSILENT"; }; };
+		DFF0F0FD17528350002DA3A4 /* find.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1D080D25F9FC00618676 /* find.cpp */; settings = {COMPILER_FLAGS = "-DSILENT"; }; };
+		DFF0F0FE17528350002DA3A4 /* getbits.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1D0A0D25F9FC00618676 /* getbits.cpp */; settings = {COMPILER_FLAGS = "-DSILENT"; }; };
+		DFF0F0FF17528350002DA3A4 /* global.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1D0C0D25F9FC00618676 /* global.cpp */; settings = {COMPILER_FLAGS = "-DSILENT"; }; };
+		DFF0F10017528350002DA3A4 /* int64.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1D0F0D25F9FC00618676 /* int64.cpp */; settings = {COMPILER_FLAGS = "-DSILENT"; }; };
+		DFF0F10117528350002DA3A4 /* isnt.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1D110D25F9FC00618676 /* isnt.cpp */; settings = {COMPILER_FLAGS = "-DSILENT"; }; };
+		DFF0F10217528350002DA3A4 /* log.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1D160D25F9FC00618676 /* log.cpp */; settings = {COMPILER_FLAGS = "-DSILENT"; }; };
+		DFF0F10317528350002DA3A4 /* match.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1D1A0D25F9FC00618676 /* match.cpp */; settings = {COMPILER_FLAGS = "-DSILENT"; }; };
+		DFF0F10417528350002DA3A4 /* options.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1D1E0D25F9FC00618676 /* options.cpp */; settings = {COMPILER_FLAGS = "-DSILENT"; }; };
+		DFF0F10517528350002DA3A4 /* pathfn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1D210D25F9FC00618676 /* pathfn.cpp */; settings = {COMPILER_FLAGS = "-DSILENT"; }; };
+		DFF0F10617528350002DA3A4 /* rar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E257B0D263C4400618676 /* rar.cpp */; settings = {COMPILER_FLAGS = "-DSILENT"; }; };
+		DFF0F10717528350002DA3A4 /* rarvm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1D2A0D25F9FC00618676 /* rarvm.cpp */; settings = {COMPILER_FLAGS = "-DSILENT"; }; };
+		DFF0F10817528350002DA3A4 /* rawread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1D2D0D25F9FC00618676 /* rawread.cpp */; settings = {COMPILER_FLAGS = "-DSILENT"; }; };
+		DFF0F10917528350002DA3A4 /* rdwrfn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1D2F0D25F9FC00618676 /* rdwrfn.cpp */; settings = {COMPILER_FLAGS = "-DSILENT"; }; };
+		DFF0F10A17528350002DA3A4 /* recvol.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1D330D25F9FC00618676 /* recvol.cpp */; settings = {COMPILER_FLAGS = "-DSILENT"; }; };
+		DFF0F10B17528350002DA3A4 /* resource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1D350D25F9FC00618676 /* resource.cpp */; settings = {COMPILER_FLAGS = "-DSILENT"; }; };
+		DFF0F10C17528350002DA3A4 /* rijndael.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1D370D25F9FC00618676 /* rijndael.cpp */; settings = {COMPILER_FLAGS = "-DSILENT"; }; };
+		DFF0F10D17528350002DA3A4 /* rs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1D390D25F9FC00618676 /* rs.cpp */; settings = {COMPILER_FLAGS = "-DSILENT"; }; };
+		DFF0F10E17528350002DA3A4 /* savepos.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1D3B0D25F9FC00618676 /* savepos.cpp */; settings = {COMPILER_FLAGS = "-DSILENT"; }; };
+		DFF0F10F17528350002DA3A4 /* scantree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1D3D0D25F9FC00618676 /* scantree.cpp */; settings = {COMPILER_FLAGS = "-DSILENT"; }; };
+		DFF0F11017528350002DA3A4 /* sha1.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1D3F0D25F9FC00618676 /* sha1.cpp */; settings = {COMPILER_FLAGS = "-DSILENT"; }; };
+		DFF0F11117528350002DA3A4 /* strfn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1D460D25F9FC00618676 /* strfn.cpp */; settings = {COMPILER_FLAGS = "-DSILENT"; }; };
+		DFF0F11217528350002DA3A4 /* strlist.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1D480D25F9FC00618676 /* strlist.cpp */; settings = {COMPILER_FLAGS = "-DSILENT"; }; };
+		DFF0F11317528350002DA3A4 /* system.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1D4C0D25F9FC00618676 /* system.cpp */; settings = {COMPILER_FLAGS = "-DSILENT"; }; };
+		DFF0F11417528350002DA3A4 /* timefn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1D4E0D25F9FC00618676 /* timefn.cpp */; settings = {COMPILER_FLAGS = "-DSILENT"; }; };
+		DFF0F11517528350002DA3A4 /* ulinks.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1D500D25F9FC00618676 /* ulinks.cpp */; settings = {COMPILER_FLAGS = "-DSILENT"; }; };
+		DFF0F11617528350002DA3A4 /* unicode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1D520D25F9FC00618676 /* unicode.cpp */; settings = {COMPILER_FLAGS = "-DSILENT"; }; };
+		DFF0F11717528350002DA3A4 /* unpack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E25770D263BF600618676 /* unpack.cpp */; settings = {COMPILER_FLAGS = "-DSILENT"; }; };
+		DFF0F11817528350002DA3A4 /* volume.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1D5E0D25F9FC00618676 /* volume.cpp */; settings = {COMPILER_FLAGS = "-DSILENT"; }; };
 		DFF0F11917528350002DA3A4 /* Addon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18B49FF11152BFA5001AF8A6 /* Addon.cpp */; };
 		DFF0F11A17528350002DA3A4 /* AddonCallbacks.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C8482911156CFFE7005A996F /* AddonCallbacks.cpp */; };
 		DFF0F11B17528350002DA3A4 /* AddonCallbacksAddon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C8482913156CFFE7005A996F /* AddonCallbacksAddon.cpp */; };
@@ -815,7 +860,6 @@
 		DFF0F19317528350002DA3A4 /* DVDMessageTracker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E157C0D25F9FA00618676 /* DVDMessageTracker.cpp */; };
 		DFF0F19417528350002DA3A4 /* DVDOverlayContainer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E157E0D25F9FA00618676 /* DVDOverlayContainer.cpp */; };
 		DFF0F19517528350002DA3A4 /* DVDOverlayRenderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E15800D25F9FA00618676 /* DVDOverlayRenderer.cpp */; };
-		DFF0F19617528350002DA3A4 /* DVDPerformanceCounter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E15820D25F9FA00618676 /* DVDPerformanceCounter.cpp */; };
 		DFF0F19717528350002DA3A4 /* DVDPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E15840D25F9FA00618676 /* DVDPlayer.cpp */; };
 		DFF0F19817528350002DA3A4 /* DVDPlayerAudio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E15860D25F9FA00618676 /* DVDPlayerAudio.cpp */; };
 		DFF0F19917528350002DA3A4 /* DVDPlayerSubtitle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E15880D25F9FA00618676 /* DVDPlayerSubtitle.cpp */; };
@@ -1346,7 +1390,6 @@
 		DFF0F3A717528350002DA3A4 /* SettingSection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DFECFB00172D9CAB00A43CF7 /* SettingSection.cpp */; };
 		DFF0F3A817528350002DA3A4 /* SettingsManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DFECFB02172D9CAB00A43CF7 /* SettingsManager.cpp */; };
 		DFF0F3A917528350002DA3A4 /* SettingUpdate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DFECFB03172D9CAB00A43CF7 /* SettingUpdate.cpp */; };
-		DFF0F3AA17528350002DA3A4 /* SettingVisibility.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DFECFB05172D9CAB00A43CF7 /* SettingVisibility.cpp */; };
 		DFF0F3AB17528350002DA3A4 /* SkinSettings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DF89901A1709BB2D00B35C21 /* SkinSettings.cpp */; };
 		DFF0F3AC17528350002DA3A4 /* VideoSettings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1E010D25F9FD00618676 /* VideoSettings.cpp */; };
 		DFF0F3AD17528350002DA3A4 /* DarwinStorageProvider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F599CD73108E6A7A0010EC2A /* DarwinStorageProvider.cpp */; };
@@ -1646,7 +1689,6 @@
 		E38E1FA30D25F9FD00618676 /* DVDMessageTracker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E157C0D25F9FA00618676 /* DVDMessageTracker.cpp */; };
 		E38E1FA40D25F9FD00618676 /* DVDOverlayContainer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E157E0D25F9FA00618676 /* DVDOverlayContainer.cpp */; };
 		E38E1FA50D25F9FD00618676 /* DVDOverlayRenderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E15800D25F9FA00618676 /* DVDOverlayRenderer.cpp */; };
-		E38E1FA60D25F9FD00618676 /* DVDPerformanceCounter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E15820D25F9FA00618676 /* DVDPerformanceCounter.cpp */; };
 		E38E1FA70D25F9FD00618676 /* DVDPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E15840D25F9FA00618676 /* DVDPlayer.cpp */; };
 		E38E1FA80D25F9FD00618676 /* DVDPlayerAudio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E15860D25F9FA00618676 /* DVDPlayerAudio.cpp */; };
 		E38E1FA90D25F9FD00618676 /* DVDPlayerSubtitle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E15880D25F9FA00618676 /* DVDPlayerSubtitle.cpp */; };
@@ -1949,8 +1991,8 @@
 		E38E23980D2626E600618676 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E38E23910D2626E600618676 /* OpenGL.framework */; };
 		E38E25690D2639F100618676 /* libxdaap.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E38E25680D2639F100618676 /* libxdaap.a */; };
 		E38E256D0D263A1C00618676 /* librtv.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E38E256C0D263A1C00618676 /* librtv.a */; };
-		E38E25780D263BF600618676 /* unpack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E25770D263BF600618676 /* unpack.cpp */; };
-		E38E257C0D263C4400618676 /* rar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E257B0D263C4400618676 /* rar.cpp */; };
+		E38E25780D263BF600618676 /* unpack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E25770D263BF600618676 /* unpack.cpp */; settings = {COMPILER_FLAGS = "-DSILENT"; }; };
+		E38E257C0D263C4400618676 /* rar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E257B0D263C4400618676 /* rar.cpp */; settings = {COMPILER_FLAGS = "-DSILENT"; }; };
 		E38E25C00D263DC100618676 /* DVDFactoryDemuxer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E25BF0D263DC100618676 /* DVDFactoryDemuxer.cpp */; };
 		E38E25C30D263DE200618676 /* DVDDemuxFFmpeg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E25C20D263DE200618676 /* DVDDemuxFFmpeg.cpp */; };
 		E3A4780A0D29029A00F3C3A6 /* GUIDialogCache.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E3A478090D29029A00F3C3A6 /* GUIDialogCache.cpp */; };
@@ -2242,7 +2284,6 @@
 		E49911FB174E5D4500741B6D /* DVDMessageTracker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E157C0D25F9FA00618676 /* DVDMessageTracker.cpp */; };
 		E49911FC174E5D4500741B6D /* DVDOverlayContainer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E157E0D25F9FA00618676 /* DVDOverlayContainer.cpp */; };
 		E49911FD174E5D4500741B6D /* DVDOverlayRenderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E15800D25F9FA00618676 /* DVDOverlayRenderer.cpp */; };
-		E49911FE174E5D4500741B6D /* DVDPerformanceCounter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E15820D25F9FA00618676 /* DVDPerformanceCounter.cpp */; };
 		E49911FF174E5D4500741B6D /* DVDPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E15840D25F9FA00618676 /* DVDPlayer.cpp */; };
 		E4991200174E5D4500741B6D /* DVDPlayerAudio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E15860D25F9FA00618676 /* DVDPlayerAudio.cpp */; };
 		E4991201174E5D4500741B6D /* DVDPlayerSubtitle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E15880D25F9FA00618676 /* DVDPlayerSubtitle.cpp */; };
@@ -2773,7 +2814,6 @@
 		E499142B174E603C00741B6D /* SettingSection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DFECFB00172D9CAB00A43CF7 /* SettingSection.cpp */; };
 		E499142C174E603C00741B6D /* SettingsManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DFECFB02172D9CAB00A43CF7 /* SettingsManager.cpp */; };
 		E499142D174E603C00741B6D /* SettingUpdate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DFECFB03172D9CAB00A43CF7 /* SettingUpdate.cpp */; };
-		E499142E174E603C00741B6D /* SettingVisibility.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DFECFB05172D9CAB00A43CF7 /* SettingVisibility.cpp */; };
 		E499142F174E603C00741B6D /* SkinSettings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DF89901A1709BB2D00B35C21 /* SkinSettings.cpp */; };
 		E4991430174E603C00741B6D /* VideoSettings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E1E010D25F9FD00618676 /* VideoSettings.cpp */; };
 		E4991431174E604300741B6D /* DarwinStorageProvider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F599CD73108E6A7A0010EC2A /* DarwinStorageProvider.cpp */; };
@@ -3008,6 +3048,9 @@
 		E4E91BB80E7F7338001F0546 /* NptXbmcFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E4E91BB70E7F7338001F0546 /* NptXbmcFile.cpp */; settings = {COMPILER_FLAGS = "-I$SRCROOT/lib/libUPnP/Platinum/Source/Core -I$SRCROOT/lib/libUPnP/Platinum/Source/Platinum -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaConnect -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaRenderer -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaServer -I$SRCROOT/lib/libUPnP/Platinum/Source/Extras -I$SRCROOT/lib/libUPnP/Neptune/Source/System/Posix -I$SRCROOT/lib/libUPnP/Neptune/Source/Core"; }; };
 		EC720A8F155091BB00FFD782 /* ilog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EC720A8D155091BB00FFD782 /* ilog.cpp */; };
 		EC720A9D1550927000FFD782 /* XbmcContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EC720A9B1550927000FFD782 /* XbmcContext.cpp */; };
+		F500E35617F3412C004FC217 /* WinEvents.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F500E35517F3412C004FC217 /* WinEvents.cpp */; };
+		F500E35717F3412C004FC217 /* WinEvents.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F500E35517F3412C004FC217 /* WinEvents.cpp */; };
+		F500E35817F3412C004FC217 /* WinEvents.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F500E35517F3412C004FC217 /* WinEvents.cpp */; };
 		F506297A0E57B9680066625A /* MultiPathFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F50629780E57B9680066625A /* MultiPathFile.cpp */; };
 		F5071906175A26AD004C87D1 /* VideoDecodeAcceleration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F5071905175A26AD004C87D1 /* VideoDecodeAcceleration.framework */; };
 		F50FDC5A119B4B2C00C8B8CD /* GUIDialogTextViewer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F50FDC59119B4B2C00C8B8CD /* GUIDialogTextViewer.cpp */; };
@@ -3171,6 +3214,8 @@
 		0E30286C1759FCC200D93596 /* SettingsManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SettingsManager.h; sourceTree = "<group>"; };
 		0E3036EA1760F68A00D93596 /* FavouritesDirectory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FavouritesDirectory.cpp; sourceTree = "<group>"; };
 		0E3036EB1760F68A00D93596 /* FavouritesDirectory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FavouritesDirectory.h; sourceTree = "<group>"; };
+		180F6C7F17CE9A5700127892 /* smc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = smc.h; sourceTree = "<group>"; };
+		180F6C8017CE9A5700127892 /* smc.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = smc.c; sourceTree = "<group>"; };
 		18308CB41303370800AA309E /* stat_utf8.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stat_utf8.h; sourceTree = "<group>"; };
 		18308CB51303370800AA309E /* stdio_utf8.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stdio_utf8.h; sourceTree = "<group>"; };
 		183FDF8811AF0B0500B81E9C /* PluginSource.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PluginSource.cpp; sourceTree = "<group>"; };
@@ -3653,6 +3698,8 @@
 		5558ED0F176396CD00118C35 /* StereoscopicsManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StereoscopicsManager.h; sourceTree = "<group>"; };
 		55611BA21766672F00754072 /* RenderFlags.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RenderFlags.cpp; sourceTree = "<group>"; };
 		55611BA41766679200754072 /* RenderFlags.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RenderFlags.h; sourceTree = "<group>"; };
+		55D3604C1826CAB900DA66D2 /* OverlayRendererGUI.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OverlayRendererGUI.cpp; sourceTree = "<group>"; };
+		55D3604D1826CAB900DA66D2 /* OverlayRendererGUI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OverlayRendererGUI.h; sourceTree = "<group>"; };
 		6E2FACD20E26E92800DF79EA /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		6E97BDBF0DA2B620003A2A89 /* EventClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EventClient.h; sourceTree = "<group>"; };
 		6E97BDC00DA2B620003A2A89 /* EventPacket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EventPacket.h; sourceTree = "<group>"; };
@@ -3670,6 +3717,14 @@
 		7C1D682815A7D2FD00658B65 /* DatabaseManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DatabaseManager.h; sourceTree = "<group>"; };
 		7C1F6EB913ECCFA7001726AB /* LibraryDirectory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LibraryDirectory.cpp; sourceTree = "<group>"; };
 		7C1F6EBA13ECCFA7001726AB /* LibraryDirectory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LibraryDirectory.h; sourceTree = "<group>"; };
+		7C26126F1825B6340086E04D /* DatabaseQuery.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DatabaseQuery.cpp; sourceTree = "<group>"; };
+		7C2612701825B6340086E04D /* DatabaseQuery.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DatabaseQuery.h; sourceTree = "<group>"; };
+		7C2612631820667C0086E04D /* ISettingControl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ISettingControl.cpp; sourceTree = "<group>"; };
+		7C2612641820667C0086E04D /* ISettingControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ISettingControl.h; sourceTree = "<group>"; };
+		7C2612651820667C0086E04D /* ISettingControlCreator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ISettingControlCreator.h; sourceTree = "<group>"; };
+		7C2612661820667C0086E04D /* SettingDefinitions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SettingDefinitions.h; sourceTree = "<group>"; };
+		7C26126A182068660086E04D /* SettingsOperations.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SettingsOperations.cpp; sourceTree = "<group>"; };
+		7C26126B182068660086E04D /* SettingsOperations.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SettingsOperations.h; sourceTree = "<group>"; };
 		7C2D6AE20F35453E00DD2E85 /* SpecialProtocol.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SpecialProtocol.cpp; sourceTree = "<group>"; };
 		7C2D6AE30F35453E00DD2E85 /* SpecialProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpecialProtocol.h; sourceTree = "<group>"; };
 		7C4458BB161E203800A905F6 /* Screenshot.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Screenshot.cpp; sourceTree = "<group>"; };
@@ -3709,6 +3764,10 @@
 		7C779E51104A58F900F444C4 /* GUIWindowTestPatternGL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GUIWindowTestPatternGL.h; sourceTree = "<group>"; };
 		7C7B2B2E1134F36400713D6D /* mysqldataset.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mysqldataset.cpp; sourceTree = "<group>"; };
 		7C7B2B2F1134F36400713D6D /* mysqldataset.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mysqldataset.h; sourceTree = "<group>"; };
+		7C7BCDBF17727951004842FB /* IListProvider.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IListProvider.cpp; path = xbmc/listproviders/IListProvider.cpp; sourceTree = SOURCE_ROOT; };
+		7C7BCDC217727951004842FB /* StaticProvider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = StaticProvider.h; path = xbmc/listproviders/StaticProvider.h; sourceTree = SOURCE_ROOT; };
+		7C7BCDC317727951004842FB /* StaticProvider.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = StaticProvider.cpp; path = xbmc/listproviders/StaticProvider.cpp; sourceTree = SOURCE_ROOT; };
+		7C7BCDC417727951004842FB /* IListProvider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IListProvider.h; path = xbmc/listproviders/IListProvider.h; sourceTree = SOURCE_ROOT; };
 		7C7CEAEF165629530059C9EB /* AELimiter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AELimiter.cpp; sourceTree = "<group>"; };
 		7C7CEAF0165629530059C9EB /* AELimiter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AELimiter.h; sourceTree = "<group>"; };
 		7C84A59C12FA3C1600CD1714 /* SourcesDirectory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SourcesDirectory.cpp; path = xbmc/filesystem/SourcesDirectory.cpp; sourceTree = SOURCE_ROOT; };
@@ -3723,6 +3782,10 @@
 		7C8A14551154CB2600E5FCFA /* TextureCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TextureCache.h; sourceTree = "<group>"; };
 		7C8A187A115B2A8200E5FCFA /* TextureDatabase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TextureDatabase.cpp; sourceTree = "<group>"; };
 		7C8A187B115B2A8200E5FCFA /* TextureDatabase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TextureDatabase.h; sourceTree = "<group>"; };
+		7C8FC6EC1829A4580045153D /* DirectoryProvider.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DirectoryProvider.cpp; path = xbmc/listproviders/DirectoryProvider.cpp; sourceTree = SOURCE_ROOT; };
+		7C8FC6ED1829A4580045153D /* DirectoryProvider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DirectoryProvider.h; path = xbmc/listproviders/DirectoryProvider.h; sourceTree = SOURCE_ROOT; };
+		7C920CF7181669FF00DA1477 /* TextureOperations.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TextureOperations.cpp; sourceTree = "<group>"; };
+		7C920CF8181669FF00DA1477 /* TextureOperations.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TextureOperations.h; sourceTree = "<group>"; };
 		7C99B6A2133D342100FC2B16 /* CircularCache.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CircularCache.cpp; sourceTree = "<group>"; };
 		7C99B6A3133D342100FC2B16 /* CircularCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CircularCache.h; sourceTree = "<group>"; };
 		7C99B7931340723F00FC2B16 /* GUIDialogPlayEject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GUIDialogPlayEject.cpp; sourceTree = "<group>"; };
@@ -3741,6 +3804,8 @@
 		7CC30DBF16291C2C003E7579 /* VideoThumbLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VideoThumbLoader.h; sourceTree = "<group>"; };
 		7CC30E8816296078003E7579 /* EdenVideoArtUpdater.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = EdenVideoArtUpdater.cpp; sourceTree = "<group>"; };
 		7CC30E8916296078003E7579 /* EdenVideoArtUpdater.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EdenVideoArtUpdater.h; sourceTree = "<group>"; };
+		7CC82C9118284F9F0010DF30 /* CharsetDetection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CharsetDetection.cpp; sourceTree = "<group>"; };
+		7CC82C9218284F9F0010DF30 /* CharsetDetection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CharsetDetection.h; sourceTree = "<group>"; };
 		7CCF7F1B1069F3AE00992676 /* Builtins.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Builtins.cpp; sourceTree = "<group>"; };
 		7CCF7F1C1069F3AE00992676 /* Builtins.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Builtins.h; sourceTree = "<group>"; };
 		7CCF7FC7106A0DF500992676 /* TimeUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TimeUtils.cpp; sourceTree = "<group>"; };
@@ -4002,6 +4067,8 @@
 		DF2345E015FA639500A934F6 /* UPnPServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UPnPServer.h; sourceTree = "<group>"; };
 		DF24A6B01406C7C500C7721E /* AFPDirectory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AFPDirectory.cpp; sourceTree = "<group>"; };
 		DF24A6B11406C7C500C7721E /* AFPDirectory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFPDirectory.h; sourceTree = "<group>"; };
+		DF28DF4B17B8379E0077F41A /* ProfilesOperations.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ProfilesOperations.cpp; sourceTree = "<group>"; };
+		DF28DF4C17B8379E0077F41A /* ProfilesOperations.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ProfilesOperations.h; sourceTree = "<group>"; };
 		DF28ED94170E1A11005FA9D2 /* GUIDialogLockSettings.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GUIDialogLockSettings.cpp; sourceTree = "<group>"; };
 		DF28ED95170E1A11005FA9D2 /* GUIDialogLockSettings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GUIDialogLockSettings.h; sourceTree = "<group>"; };
 		DF28ED96170E1A11005FA9D2 /* GUIDialogProfileSettings.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GUIDialogProfileSettings.cpp; sourceTree = "<group>"; };
@@ -4014,6 +4081,8 @@
 		DF28EDA0170E1A11005FA9D2 /* GUIWindowSettingsProfile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GUIWindowSettingsProfile.h; sourceTree = "<group>"; };
 		DF28EE01170E1E51005FA9D2 /* DisplaySettings.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DisplaySettings.cpp; sourceTree = "<group>"; };
 		DF28EE02170E1E51005FA9D2 /* DisplaySettings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DisplaySettings.h; sourceTree = "<group>"; };
+		DF29667E17B2B04300DF10F9 /* SettingRequirement.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SettingRequirement.cpp; sourceTree = "<group>"; };
+		DF29667F17B2B04300DF10F9 /* SettingRequirement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SettingRequirement.h; sourceTree = "<group>"; };
 		DF3488E513FD958F0026A711 /* GUIAction.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GUIAction.cpp; sourceTree = "<group>"; };
 		DF3488E613FD958F0026A711 /* GUIAction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GUIAction.h; sourceTree = "<group>"; };
 		DF34892813FD9C780026A711 /* AirPlayServer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AirPlayServer.cpp; sourceTree = "<group>"; };
@@ -4063,6 +4132,7 @@
 		DF527732151BAF4C00B5B63B /* WebSocketV8.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WebSocketV8.h; sourceTree = "<group>"; };
 		DF529BAC1741697B00523FB4 /* Environment.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Environment.cpp; sourceTree = "<group>"; };
 		DF529BAD1741697B00523FB4 /* Environment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Environment.h; sourceTree = "<group>"; };
+		DF5EEEFB17CE977A003DEC49 /* AERingBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AERingBuffer.h; sourceTree = "<group>"; };
 		DF64FE3516C07AAA00D028FB /* GUIViewControl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GUIViewControl.cpp; sourceTree = "<group>"; };
 		DF64FE3616C07AAA00D028FB /* GUIViewControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GUIViewControl.h; sourceTree = "<group>"; };
 		DF64FE3716C07AAA00D028FB /* GUIViewState.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GUIViewState.cpp; sourceTree = "<group>"; };
@@ -4160,7 +4230,6 @@
 		DFB0F471161B747500D744F4 /* AddonsOperations.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AddonsOperations.h; sourceTree = "<group>"; };
 		DFB15B2015F8FB8100CDF0DE /* SDLMain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDLMain.h; sourceTree = "<group>"; };
 		DFB15B2115F8FB8100CDF0DE /* SDLMain.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = SDLMain.mm; sourceTree = "<group>"; };
-		DFB65F6415373AE7006B8FF1 /* AEAudioFormat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AEAudioFormat.h; sourceTree = "<group>"; };
 		DFB65F6515373AE7006B8FF1 /* AEFactory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AEFactory.cpp; sourceTree = "<group>"; };
 		DFB65F6615373AE7006B8FF1 /* AEFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AEFactory.h; sourceTree = "<group>"; };
 		DFB65F6A15373AE7006B8FF1 /* AEEncoderFFmpeg.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AEEncoderFFmpeg.cpp; sourceTree = "<group>"; };
@@ -4177,7 +4246,6 @@
 		DFB65F7615373AE7006B8FF1 /* CoreAudioAESound.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CoreAudioAESound.h; path = CoreAudio/CoreAudioAESound.h; sourceTree = "<group>"; };
 		DFB65F7715373AE7006B8FF1 /* CoreAudioAEStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CoreAudioAEStream.cpp; path = CoreAudio/CoreAudioAEStream.cpp; sourceTree = "<group>"; };
 		DFB65F7815373AE7006B8FF1 /* CoreAudioAEStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CoreAudioAEStream.h; path = CoreAudio/CoreAudioAEStream.h; sourceTree = "<group>"; };
-		DFB65F7915373AE7006B8FF1 /* CoreAudioRingBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CoreAudioRingBuffer.h; path = CoreAudio/CoreAudioRingBuffer.h; sourceTree = "<group>"; };
 		DFB65F7A15373AE7006B8FF1 /* ICoreAudioAEHAL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ICoreAudioAEHAL.h; path = CoreAudio/ICoreAudioAEHAL.h; sourceTree = "<group>"; };
 		DFB65F7B15373AE7006B8FF1 /* ICoreAudioSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ICoreAudioSource.h; path = CoreAudio/ICoreAudioSource.h; sourceTree = "<group>"; };
 		DFB65F8915373AE7006B8FF1 /* AE.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AE.h; sourceTree = "<group>"; };
@@ -4225,6 +4293,10 @@
 		DFD5812216C8284F0008EEA0 /* DAVCommon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DAVCommon.h; sourceTree = "<group>"; };
 		DFD5812316C828500008EEA0 /* DAVFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DAVFile.cpp; sourceTree = "<group>"; };
 		DFD5812416C828500008EEA0 /* DAVFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DAVFile.h; sourceTree = "<group>"; };
+		DFD882E517DD189E001516FE /* StringValidation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = StringValidation.cpp; sourceTree = "<group>"; };
+		DFD882E617DD189E001516FE /* StringValidation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StringValidation.h; sourceTree = "<group>"; };
+		DFD882F417DD1A5B001516FE /* AddonPythonInvoker.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AddonPythonInvoker.cpp; path = python/AddonPythonInvoker.cpp; sourceTree = "<group>"; };
+		DFD882F517DD1A5B001516FE /* AddonPythonInvoker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AddonPythonInvoker.h; path = python/AddonPythonInvoker.h; sourceTree = "<group>"; };
 		DFD928F116384B6800709DAE /* Timer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Timer.cpp; sourceTree = "<group>"; };
 		DFD928F216384B6800709DAE /* Timer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Timer.h; sourceTree = "<group>"; };
 		DFDA3152160E34230047A626 /* DVDOverlayCodec.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DVDOverlayCodec.cpp; sourceTree = "<group>"; };
@@ -4255,12 +4327,15 @@
 		DFECFB02172D9CAB00A43CF7 /* SettingsManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SettingsManager.cpp; sourceTree = "<group>"; };
 		DFECFB03172D9CAB00A43CF7 /* SettingUpdate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SettingUpdate.cpp; sourceTree = "<group>"; };
 		DFECFB04172D9CAB00A43CF7 /* SettingUpdate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SettingUpdate.h; sourceTree = "<group>"; };
-		DFECFB05172D9CAB00A43CF7 /* SettingVisibility.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SettingVisibility.cpp; sourceTree = "<group>"; };
-		DFECFB06172D9CAB00A43CF7 /* SettingVisibility.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SettingVisibility.h; sourceTree = "<group>"; };
 		DFECFB1A172D9D0100A43CF7 /* BooleanLogic.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BooleanLogic.cpp; sourceTree = "<group>"; };
 		DFECFB1B172D9D0100A43CF7 /* BooleanLogic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BooleanLogic.h; sourceTree = "<group>"; };
 		DFECFB4A172D9D6D00A43CF7 /* NetworkServices.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = NetworkServices.cpp; sourceTree = "<group>"; };
 		DFECFB4B172D9D6D00A43CF7 /* NetworkServices.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NetworkServices.h; sourceTree = "<group>"; };
+		DFEF0BA9180ADE6400AEAED1 /* FileItemListModification.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FileItemListModification.cpp; sourceTree = "<group>"; };
+		DFEF0BAA180ADE6400AEAED1 /* FileItemListModification.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FileItemListModification.h; sourceTree = "<group>"; };
+		DFEF0BAB180ADE6400AEAED1 /* IFileItemListModifier.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFileItemListModifier.h; sourceTree = "<group>"; };
+		DFEF0BBF180ADEDA00AEAED1 /* SmartPlaylistFileItemListModifier.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SmartPlaylistFileItemListModifier.cpp; sourceTree = "<group>"; };
+		DFEF0BC0180ADEDA00AEAED1 /* SmartPlaylistFileItemListModifier.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SmartPlaylistFileItemListModifier.h; sourceTree = "<group>"; };
 		DFF0EB8717528174002DA3A4 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		DFF0EB8D17528174002DA3A4 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		DFF0EB9517528174002DA3A4 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
@@ -4449,8 +4524,6 @@
 		E38E157F0D25F9FA00618676 /* DVDOverlayContainer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DVDOverlayContainer.h; sourceTree = "<group>"; };
 		E38E15800D25F9FA00618676 /* DVDOverlayRenderer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DVDOverlayRenderer.cpp; sourceTree = "<group>"; };
 		E38E15810D25F9FA00618676 /* DVDOverlayRenderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DVDOverlayRenderer.h; sourceTree = "<group>"; };
-		E38E15820D25F9FA00618676 /* DVDPerformanceCounter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DVDPerformanceCounter.cpp; sourceTree = "<group>"; };
-		E38E15830D25F9FA00618676 /* DVDPerformanceCounter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DVDPerformanceCounter.h; sourceTree = "<group>"; };
 		E38E15840D25F9FA00618676 /* DVDPlayer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DVDPlayer.cpp; sourceTree = "<group>"; };
 		E38E15850D25F9FA00618676 /* DVDPlayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DVDPlayer.h; sourceTree = "<group>"; };
 		E38E15860D25F9FA00618676 /* DVDPlayerAudio.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DVDPlayerAudio.cpp; sourceTree = "<group>"; };
@@ -5185,16 +5258,16 @@
 		E49910D9174E4A6400741B6D /* IOSExternalTouchController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = IOSExternalTouchController.mm; sourceTree = "<group>"; };
 		E49910DA174E4A6400741B6D /* IOSScreenManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IOSScreenManager.h; sourceTree = "<group>"; };
 		E49910DB174E4A6400741B6D /* IOSScreenManager.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = IOSScreenManager.mm; sourceTree = "<group>"; };
-		E49910E2174E549400741B6D /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.1.sdk/System/Library/Frameworks/QuartzCore.framework; sourceTree = DEVELOPER_DIR; };
-		E49910E4174E54A100741B6D /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.1.sdk/System/Library/Frameworks/OpenGLES.framework; sourceTree = DEVELOPER_DIR; };
-		E49910E6174E54B300741B6D /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.1.sdk/System/Library/Frameworks/CoreMedia.framework; sourceTree = DEVELOPER_DIR; };
-		E49910E8174E54C300741B6D /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.1.sdk/System/Library/Frameworks/CoreVideo.framework; sourceTree = DEVELOPER_DIR; };
-		E49910EA174E54C900741B6D /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.1.sdk/System/Library/Frameworks/CoreAudio.framework; sourceTree = DEVELOPER_DIR; };
-		E49910EC174E54D200741B6D /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.1.sdk/System/Library/Frameworks/AudioToolbox.framework; sourceTree = DEVELOPER_DIR; };
-		E49910EE174E54E400741B6D /* ImageIO.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ImageIO.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.1.sdk/System/Library/Frameworks/ImageIO.framework; sourceTree = DEVELOPER_DIR; };
-		E49910F0174E54EC00741B6D /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.1.sdk/System/Library/Frameworks/CFNetwork.framework; sourceTree = DEVELOPER_DIR; };
-		E49910F2174E54FB00741B6D /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.1.sdk/System/Library/Frameworks/AVFoundation.framework; sourceTree = DEVELOPER_DIR; };
-		E49910F4174E550200741B6D /* MediaPlayer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MediaPlayer.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.1.sdk/System/Library/Frameworks/MediaPlayer.framework; sourceTree = DEVELOPER_DIR; };
+		E49910E2174E549400741B6D /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		E49910E4174E54A100741B6D /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
+		E49910E6174E54B300741B6D /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
+		E49910E8174E54C300741B6D /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = System/Library/Frameworks/CoreVideo.framework; sourceTree = SDKROOT; };
+		E49910EA174E54C900741B6D /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
+		E49910EC174E54D200741B6D /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
+		E49910EE174E54E400741B6D /* ImageIO.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ImageIO.framework; path = System/Library/Frameworks/ImageIO.framework; sourceTree = SDKROOT; };
+		E49910F0174E54EC00741B6D /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
+		E49910F2174E54FB00741B6D /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		E49910F4174E550200741B6D /* MediaPlayer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MediaPlayer.framework; path = System/Library/Frameworks/MediaPlayer.framework; sourceTree = SDKROOT; };
 		E4991334174E5E5C00741B6D /* GenericTouchActionHandler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GenericTouchActionHandler.cpp; sourceTree = "<group>"; };
 		E4991335174E5E5C00741B6D /* GenericTouchActionHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GenericTouchActionHandler.h; sourceTree = "<group>"; };
 		E4991340174E5E5C00741B6D /* ITouchActionHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ITouchActionHandler.h; sourceTree = "<group>"; };
@@ -5252,6 +5325,8 @@
 		EC720A8E155091BB00FFD782 /* ilog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ilog.h; path = commons/ilog.h; sourceTree = "<group>"; };
 		EC720A9B1550927000FFD782 /* XbmcContext.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = XbmcContext.cpp; sourceTree = "<group>"; };
 		EC720A9C1550927000FFD782 /* XbmcContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XbmcContext.h; sourceTree = "<group>"; };
+		F500E35517F3412C004FC217 /* WinEvents.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = WinEvents.cpp; sourceTree = "<group>"; };
+		F500E35917F34132004FC217 /* WinEvents.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WinEvents.h; sourceTree = "<group>"; };
 		F502BFDA160F34B900C96C76 /* CallbackHandler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CallbackHandler.cpp; path = python/CallbackHandler.cpp; sourceTree = "<group>"; };
 		F502BFDB160F34B900C96C76 /* CallbackHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CallbackHandler.h; path = python/CallbackHandler.h; sourceTree = "<group>"; };
 		F502BFE4160F34DC00C96C76 /* LanguageHook.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LanguageHook.cpp; path = python/LanguageHook.cpp; sourceTree = "<group>"; };
@@ -6023,6 +6098,8 @@
 				18B7C92C129428CA009E7A26 /* PlayListXML.h */,
 				18B7C92D129428CA009E7A26 /* SmartPlayList.cpp */,
 				18B7C92E129428CA009E7A26 /* SmartPlayList.h */,
+				DFEF0BBF180ADEDA00AEAED1 /* SmartPlaylistFileItemListModifier.cpp */,
+				DFEF0BC0180ADEDA00AEAED1 /* SmartPlaylistFileItemListModifier.h */,
 			);
 			path = playlists;
 			sourceTree = "<group>";
@@ -6337,6 +6414,8 @@
 			children = (
 				E38E16800D25F9FA00618676 /* Database.cpp */,
 				E38E16810D25F9FA00618676 /* Database.h */,
+				7C26126F1825B6340086E04D /* DatabaseQuery.cpp */,
+				7C2612701825B6340086E04D /* DatabaseQuery.h */,
 				E38E1CD70D25F9FC00618676 /* dataset.cpp */,
 				E38E1CD80D25F9FC00618676 /* dataset.h */,
 				7C7B2B2E1134F36400713D6D /* mysqldataset.cpp */,
@@ -6564,6 +6643,8 @@
 				7C779E26104A57E500F444C4 /* WinEvents.h */,
 				7C779E27104A57E500F444C4 /* WinEventsSDL.cpp */,
 				7C779E28104A57E500F444C4 /* WinEventsSDL.h */,
+				F500E35517F3412C004FC217 /* WinEvents.cpp */,
+				F500E35917F34132004FC217 /* WinEvents.h */,
 				7C779E29104A57E500F444C4 /* WinSystem.cpp */,
 				7C779E2A104A57E500F444C4 /* WinSystem.h */,
 				7C779E2F104A57E500F444C4 /* XBMC_events.h */,
@@ -6591,6 +6672,20 @@
 				552A226815F7E14B0015C0D0 /* main.cpp */,
 			);
 			name = main;
+			sourceTree = "<group>";
+		};
+		7C430161175C41FE009B82E5 /* listproviders */ = {
+			isa = PBXGroup;
+			children = (
+				7C8FC6EC1829A4580045153D /* DirectoryProvider.cpp */,
+				7C8FC6ED1829A4580045153D /* DirectoryProvider.h */,
+				7C7BCDBF17727951004842FB /* IListProvider.cpp */,
+				7C7BCDC417727951004842FB /* IListProvider.h */,
+				7C7BCDC317727951004842FB /* StaticProvider.cpp */,
+				7C7BCDC217727951004842FB /* StaticProvider.h */,
+			);
+			name = listproviders;
+			path = linux;
 			sourceTree = "<group>";
 		};
 		7C5608C30F1754930056433A /* ExternalPlayer */ = {
@@ -6790,6 +6885,8 @@
 			isa = PBXGroup;
 			children = (
 				DF1ACFD015FCE50700E10810 /* generated */,
+				DFD882F417DD1A5B001516FE /* AddonPythonInvoker.cpp */,
+				DFD882F517DD1A5B001516FE /* AddonPythonInvoker.h */,
 				F502BFDA160F34B900C96C76 /* CallbackHandler.cpp */,
 				F502BFDB160F34B900C96C76 /* CallbackHandler.h */,
 				F502BFE4160F34DC00C96C76 /* LanguageHook.cpp */,
@@ -6988,7 +7085,6 @@
 				DFB65F6C15373AE7006B8FF1 /* Engines */,
 				DFB65F8815373AE7006B8FF1 /* Interfaces */,
 				DFB65FA215373AE7006B8FF1 /* Utils */,
-				DFB65F6415373AE7006B8FF1 /* AEAudioFormat.h */,
 				DFB65F6515373AE7006B8FF1 /* AEFactory.cpp */,
 				DFB65F6615373AE7006B8FF1 /* AEFactory.h */,
 			);
@@ -7044,6 +7140,7 @@
 				DFB65FAC15373AE7006B8FF1 /* AEPackIEC61937.h */,
 				DFB65FAD15373AE7006B8FF1 /* AERemap.cpp */,
 				DFB65FAE15373AE7006B8FF1 /* AERemap.h */,
+				DF5EEEFB17CE977A003DEC49 /* AERingBuffer.h */,
 				DFB65FAF15373AE7006B8FF1 /* AEStreamInfo.cpp */,
 				DFB65FB015373AE7006B8FF1 /* AEStreamInfo.h */,
 				DFB65FB115373AE7006B8FF1 /* AEUtil.cpp */,
@@ -7120,6 +7217,8 @@
 				6E2FACD20E26E92800DF79EA /* Info.plist */,
 				F51CEEEE0F5C5D20004F4602 /* OSXGNUReplacements.c */,
 				F51CEEF00F5C5D28004F4602 /* OSXGNUReplacements.h */,
+				180F6C7F17CE9A5700127892 /* smc.h */,
+				180F6C8017CE9A5700127892 /* smc.c */,
 				E306D12C0DDF7B590052C2AD /* XBMCHelper.cpp */,
 				E306D12D0DDF7B590052C2AD /* XBMCHelper.h */,
 				820023D9171A28A300667D1C /* OSXTextInputResponder.h */,
@@ -7143,6 +7242,7 @@
 				18B7C8C61294252E009E7A26 /* input */,
 				4367217312D6640E002508E6 /* interfaces */,
 				E38E1D690D25F9FD00618676 /* linux */,
+				7C430161175C41FE009B82E5 /* listproviders */,
 				552A226615F7E11B0015C0D0 /* main */,
 				18B7C853129423A7009E7A26 /* music */,
 				431376F212D6449100680C15 /* network */,
@@ -7189,6 +7289,8 @@
 				E38E168D0D25F9FA00618676 /* DynamicDll.h */,
 				E38E16920D25F9FA00618676 /* FileItem.cpp */,
 				E38E16930D25F9FA00618676 /* FileItem.h */,
+				DFEF0BA9180ADE6400AEAED1 /* FileItemListModification.cpp */,
+				DFEF0BAA180ADE6400AEAED1 /* FileItemListModification.h */,
 				DFBB4317178B5E6F006CC20A /* GitRevision.cpp */,
 				DFBB4318178B5E6F006CC20A /* GitRevision.h */,
 				E38E1E3E0D25F9FD00618676 /* GUIInfoManager.cpp */,
@@ -7198,6 +7300,7 @@
 				E38E17F20D25F9FA00618676 /* GUIPassword.cpp */,
 				E38E17F30D25F9FA00618676 /* GUIPassword.h */,
 				E38E17F60D25F9FA00618676 /* GUIUserMessages.h */,
+				DFEF0BAB180ADE6400AEAED1 /* IFileItemListModifier.h */,
 				E38E184F0D25F9FA00618676 /* IProgressCallback.h */,
 				E38E18580D25F9FA00618676 /* LangInfo.cpp */,
 				E38E18590D25F9FA00618676 /* LangInfo.h */,
@@ -7370,8 +7473,6 @@
 				E38E157F0D25F9FA00618676 /* DVDOverlayContainer.h */,
 				E38E15800D25F9FA00618676 /* DVDOverlayRenderer.cpp */,
 				E38E15810D25F9FA00618676 /* DVDOverlayRenderer.h */,
-				E38E15820D25F9FA00618676 /* DVDPerformanceCounter.cpp */,
-				E38E15830D25F9FA00618676 /* DVDPerformanceCounter.h */,
 				E38E15840D25F9FA00618676 /* DVDPlayer.cpp */,
 				E38E15850D25F9FA00618676 /* DVDPlayer.h */,
 				E38E15860D25F9FA00618676 /* DVDPlayerAudio.cpp */,
@@ -7679,6 +7780,8 @@
 				F5D8D730102BB3B1004A11AB /* OverlayRenderer.h */,
 				F5D8D72F102BB3B1004A11AB /* OverlayRendererGL.cpp */,
 				F5D8D72E102BB3B1004A11AB /* OverlayRendererGL.h */,
+				55D3604C1826CAB900DA66D2 /* OverlayRendererGUI.cpp */,
+				55D3604D1826CAB900DA66D2 /* OverlayRendererGUI.h */,
 				431AE5D7109C1A63007428C3 /* OverlayRendererUtil.cpp */,
 				431AE5D8109C1A63007428C3 /* OverlayRendererUtil.h */,
 				F56579AD13060D1E0085ED7F /* RenderCapture.cpp */,
@@ -8492,6 +8595,9 @@
 				DFECFAEE172D9CAB00A43CF7 /* ISetting.cpp */,
 				DFECFAEF172D9CAB00A43CF7 /* ISetting.h */,
 				DFECFAF0172D9CAB00A43CF7 /* ISettingCallback.h */,
+				7C2612631820667C0086E04D /* ISettingControl.cpp */,
+				7C2612641820667C0086E04D /* ISettingControl.h */,
+				7C2612651820667C0086E04D /* ISettingControlCreator.h */,
 				DFECFAF1172D9CAB00A43CF7 /* ISettingCreator.h */,
 				DF8990141709BB2D00B35C21 /* ISettingsHandler.h */,
 				DF8990151709BB2D00B35C21 /* ISubSettings.h */,
@@ -8509,10 +8615,13 @@
 				DFECFAF9172D9CAB00A43CF7 /* SettingConditions.h */,
 				DFECFAFA172D9CAB00A43CF7 /* SettingControl.cpp */,
 				DFECFAFB172D9CAB00A43CF7 /* SettingControl.h */,
+				7C2612661820667C0086E04D /* SettingDefinitions.h */,
 				DFECFAFC172D9CAB00A43CF7 /* SettingDependency.cpp */,
 				DFECFAFD172D9CAB00A43CF7 /* SettingDependency.h */,
 				DFECFAFE172D9CAB00A43CF7 /* SettingPath.cpp */,
 				DFECFAFF172D9CAB00A43CF7 /* SettingPath.h */,
+				DF29667E17B2B04300DF10F9 /* SettingRequirement.cpp */,
+				DF29667F17B2B04300DF10F9 /* SettingRequirement.h */,
 				18B7C38E129420E5009E7A26 /* Settings.cpp */,
 				18B7C38F129420E5009E7A26 /* Settings.h */,
 				DFECFB00172D9CAB00A43CF7 /* SettingSection.cpp */,
@@ -8521,8 +8630,6 @@
 				0E30286C1759FCC200D93596 /* SettingsManager.h */,
 				DFECFB03172D9CAB00A43CF7 /* SettingUpdate.cpp */,
 				DFECFB04172D9CAB00A43CF7 /* SettingUpdate.h */,
-				DFECFB05172D9CAB00A43CF7 /* SettingVisibility.cpp */,
-				DFECFB06172D9CAB00A43CF7 /* SettingVisibility.h */,
 				DF89901A1709BB2D00B35C21 /* SkinSettings.cpp */,
 				DF89901B1709BB2D00B35C21 /* SkinSettings.h */,
 				E38E1E010D25F9FD00618676 /* VideoSettings.cpp */,
@@ -8554,6 +8661,8 @@
 				DFECFB1B172D9D0100A43CF7 /* BooleanLogic.h */,
 				E38E1E290D25F9FD00618676 /* CharsetConverter.cpp */,
 				E38E1E2A0D25F9FD00618676 /* CharsetConverter.h */,
+				7CC82C9118284F9F0010DF30 /* CharsetDetection.cpp */,
+				7CC82C9218284F9F0010DF30 /* CharsetDetection.h */,
 				E38E1E2B0D25F9FD00618676 /* CPUInfo.cpp */,
 				E38E1E2C0D25F9FD00618676 /* CPUInfo.h */,
 				18B7C8E712942603009E7A26 /* Crc32.cpp */,
@@ -8657,6 +8766,8 @@
 				18ECC96113CF178D00A9ED6C /* StreamUtils.h */,
 				18B7C8F11294261F009E7A26 /* StringUtils.cpp */,
 				18B7C8F21294261F009E7A26 /* StringUtils.h */,
+				DFD882E517DD189E001516FE /* StringValidation.cpp */,
+				DFD882E617DD189E001516FE /* StringValidation.h */,
 				E38E1E830D25F9FD00618676 /* SystemInfo.cpp */,
 				E38E1E840D25F9FD00618676 /* SystemInfo.h */,
 				C848291D156D003E005A996F /* TextSearch.cpp */,
@@ -8987,10 +9098,16 @@
 				F5AE409313415D9E0004BD79 /* PlayerOperations.h */,
 				F5AE409413415D9E0004BD79 /* PlaylistOperations.cpp */,
 				F5AE409513415D9E0004BD79 /* PlaylistOperations.h */,
+				DF28DF4B17B8379E0077F41A /* ProfilesOperations.cpp */,
+				DF28DF4C17B8379E0077F41A /* ProfilesOperations.h */,
 				DF00492B162DAEA200A971AD /* PVROperations.cpp */,
 				DF00492C162DAEA200A971AD /* PVROperations.h */,
+				7C26126A182068660086E04D /* SettingsOperations.cpp */,
+				7C26126B182068660086E04D /* SettingsOperations.h */,
 				F5AE409613415D9E0004BD79 /* SystemOperations.cpp */,
 				F5AE409713415D9E0004BD79 /* SystemOperations.h */,
+				7C920CF7181669FF00DA1477 /* TextureOperations.cpp */,
+				7C920CF8181669FF00DA1477 /* TextureOperations.h */,
 				F5AE409813415D9E0004BD79 /* VideoLibrary.cpp */,
 				F5AE409913415D9E0004BD79 /* VideoLibrary.h */,
 				F5AE409A13415D9E0004BD79 /* XBMCOperations.cpp */,
@@ -9211,7 +9328,6 @@
 				F5ED942D155D729500842059 /* CoreAudioHardware.h */,
 				F5ED9494155D7B9900842059 /* CoreAudioMixMap.cpp */,
 				F5ED9495155D7B9900842059 /* CoreAudioMixMap.h */,
-				DFB65F7915373AE7006B8FF1 /* CoreAudioRingBuffer.h */,
 				F5ED943C155D743700842059 /* CoreAudioStream.cpp */,
 				F5ED943D155D743700842059 /* CoreAudioStream.h */,
 				F5ED94A9155D7F8000842059 /* CoreAudioUnit.cpp */,
@@ -9622,7 +9738,6 @@
 				E38E1FA30D25F9FD00618676 /* DVDMessageTracker.cpp in Sources */,
 				E38E1FA40D25F9FD00618676 /* DVDOverlayContainer.cpp in Sources */,
 				E38E1FA50D25F9FD00618676 /* DVDOverlayRenderer.cpp in Sources */,
-				E38E1FA60D25F9FD00618676 /* DVDPerformanceCounter.cpp in Sources */,
 				E38E1FA70D25F9FD00618676 /* DVDPlayer.cpp in Sources */,
 				E38E1FA80D25F9FD00618676 /* DVDPlayerAudio.cpp in Sources */,
 				E38E1FA90D25F9FD00618676 /* DVDPlayerSubtitle.cpp in Sources */,
@@ -10057,6 +10172,7 @@
 				43BF09171080C6BA00E25290 /* NptResults.cpp in Sources */,
 				43BF09181080C6BA00E25290 /* NptRingBuffer.cpp in Sources */,
 				43BF09191080C6BA00E25290 /* NptSimpleMessageQueue.cpp in Sources */,
+				55D3604E1826CAB900DA66D2 /* OverlayRendererGUI.cpp in Sources */,
 				43BF091A1080C6BA00E25290 /* NptSockets.cpp in Sources */,
 				43BF091B1080C6BA00E25290 /* NptStreams.cpp in Sources */,
 				43BF091C1080C6BA00E25290 /* NptStrings.cpp in Sources */,
@@ -10567,7 +10683,6 @@
 				DFECFB0F172D9CAB00A43CF7 /* SettingSection.cpp in Sources */,
 				DFECFB10172D9CAB00A43CF7 /* SettingsManager.cpp in Sources */,
 				DFECFB11172D9CAB00A43CF7 /* SettingUpdate.cpp in Sources */,
-				DFECFB12172D9CAB00A43CF7 /* SettingVisibility.cpp in Sources */,
 				DFECFB1C172D9D0100A43CF7 /* BooleanLogic.cpp in Sources */,
 				DFECFB4C172D9D6D00A43CF7 /* NetworkServices.cpp in Sources */,
 				F5DB700217322DBB00D4DF21 /* FavouritesOperations.cpp in Sources */,
@@ -10586,6 +10701,22 @@
 				55611BA31766672F00754072 /* RenderFlags.cpp in Sources */,
 				5558ED10176396CD00118C35 /* StereoscopicsManager.cpp in Sources */,
 				F59EED7E17AD5174005BB7C6 /* ApplicationPlayer.cpp in Sources */,
+				DF29668017B2B04300DF10F9 /* SettingRequirement.cpp in Sources */,
+				DF28DF4D17B8379E0077F41A /* ProfilesOperations.cpp in Sources */,
+				180F6C8117CE9A5700127892 /* smc.c in Sources */,
+				DFD882F817DD1A5B001516FE /* AddonPythonInvoker.cpp in Sources */,
+				DFD882E917DD189E001516FE /* StringValidation.cpp in Sources */,
+				F500E35617F3412C004FC217 /* WinEvents.cpp in Sources */,
+				7C2612711825B6340086E04D /* DatabaseQuery.cpp in Sources */,
+				7C920CF9181669FF00DA1477 /* TextureOperations.cpp in Sources */,
+				DFEF0BAC180ADE6400AEAED1 /* FileItemListModification.cpp in Sources */,
+				DFEF0BC1180ADEDA00AEAED1 /* SmartPlaylistFileItemListModifier.cpp in Sources */,
+				7C2612671820667C0086E04D /* ISettingControl.cpp in Sources */,
+				7CC82C9318284F9F0010DF30 /* CharsetDetection.cpp in Sources */,
+				7C26126C182068660086E04D /* SettingsOperations.cpp in Sources */,
+				7C7BCDC517727951004842FB /* IListProvider.cpp in Sources */,
+				7C7BCDC717727951004842FB /* StaticProvider.cpp in Sources */,
+				7C8FC6EE1829A4580045153D /* DirectoryProvider.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -10845,7 +10976,6 @@
 				DFF0F19317528350002DA3A4 /* DVDMessageTracker.cpp in Sources */,
 				DFF0F19417528350002DA3A4 /* DVDOverlayContainer.cpp in Sources */,
 				DFF0F19517528350002DA3A4 /* DVDOverlayRenderer.cpp in Sources */,
-				DFF0F19617528350002DA3A4 /* DVDPerformanceCounter.cpp in Sources */,
 				DFF0F19717528350002DA3A4 /* DVDPlayer.cpp in Sources */,
 				DFF0F19817528350002DA3A4 /* DVDPlayerAudio.cpp in Sources */,
 				DFF0F19917528350002DA3A4 /* DVDPlayerSubtitle.cpp in Sources */,
@@ -11376,7 +11506,6 @@
 				DFF0F3A717528350002DA3A4 /* SettingSection.cpp in Sources */,
 				DFF0F3A817528350002DA3A4 /* SettingsManager.cpp in Sources */,
 				DFF0F3A917528350002DA3A4 /* SettingUpdate.cpp in Sources */,
-				DFF0F3AA17528350002DA3A4 /* SettingVisibility.cpp in Sources */,
 				DFF0F3AB17528350002DA3A4 /* SkinSettings.cpp in Sources */,
 				DFF0F3AC17528350002DA3A4 /* VideoSettings.cpp in Sources */,
 				DFF0F3AD17528350002DA3A4 /* DarwinStorageProvider.cpp in Sources */,
@@ -11612,6 +11741,22 @@
 				F55BA70C17AB2265002A36D1 /* StereoscopicsManager.cpp in Sources */,
 				F55BA71117AB2293002A36D1 /* RenderFlags.cpp in Sources */,
 				F59EED8017AD5174005BB7C6 /* ApplicationPlayer.cpp in Sources */,
+				DF29668217B2B04300DF10F9 /* SettingRequirement.cpp in Sources */,
+				DF28DF4F17B8379E0077F41A /* ProfilesOperations.cpp in Sources */,
+				DFD882F617DD1A5B001516FE /* AddonPythonInvoker.cpp in Sources */,
+				DFD882E717DD189E001516FE /* StringValidation.cpp in Sources */,
+				F500E35817F3412C004FC217 /* WinEvents.cpp in Sources */,
+				7C2612731825B6340086E04D /* DatabaseQuery.cpp in Sources */,
+				7C920CFB181669FF00DA1477 /* TextureOperations.cpp in Sources */,
+				DFEF0BAE180ADE6400AEAED1 /* FileItemListModification.cpp in Sources */,
+				DFEF0BC3180ADEDA00AEAED1 /* SmartPlaylistFileItemListModifier.cpp in Sources */,
+				7C2612691820667C0086E04D /* ISettingControl.cpp in Sources */,
+				7CC82C9518284F9F0010DF30 /* CharsetDetection.cpp in Sources */,
+				DF6D1DFF18312525009DB64F /* OverlayRendererGUI.cpp in Sources */,
+				7C26126E182068660086E04D /* SettingsOperations.cpp in Sources */,
+				7C7BCDCB17727951004842FB /* IListProvider.cpp in Sources */,
+				7C7BCDCD17727952004842FB /* StaticProvider.cpp in Sources */,
+				7C8FC6F01829A4580045153D /* DirectoryProvider.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -11878,7 +12023,6 @@
 				E49911FB174E5D4500741B6D /* DVDMessageTracker.cpp in Sources */,
 				E49911FC174E5D4500741B6D /* DVDOverlayContainer.cpp in Sources */,
 				E49911FD174E5D4500741B6D /* DVDOverlayRenderer.cpp in Sources */,
-				E49911FE174E5D4500741B6D /* DVDPerformanceCounter.cpp in Sources */,
 				E49911FF174E5D4500741B6D /* DVDPlayer.cpp in Sources */,
 				E4991200174E5D4500741B6D /* DVDPlayerAudio.cpp in Sources */,
 				E4991201174E5D4500741B6D /* DVDPlayerSubtitle.cpp in Sources */,
@@ -12409,7 +12553,6 @@
 				E499142B174E603C00741B6D /* SettingSection.cpp in Sources */,
 				E499142C174E603C00741B6D /* SettingsManager.cpp in Sources */,
 				E499142D174E603C00741B6D /* SettingUpdate.cpp in Sources */,
-				E499142E174E603C00741B6D /* SettingVisibility.cpp in Sources */,
 				E499142F174E603C00741B6D /* SkinSettings.cpp in Sources */,
 				E4991430174E603C00741B6D /* VideoSettings.cpp in Sources */,
 				E4991431174E604300741B6D /* DarwinStorageProvider.cpp in Sources */,
@@ -12640,6 +12783,22 @@
 				F55BA70B17AB2264002A36D1 /* StereoscopicsManager.cpp in Sources */,
 				F55BA71017AB2293002A36D1 /* RenderFlags.cpp in Sources */,
 				F59EED7F17AD5174005BB7C6 /* ApplicationPlayer.cpp in Sources */,
+				DF29668117B2B04300DF10F9 /* SettingRequirement.cpp in Sources */,
+				DF28DF4E17B8379E0077F41A /* ProfilesOperations.cpp in Sources */,
+				DFD882F717DD1A5B001516FE /* AddonPythonInvoker.cpp in Sources */,
+				DFD882E817DD189E001516FE /* StringValidation.cpp in Sources */,
+				F500E35717F3412C004FC217 /* WinEvents.cpp in Sources */,
+				7C2612721825B6340086E04D /* DatabaseQuery.cpp in Sources */,
+				7C920CFA181669FF00DA1477 /* TextureOperations.cpp in Sources */,
+				DFEF0BAD180ADE6400AEAED1 /* FileItemListModification.cpp in Sources */,
+				DFEF0BC2180ADEDA00AEAED1 /* SmartPlaylistFileItemListModifier.cpp in Sources */,
+				7C2612681820667C0086E04D /* ISettingControl.cpp in Sources */,
+				7CC82C9418284F9F0010DF30 /* CharsetDetection.cpp in Sources */,
+				DF6D1DFE18312525009DB64F /* OverlayRendererGUI.cpp in Sources */,
+				7C26126D182068660086E04D /* SettingsOperations.cpp in Sources */,
+				7C7BCDC817727951004842FB /* IListProvider.cpp in Sources */,
+				7C7BCDCA17727951004842FB /* StaticProvider.cpp in Sources */,
+				7C8FC6EF1829A4580045153D /* DirectoryProvider.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -12705,7 +12864,7 @@
 					HAS_SPC_CODEC,
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
-				GCC_VERSION = com.apple.compilers.llvmgcc42;
+				GCC_VERSION = "";
 				GENERATE_PROFILING_CODE = NO;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
@@ -12838,7 +12997,7 @@
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_UNROLL_LOOPS = YES;
-				GCC_VERSION = com.apple.compilers.llvmgcc42;
+				GCC_VERSION = "";
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					$SRCROOT,
@@ -13003,7 +13162,6 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SDKROOT)$(SYSTEM_LIBRARY_DIR)/PrivateFrameworks\"",
-					"\"$(DEVELOPER_DIR)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.1.sdk/System/Library/Frameworks\"",
 				);
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_VERSION = 4.2;
@@ -13116,7 +13274,6 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SDKROOT)$(SYSTEM_LIBRARY_DIR)/PrivateFrameworks\"",
-					"\"$(DEVELOPER_DIR)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.1.sdk/System/Library/Frameworks\"",
 				);
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
@@ -13231,7 +13388,6 @@
 				COPY_PHASE_STRIP = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(DEVELOPER_DIR)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.1.sdk/System/Library/Frameworks\"",
 					"\"$(SDKROOT)$(SYSTEM_LIBRARY_DIR)/PrivateFrameworks\"",
 				);
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -13272,7 +13428,6 @@
 				COPY_PHASE_STRIP = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(DEVELOPER_DIR)/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.1.sdk/System/Library/Frameworks\"",
 					"\"$(SDKROOT)$(SYSTEM_LIBRARY_DIR)/PrivateFrameworks\"",
 				);
 				GCC_C_LANGUAGE_STANDARD = gnu99;

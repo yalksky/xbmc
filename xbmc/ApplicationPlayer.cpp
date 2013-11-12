@@ -20,6 +20,7 @@
 
 #include "ApplicationPlayer.h"
 #include "cores/IPlayer.h"
+#include "Application.h"
 
 #define VOLUME_MINIMUM 0.0f        // -60dB
 #define VOLUME_MAXIMUM 1.0f        // 0dB
@@ -38,10 +39,12 @@ boost::shared_ptr<IPlayer> CApplicationPlayer::GetInternal() const
 
 void CApplicationPlayer::ClosePlayer()
 {
-  CSingleLock lock(m_player_lock);
-  if (m_pPlayer)
+  boost::shared_ptr<IPlayer> player = GetInternal();
+  if (player)
   {
     CloseFile();
+    // we need to do this directly on the member
+    CSingleLock lock(m_player_lock);
     m_pPlayer.reset();
   }
 }
@@ -220,11 +223,11 @@ void CApplicationPlayer::SetVolume(float volume)
     player->SetVolume(volume);
 }
 
-void CApplicationPlayer::Seek(bool bPlus, bool bLargeStep)
+void CApplicationPlayer::Seek(bool bPlus, bool bLargeStep, bool bChapterOverride)
 {
   boost::shared_ptr<IPlayer> player = GetInternal();
   if (player)
-    player->Seek(bPlus, bLargeStep);
+    player->Seek(bPlus, bLargeStep, bChapterOverride);
 }
 
 void CApplicationPlayer::SeekPercentage(float fPercent)
@@ -616,12 +619,6 @@ void CApplicationPlayer::GetGeneralInfo( CStdString& strVideoInfo)
     player->GetGeneralInfo(strVideoInfo);
 }
 
-bool CApplicationPlayer::GetCurrentSubtitle(CStdString& strSubtitle)
-{
-  boost::shared_ptr<IPlayer> player = GetInternal();
-  return (player && player->GetCurrentSubtitle(strSubtitle));
-}
-
 int  CApplicationPlayer::SeekChapter(int iChapter)
 {
   boost::shared_ptr<IPlayer> player = GetInternal();
@@ -661,6 +658,10 @@ void CApplicationPlayer::GetScalingMethods(std::vector<int> &scalingMethods)
 
 void CApplicationPlayer::SetPlaySpeed(int iSpeed, bool bApplicationMuted)
 {
+  boost::shared_ptr<IPlayer> player = GetInternal();
+  if (!player)
+    return;
+
   if (!IsPlayingAudio() && !IsPlayingVideo())
     return ;
   if (m_iPlaySpeed == iSpeed)
@@ -687,13 +688,13 @@ void CApplicationPlayer::SetPlaySpeed(int iSpeed, bool bApplicationMuted)
   {
     if (m_iPlaySpeed == 1)
     { // restore volume
-      m_pPlayer->SetVolume(VOLUME_MAXIMUM);
+      player->SetVolume(g_application.GetVolume(false));
     }
     else
     { // mute volume
-      m_pPlayer->SetVolume(VOLUME_MINIMUM);
+      player->SetVolume(VOLUME_MINIMUM);
     }
-    m_pPlayer->SetMute(bApplicationMuted);
+    player->SetMute(bApplicationMuted);
   }
 }
 

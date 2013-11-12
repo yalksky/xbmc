@@ -83,7 +83,7 @@ using namespace MUSIC_INFO;
 CGUIWindowMusicBase::CGUIWindowMusicBase(int id, const CStdString &xmlFile)
     : CGUIMediaWindow(id, xmlFile)
 {
-
+  m_dlgProgress = NULL;
 }
 
 CGUIWindowMusicBase::~CGUIWindowMusicBase ()
@@ -294,7 +294,7 @@ void CGUIWindowMusicBase::OnInfo(int iItem, bool bShowInfo)
 void CGUIWindowMusicBase::OnInfo(CFileItem *pItem, bool bShowInfo)
 {
   if ((pItem->IsMusicDb() && !pItem->HasMusicInfoTag()) || pItem->IsParentFolder() ||
-       URIUtils::IsSpecial(pItem->GetPath()) || pItem->GetPath().Left(14).Equals("musicsearch://"))
+       URIUtils::IsSpecial(pItem->GetPath()) || StringUtils::StartsWithNoCase(pItem->GetPath(), "musicsearch://"))
     return; // nothing to do
 
   if (!pItem->m_bIsFolder)
@@ -347,12 +347,10 @@ void CGUIWindowMusicBase::OnInfo(CFileItem *pItem, bool bShowInfo)
     if (pItem->HasMusicInfoTag() && pItem->GetMusicInfoTag()->Loaded() &&
        !pItem->GetMusicInfoTag()->GetAlbum().IsEmpty())
     {
-      bool result = ShowAlbumInfo(pItem.get());
-
       if (m_dlgProgress && bShowInfo)
         m_dlgProgress->Close();
 
-      if (!result) // Something went wrong, so bail for the rest
+      if (!ShowAlbumInfo(pItem.get())) // Something went wrong, so bail for the rest
         break;
     }
   }
@@ -399,6 +397,9 @@ void CGUIWindowMusicBase::ShowArtistInfo(const CFileItem *pItem, bool bShowInfo 
         break;
       }
     }
+
+    if (m_dlgProgress)
+      m_dlgProgress->Close();
 
     CGUIDialogMusicInfo *pDlgArtistInfo = (CGUIDialogMusicInfo*)g_windowManager.GetWindow(WINDOW_DIALOG_MUSIC_INFO);
     if (pDlgArtistInfo)
@@ -469,6 +470,9 @@ bool CGUIWindowMusicBase::ShowAlbumInfo(const CFileItem *pItem, bool bShowInfo /
         return false;
       }
     }
+
+    if (m_dlgProgress)
+      m_dlgProgress->Close();
 
     CGUIDialogMusicInfo *pDlgAlbumInfo = (CGUIDialogMusicInfo*)g_windowManager.GetWindow(WINDOW_DIALOG_MUSIC_INFO);
     if (pDlgAlbumInfo)
@@ -737,8 +741,6 @@ void CGUIWindowMusicBase::GetNonContextButtons(CContextButtons &buttons)
 {
   if (!m_vecItems->IsVirtualDirectoryRoot())
     buttons.Add(CONTEXT_BUTTON_GOTO_ROOT, 20128);
-  if (g_playlistPlayer.GetPlaylist(PLAYLIST_MUSIC).size() > 0)
-    buttons.Add(CONTEXT_BUTTON_NOW_PLAYING, 13350);
   buttons.Add(CONTEXT_BUTTON_SETTINGS, 5);
 }
 
@@ -804,10 +806,6 @@ bool CGUIWindowMusicBase::OnContextButton(int itemNumber, CONTEXT_BUTTON button)
       g_application.StopMusicScan();
       return true;
     }
-
-  case CONTEXT_BUTTON_NOW_PLAYING:
-    g_windowManager.ActivateWindow(WINDOW_MUSIC_PLAYLIST);
-    return true;
 
   case CONTEXT_BUTTON_GOTO_ROOT:
     Update("");
@@ -1140,10 +1138,6 @@ bool CGUIWindowMusicBase::GetDirectory(const CStdString &strDirectory, CFileItem
   return bResult;
 }
 
-void CGUIWindowMusicBase::OnPrepareFileItems(CFileItemList &items)
-{
-}
-
 bool CGUIWindowMusicBase::CheckFilterAdvanced(CFileItemList &items) const
 {
   CStdString content = items.GetContent();
@@ -1156,7 +1150,7 @@ bool CGUIWindowMusicBase::CheckFilterAdvanced(CFileItemList &items) const
 
 bool CGUIWindowMusicBase::CanContainFilter(const CStdString &strDirectory) const
 {
-  return StringUtils::StartsWith(strDirectory, "musicdb://");
+  return StringUtils::StartsWithNoCase(strDirectory, "musicdb://");
 }
 
 void CGUIWindowMusicBase::OnInitWindow()

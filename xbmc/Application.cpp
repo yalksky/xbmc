@@ -92,7 +92,6 @@
 #include "settings/MediaSettings.h"
 #include "settings/MediaSourceSettings.h"
 #include "settings/SkinSettings.h"
-#include "settings/Settings.h"
 #include "guilib/LocalizeStrings.h"
 #include "utils/CPUInfo.h"
 #include "utils/RssManager.h"
@@ -317,11 +316,6 @@
 #include "utils/Weather.h"
 #include "DatabaseManager.h"
 
-#include "settings/DisplaySettings.h"
-#include "settings/MediaSettings.h"
-#include "settings/SkinSettings.h"
-#include "view/ViewStateSettings.h"
-
 #ifdef TARGET_POSIX
 #include "XHandle.h"
 #endif
@@ -341,10 +335,15 @@
 
 #if defined(TARGET_ANDROID)
 #include "android/activity/XBMCApp.h"
+#include "android/activity/AndroidFeatures.h"
 #endif
 
 #ifdef TARGET_WINDOWS
 #include "utils/Environment.h"
+#endif
+
+#if defined(HAS_LIBAMCODEC)
+#include "utils/AMLUtils.h"
 #endif
 
 using namespace std;
@@ -402,6 +401,7 @@ CApplication::CApplication(void)
   m_bPlaybackStarting = false;
   m_ePlayState = PLAY_STATE_NONE;
   m_skinReloading = false;
+  m_skinReverting = false;
   m_loggingIn = false;
 
 #ifdef HAS_GLX
@@ -641,28 +641,56 @@ bool CApplication::Create()
   CProfilesManager::Get().Load();
 
   CLog::Log(LOGNOTICE, "-----------------------------------------------------------------------");
-#if defined(TARGET_DARWIN_OSX)
-  CLog::Log(LOGNOTICE, "Starting XBMC (%s), Built on " __DATE__ " (GCC version %i.%i.%i). Platform: Darwin OSX (%s)", 
-              g_infoManager.GetVersion().c_str(), __GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__, g_sysinfo.GetUnameVersion().c_str());
-#elif defined(TARGET_DARWIN_IOS)
-  CLog::Log(LOGNOTICE, "Starting XBMC (%s), Built on " __DATE__ " (GCC version %i.%i.%i). Platform: Darwin iOS (%s)",
-              g_infoManager.GetVersion().c_str(), __GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__, g_sysinfo.GetUnameVersion().c_str());
-#elif defined(TARGET_FREEBSD)
-  CLog::Log(LOGNOTICE, "Starting XBMC (%s), Built on " __DATE__ " (GCC version %i.%i.%i). Platform: FreeBSD (%s)",
-              g_infoManager.GetVersion().c_str(), __GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__, g_sysinfo.GetUnameVersion().c_str());
-#elif defined(TARGET_POSIX)
-  CLog::Log(LOGNOTICE, "Starting XBMC (%s), Built on " __DATE__ " (GCC version %i.%i.%i). Platform: Linux (%s, %s)",
-              g_infoManager.GetVersion().c_str(), __GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__, g_sysinfo.GetLinuxDistro().c_str(), g_sysinfo.GetUnameVersion().c_str());
-#elif defined(TARGET_WINDOWS)
-  CLog::Log(LOGNOTICE, "Starting XBMC (%s), Built on " __DATE__ " (MSVC version %i). Platform: %s", g_infoManager.GetVersion().c_str(), _MSC_VER, g_sysinfo.GetKernelVersion().c_str());
+  CLog::Log(LOGNOTICE, "Starting XBMC (%s). Platform: %s %s %d-bit", g_infoManager.GetVersion().c_str(), g_sysinfo.GetBuildTargetCpuFamily().c_str(),
+      g_sysinfo.GetBuildTargetPlatformName().c_str(), g_sysinfo.GetXbmcBitness());
+
+/* Expand macro before stringify */
+#define STR_MACRO(x) #x
+#define XSTR_MACRO(x) STR_MACRO(x)
+
+  std::string compilerStr;
+#if defined(__clang__)
+  compilerStr = "Clang " XSTR_MACRO(__clang_major__) "." XSTR_MACRO(__clang_minor__) "." XSTR_MACRO(__clang_patchlevel__);
+#elif defined (__INTEL_COMPILER)
+  compilerStr = "Intel Compiler " XSTR_MACRO(__INTEL_COMPILER);
+#elif defined (__GNUC__)
+#ifdef __llvm__
+  /* Note: this will not detect GCC + DragonEgg */
+  compilerStr = "llvm-gcc "; 
+#else // __llvm__
+  compilerStr = "GCC ";
+#endif // !__llvm__
+  compilerStr += XSTR_MACRO(__GNUC__) "." XSTR_MACRO(__GNUC_MINOR__) "." XSTR_MACRO(__GNUC_PATCHLEVEL__);
+#elif defined (_MSC_VER)
+  compilerStr = "MSVC " XSTR_MACRO(_MSC_FULL_VER);
+#else
+  compilerStr = "unknown compiler";
 #endif
+  std::string buildType;
 #if defined(_DEBUG)
-  CLog::Log(LOGINFO, "Using Debug XBMC build");
+  buildType = "Debug";
 #elif defined(NDEBUG)
-  CLog::Log(LOGINFO, "Using Release XBMC build");
+  buildType = "Release";
+#else
+  buildType = "Unknown";
 #endif
+  CLog::Log(LOGNOTICE, "Using %s XBMC x%d build, compiled " __DATE__ " by %s for %s %s %d-bit %s", buildType.c_str(), g_sysinfo.GetXbmcBitness(), compilerStr.c_str(),
+      g_sysinfo.GetBuildTargetCpuFamily().c_str(), g_sysinfo.GetBuildTargetPlatformName().c_str(), g_sysinfo.GetXbmcBitness(), g_sysinfo.GetBuildTargetPlatformVersion().c_str());
+
+#if defined(TARGET_DARWIN_OSX)
+  CLog::Log(LOGNOTICE, "Running on Darwin OSX %d-bit %s", g_sysinfo.GetKernelBitness(), g_sysinfo.GetUnameVersion().c_str());
+#elif defined(TARGET_DARWIN_IOS)
+  CLog::Log(LOGNOTICE, "Running on Darwin iOS %d-bit %s%s", g_sysinfo.GetKernelBitness(), g_sysinfo.IsAppleTV2() ? "(AppleTV2) " : "", g_sysinfo.GetUnameVersion().c_str());
+#elif defined(TARGET_FREEBSD)
+  CLog::Log(LOGNOTICE, "Running on FreeBSD %d-bit %s", g_sysinfo.GetKernelBitness(), g_sysinfo.GetUnameVersion().c_str());
+#elif defined(TARGET_POSIX)
+  CLog::Log(LOGNOTICE, "Running on Linux %d-bit (%s, %s)", g_sysinfo.GetKernelBitness(), g_sysinfo.GetLinuxDistro().c_str(), g_sysinfo.GetUnameVersion().c_str());
+#elif defined(TARGET_WINDOWS)
+  CLog::Log(LOGNOTICE, "Running on %s", g_sysinfo.GetKernelVersion().c_str());
+#endif
+  
+  CLog::Log(LOGNOTICE, "Host CPU: %s, %d core%s available", g_cpuInfo.getCPUModel().c_str(), g_cpuInfo.getCPUCount(), (g_cpuInfo.getCPUCount()==1) ? "" : "s");
 #if defined(TARGET_WINDOWS)
-  CLog::Log(LOGNOTICE, "%s", g_cpuInfo.getCPUModel().c_str());
   CLog::Log(LOGNOTICE, "%s", CWIN32Util::GetResInfoString().c_str());
   CLog::Log(LOGNOTICE, "Running with %s rights", (CWIN32Util::IsCurrentUserLocalAdministrator() == TRUE) ? "administrator" : "restricted");
   CLog::Log(LOGNOTICE, "Aero is %s", (g_sysinfo.IsAeroDisabled() == true) ? "disabled" : "enabled");
@@ -679,24 +707,11 @@ bool CApplication::Create()
   CLog::Log(LOGNOTICE, "The executable running is: %s", executable.c_str());
   CLog::Log(LOGNOTICE, "Local hostname: %s", m_network->GetHostName().c_str());
   CLog::Log(LOGNOTICE, "Log File is located: %sxbmc.log", g_advancedSettings.m_logFolder.c_str());
+  CRegExp::LogCheckUtf8Support();
   CLog::Log(LOGNOTICE, "-----------------------------------------------------------------------");
 
   CStdString strExecutablePath;
   CUtil::GetHomePath(strExecutablePath);
-
-  // if we are running from DVD our UserData location will be TDATA
-  if (URIUtils::IsDVD(strExecutablePath))
-  {
-    // TODO: Should we copy over any UserData folder from the DVD?
-    if (!CFile::Exists("special://masterprofile/guisettings.xml")) // first run - cache userdata folder
-    {
-      CFileItemList items;
-      CUtil::GetRecursiveListing("special://xbmc/userdata",items,"");
-      for (int i=0;i<items.Size();++i)
-          CFile::Cache(items[i]->GetPath(),"special://masterprofile/"+URIUtils::GetFileName(items[i]->GetPath()));
-    }
-    g_advancedSettings.m_logFolder = "special://masterprofile/";
-  }
 
 #ifdef HAS_XRANDR
   g_xrandr.LoadCustomModeLinesToAllOutputs();
@@ -745,9 +760,6 @@ bool CApplication::Create()
 
   update_emu_environ();//apply the GUI settings
 
-  // initialize our charset converter
-  g_charsetConverter.reset();
-
   // Load the langinfo to have user charset <-> utf-8 conversion
   CStdString strLanguage = CSettings::Get().GetString("locale.language");
   strLanguage[0] = toupper(strLanguage[0]);
@@ -757,6 +769,8 @@ bool CApplication::Create()
 
   CLog::Log(LOGINFO, "load language info file: %s", strLangInfoPath.c_str());
   g_langInfo.Load(strLangInfoPath);
+  g_langInfo.SetAudioLanguage(CSettings::Get().GetString("locale.audiolanguage"));
+  g_langInfo.SetSubtitleLanguage(CSettings::Get().GetString("locale.subtitlelanguage"));
 
   CStdString strLanguagePath = "special://xbmc/language/";
 
@@ -799,6 +813,9 @@ bool CApplication::Create()
     CLog::Log(LOGFATAL, "CApplication::Create: Unable to start CAddonMgr");
     return false;
   }
+#if defined(HAS_LIRC) || defined(HAS_IRSERVERSUITE)
+  g_RemoteControl.Initialize();
+#endif
 
   // set logging from debug add-on
   AddonPtr addon;
@@ -814,9 +831,6 @@ bool CApplication::Create()
   g_Mouse.SetEnabled(CSettings::Get().GetBool("input.enablemouse"));
 
   g_Keyboard.Initialize();
-#if defined(HAS_LIRC) || defined(HAS_IRSERVERSUITE)
-  g_RemoteControl.Initialize();
-#endif
 
 #if defined(TARGET_DARWIN_OSX)
   // Configure and possible manually start the helper.
@@ -975,13 +989,11 @@ bool CApplication::InitWindow()
   }
   // set GUI res and force the clear of the screen
   g_graphicsContext.SetVideoResolution(CDisplaySettings::Get().GetCurrentResolution());
-  g_fontManager.ReloadTTFFonts();
   return true;
 }
 
 bool CApplication::DestroyWindow()
 {
-  g_fontManager.UnloadTTFFonts();
   return g_Windowing.DestroyWindow();
 }
 
@@ -1126,8 +1138,8 @@ bool CApplication::InitDirectoriesOSX()
     CSpecialProtocol::SetXBMCBinPath(xbmcPath);
     CSpecialProtocol::SetXBMCPath(xbmcPath);
     #if defined(TARGET_DARWIN_IOS)
-      CSpecialProtocol::SetHomePath(userHome + "/Library/Preferences/XBMC");
-      CSpecialProtocol::SetMasterProfilePath(userHome + "/Library/Preferences/XBMC/userdata");
+      CSpecialProtocol::SetHomePath(userHome + "/" + CStdString(DarwinGetXbmcRootFolder()) + "/XBMC");
+      CSpecialProtocol::SetMasterProfilePath(userHome + "/" + CStdString(DarwinGetXbmcRootFolder()) + "/XBMC/userdata");
     #else
       CSpecialProtocol::SetHomePath(userHome + "/Library/Application Support/XBMC");
       CSpecialProtocol::SetMasterProfilePath(userHome + "/Library/Application Support/XBMC/userdata");
@@ -1135,7 +1147,7 @@ bool CApplication::InitDirectoriesOSX()
 
     // location for temp files
     #if defined(TARGET_DARWIN_IOS)
-      CStdString strTempPath = URIUtils::AddFileToFolder(userHome,  "Library/Preferences/XBMC/temp");
+      CStdString strTempPath = URIUtils::AddFileToFolder(userHome,  CStdString(DarwinGetXbmcRootFolder()) + "/XBMC/temp");
     #else
       CStdString strTempPath = URIUtils::AddFileToFolder(userHome, ".xbmc/");
       CDirectory::Create(strTempPath);
@@ -1145,7 +1157,7 @@ bool CApplication::InitDirectoriesOSX()
 
     // xbmc.log file location
     #if defined(TARGET_DARWIN_IOS)
-      strTempPath = userHome + "/Library/Preferences";
+      strTempPath = userHome + "/" + CStdString(DarwinGetXbmcRootFolder());
     #else
       strTempPath = userHome + "/Library/Logs";
     #endif
@@ -1259,7 +1271,7 @@ bool CApplication::Initialize()
   m_dpms = new DPMSSupport();
   if (g_windowManager.Initialized())
   {
-    CSettings::Get().GetSetting("powermanagement.displaysoff")->SetVisible(m_dpms->IsSupported());
+    CSettings::Get().GetSetting("powermanagement.displaysoff")->SetRequirementsMet(m_dpms->IsSupported());
 
     g_windowManager.Add(new CGUIWindowHome);
     g_windowManager.Add(new CGUIWindowPrograms);
@@ -1561,13 +1573,27 @@ void CApplication::OnSettingChanged(const CSetting *setting)
   if (settingId == "lookandfeel.skin" ||
       settingId == "lookandfeel.font" ||
       settingId == "lookandfeel.skincolors")
-    ReloadSkin();
+  {
+    // if the skin changes and the current theme is not the default one, reset
+    // the theme to the default value (which will also change lookandfeel.skincolors
+    // which in turn will reload the skin
+    if (settingId == "lookandfeel.skin" && CSettings::Get().GetString("lookandfeel.skintheme") != "SKINDEFAULT")
+      CSettings::Get().SetString("lookandfeel.skintheme", "SKINDEFAULT");
+    else
+    {
+      std::string builtin("ReloadSkin");
+      if (settingId == "lookandfeel.skin" && !m_skinReverting)
+        builtin += "(confirm)";
+      CApplicationMessenger::Get().ExecBuiltIn(builtin);
+    }
+  }
   else if (settingId == "lookandfeel.skintheme")
   {
     // also set the default color theme
-    string colorTheme = URIUtils::ReplaceExtension(((CSettingString*)setting)->GetValue(), ".xml");
-    if (StringUtils::EqualsNoCase(colorTheme, "Textures.xml"))
-      colorTheme = "defaults.xml";
+    CStdString colorTheme = ((CSettingString*)setting)->GetValue();
+    URIUtils::RemoveExtension(colorTheme);
+    if (StringUtils::EqualsNoCase(colorTheme, "Textures"))
+      colorTheme = "defaults";
 
     // check if we have to change the skin color
     // if yes, it will trigger a call to ReloadSkin() in
@@ -1576,16 +1602,25 @@ void CApplication::OnSettingChanged(const CSetting *setting)
     if (!StringUtils::EqualsNoCase(colorTheme, CSettings::Get().GetString("lookandfeel.skincolors")))
       CSettings::Get().SetString("lookandfeel.skincolors", colorTheme);
     else
-      ReloadSkin();
+      CApplicationMessenger::Get().ExecBuiltIn("ReloadSkin");
   }
   else if (settingId == "lookandfeel.skinzoom")
     g_windowManager.SendMessage(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_WINDOW_RESIZE);
-  else if (StringUtils::StartsWith(settingId, "audiooutput."))
+  else if (StringUtils::StartsWithNoCase(settingId, "audiooutput."))
   {
-    if (settingId == "audiooutput.guisoundmode")
-      CAEFactory::SetSoundMode(((CSettingInt*)setting)->GetValue());
-
+    // AE is master of audio settings and needs to be informed first
     CAEFactory::OnSettingsChange(settingId);
+
+    if (settingId == "audiooutput.guisoundmode")
+    {
+      CAEFactory::SetSoundMode(((CSettingInt*)setting)->GetValue());
+    }
+    // this tells player whether to open an audio stream passthrough or PCM
+    // if this is changed, audio stream has to be reopened
+    else if (settingId == "audiooutput.passthrough")
+    {
+      CApplicationMessenger::Get().MediaRestart(false);
+    }
   }
   else if (StringUtils::EqualsNoCase(settingId, "musicplayer.replaygaintype"))
     m_replayGainSettings.iType = ((CSettingInt*)setting)->GetValue();
@@ -1660,6 +1695,40 @@ bool CApplication::OnSettingUpdate(CSetting* &setting, const char *oldSettingId,
       return true;
     }
   }
+#if defined(HAS_LIBAMCODEC)
+  else if (settingId == "videoplayer.useamcodec")
+  {
+    // Do not permit amcodec to be used on non-aml platforms.
+    // The setting will be hidden but the default value is true,
+    // so change it to false.
+    if (!aml_present())
+    {
+      CSettingBool *useamcodec = (CSettingBool*)setting;
+      useamcodec->SetValue(false);
+    }
+  }
+#endif
+#if defined(TARGET_ANDROID)
+  else if (settingId == "videoplayer.usemediacodec")
+  {
+    // Do not permit MediaCodec to be used Android platforms that do not have it.
+    // The setting will be hidden but the default value is true,
+    // so change it to false.
+    if (CAndroidFeatures::GetVersion() < 16)
+    {
+      CSettingBool *usemediacodec = (CSettingBool*)setting;
+      usemediacodec->SetValue(false);
+    }
+  }
+  else if (settingId == "videoplayer.usestagefright")
+  {
+    if (CAndroidFeatures::GetVersion() >= 19)
+    {
+      CSettingBool *usestagefright = (CSettingBool*)setting;
+      usestagefright->SetValue(false);
+    }
+  }
+#endif
 
   return false;
 }
@@ -1675,9 +1744,11 @@ bool CApplication::OnSettingsSaving() const
   return true;
 }
 
-void CApplication::ReloadSkin()
+void CApplication::ReloadSkin(bool confirm/*=false*/)
 {
   m_skinReloading = false;
+  std::string oldSkin = g_SkinInfo ? g_SkinInfo->ID() : "";
+
   CGUIMessage msg(GUI_MSG_LOAD_SKIN, -1, g_windowManager.GetActiveWindow());
   g_windowManager.SendMessage(msg);
   
@@ -1699,6 +1770,21 @@ void CApplication::ReloadSkin()
       pWindow->OnMessage(msg3);
     }
   }
+
+  if (!m_skinReverting && confirm)
+  {
+    bool cancelled;
+    if (!CGUIDialogYesNo::ShowAndGetInput(13123, 13111, -1, -1, -1, -1, cancelled, 10000))
+    {
+      m_skinReverting = true;
+      if (oldSkin.empty())
+        CSettings::Get().GetSetting("lookandfeel.skin")->Reset();
+      else
+        CSettings::Get().SetString("lookandfeel.skin", oldSkin);
+    }
+  }
+
+  m_skinReverting = false;
 }
 
 bool CApplication::Load(const TiXmlNode *settings)
@@ -1753,7 +1839,7 @@ void CApplication::LoadSkin(const SkinPtr& skin)
   if (!skin)
   {
     CLog::Log(LOGERROR, "failed to load requested skin, fallback to \"%s\" skin", defaultSkin.c_str());
-    CSettings::Get().SetString("lookandfeel.skin", defaultSkin);
+    CSettings::Get().GetSetting("lookandfeel.skin")->Reset();
     return ;
   }
 
@@ -1765,8 +1851,7 @@ void CApplication::LoadSkin(const SkinPtr& skin)
     if (strcmpi(skin->ID().c_str(), defaultSkin.c_str()) != 0)
     {
       CLog::Log(LOGERROR, "home.xml doesn't exist in skin: %s, fallback to \"%s\" skin", skin->ID().c_str(), defaultSkin.c_str());
-      CSettings::Get().SetString("lookandfeel.skin", defaultSkin);
-      LoadSkin(defaultSkin);
+      CSettings::Get().GetSetting("lookandfeel.skin")->Reset();
       CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Error, g_localizeStrings.Get(24102), g_localizeStrings.Get(24103));
       return ;
     }
@@ -1910,8 +1995,6 @@ void CApplication::UnloadSkin(bool forReload /* = false */)
 
   g_colorManager.Clear();
 
-  g_charsetConverter.reset();
-
   g_infoManager.Clear();
 
 //  The g_SkinInfo boost shared_ptr ought to be reset here
@@ -2017,6 +2100,7 @@ bool CApplication::RenderNoPresent()
   // dont show GUI when playing full screen video
   if (g_graphicsContext.IsFullScreenVideo())
   {
+    g_graphicsContext.SetRenderingResolution(g_graphicsContext.GetVideoResolution(), false);
     g_renderManager.Render(true, 0, 255);
 
     // close window overlays
@@ -2210,13 +2294,13 @@ bool CApplication::OnKey(const CKey& key)
   m_idleTimer.StartZero();
   bool processKey = AlwaysProcess(action);
 
-  if (StringUtils::StartsWith(action.GetName(),"CECToggleState") || StringUtils::StartsWith(action.GetName(),"CECStandby"))
+  if (StringUtils::StartsWithNoCase(action.GetName(),"CECToggleState") || StringUtils::StartsWithNoCase(action.GetName(),"CECStandby"))
   {
     bool ret = true;
 
     CLog::Log(LOGDEBUG, "%s: action %s [%d], toggling state of playing device", __FUNCTION__, action.GetName().c_str(), action.GetID());
     // do not wake up the screensaver right after switching off the playing device
-    if (StringUtils::StartsWith(action.GetName(),"CECToggleState"))
+    if (StringUtils::StartsWithNoCase(action.GetName(),"CECToggleState"))
       ret = CApplicationMessenger::Get().CECToggleState();
     else
       ret = CApplicationMessenger::Get().CECStandby();
@@ -2710,18 +2794,9 @@ bool CApplication::OnAction(const CAction &action)
 
   if (action.GetID() == ACTION_TOGGLE_DIGITAL_ANALOG)
   {
-    // we are only allowed to SetInt to a value supported in GUISettings, so we keep trying until it sticks
-    int mode = CSettings::Get().GetInt("audiooutput.mode");
-    for (int i = 0; i < 3; i++)
-    {
-      if (++mode == 3)
-        mode = 0;
-      CSettings::Get().SetInt("audiooutput.mode", mode);
-      if (CSettings::Get().GetInt("audiooutput.mode") == mode)
-         break;
-    }
+    bool passthrough = CSettings::Get().GetBool("audiooutput.passthrough");
+    CSettings::Get().SetBool("audiooutput.passthrough", !passthrough);
 
-    g_application.Restart();
     if (g_windowManager.GetActiveWindow() == WINDOW_SETTINGS_SYSTEM)
     {
       CGUIMessage msg(GUI_MSG_WINDOW_INIT, 0,0,WINDOW_INVALID,g_windowManager.GetActiveWindow());
@@ -3051,7 +3126,7 @@ bool CApplication::ProcessEventServer(float frameTime)
           m_lastAxisMap[joystickName].erase(wKeyID);
       }
 
-      return ProcessJoystickEvent(joystickName, wKeyID, isAxis, fAmount);
+      return ProcessJoystickEvent(joystickName, wKeyID, isAxis ? JACTIVE_AXIS : JACTIVE_BUTTON, fAmount);
     }
     else
     {
@@ -3095,20 +3170,31 @@ bool CApplication::ProcessEventServer(float frameTime)
     for (map<std::string, map<int, float> >::iterator iter = m_lastAxisMap.begin(); iter != m_lastAxisMap.end(); ++iter)
     {
       for (map<int, float>::iterator iterAxis = (*iter).second.begin(); iterAxis != (*iter).second.end(); ++iterAxis)
-        ProcessJoystickEvent((*iter).first, (*iterAxis).first, true, (*iterAxis).second);
+        ProcessJoystickEvent((*iter).first, (*iterAxis).first, JACTIVE_AXIS, (*iterAxis).second);
     }
   }
 
   {
     CPoint pos;
     if (es->GetMousePos(pos.x, pos.y) && g_Mouse.IsEnabled())
+    {
+      XBMC_Event newEvent;
+      newEvent.type = XBMC_MOUSEMOTION;
+      newEvent.motion.xrel = 0;
+      newEvent.motion.yrel = 0;
+      newEvent.motion.state = 0;
+      newEvent.motion.which = 0x10;  // just a different value to distinguish between mouse and event client device.
+      newEvent.motion.x = pos.x;
+      newEvent.motion.y = pos.y;
+      OnEvent(newEvent);  // had to call this to update g_Mouse position
       return OnAction(CAction(ACTION_MOUSE_MOVE, pos.x, pos.y));
+    }
   }
 #endif
   return false;
 }
 
-bool CApplication::ProcessJoystickEvent(const std::string& joystickName, int wKeyID, bool isAxis, float fAmount, unsigned int holdTime /*=0*/)
+bool CApplication::ProcessJoystickEvent(const std::string& joystickName, int wKeyID, short inputType, float fAmount, unsigned int holdTime /*=0*/)
 {
 #if defined(HAS_EVENT_SERVER)
   m_idleTimer.StartZero();
@@ -3129,7 +3215,7 @@ bool CApplication::ProcessJoystickEvent(const std::string& joystickName, int wKe
    bool fullRange = false;
 
    // Translate using regular joystick translator.
-   if (CButtonTranslator::GetInstance().TranslateJoystickString(iWin, joystickName.c_str(), wKeyID, isAxis ? JACTIVE_AXIS : JACTIVE_BUTTON, actionID, actionName, fullRange))
+   if (CButtonTranslator::GetInstance().TranslateJoystickString(iWin, joystickName.c_str(), wKeyID, inputType, actionID, actionName, fullRange))
      return ExecuteInputAction( CAction(actionID, fAmount, 0.0f, actionName, holdTime) );
    else
      CLog::Log(LOGDEBUG, "ERROR mapping joystick action. Joystick: %s %i",joystickName.c_str(), wKeyID);
@@ -3359,9 +3445,6 @@ void CApplication::Stop(int exitCode)
 
     SaveFileState(true);
 
-    // cancel any jobs from the jobmanager
-    CJobManager::GetInstance().CancelJobs();
-
     g_alarmClock.StopThread();
 
     if( m_bSystemScreenSaverEnable )
@@ -3383,6 +3466,9 @@ void CApplication::Stop(int exitCode)
     m_AppFocused = false;
     m_ExitCode = exitCode;
     CLog::Log(LOGNOTICE, "stop all");
+
+    // cancel any jobs from the jobmanager
+    CJobManager::GetInstance().CancelJobs();
 
     // stop scanning before we kill the network and so on
     if (m_musicInfoScanner->IsScanning())
@@ -3939,7 +4025,7 @@ PlayBackRet CApplication::PlayFile(const CFileItem& item, bool bRestart)
      */
     if (item.IsVideo())
     {
-      CJobManager::GetInstance().Pause(CJob::PRIORITY_LOW); // Pause any low priority jobs
+      CJobManager::GetInstance().PauseJobs();
     }
 
     // don't hold graphicscontext here since player
@@ -4429,17 +4515,14 @@ bool CApplication::WakeUpScreenSaver(bool bPowerOffKeyPressed /* = false */)
     m_iScreenSaveLock = 0;
     ResetScreenSaverTimer();
 
-    if (m_screenSaver->ID() == "visualization")
-    {
-      // we can just continue as usual from vis mode
-      return false;
-    }
-    else if (m_screenSaver->ID() == "screensaver.xbmc.builtin.dim" || m_screenSaver->ID() == "screensaver.xbmc.builtin.black" || m_screenSaver->ID().empty())
+    if (m_screenSaver->ID() == "screensaver.xbmc.builtin.dim" || m_screenSaver->ID() == "screensaver.xbmc.builtin.black" || m_screenSaver->ID().empty())
       return true;
     else if (!m_screenSaver->ID().IsEmpty())
     { // we're in screensaver window
-      if (g_windowManager.GetActiveWindow() == WINDOW_SCREENSAVER)
+      if (g_windowManager.GetActiveWindow() == WINDOW_SCREENSAVER
+          || g_windowManager.GetActiveWindow() == WINDOW_VISUALISATION)
         g_windowManager.PreviousWindow();  // show the previous window
+
       if (g_windowManager.GetActiveWindow() == WINDOW_SLIDESHOW)
         CApplicationMessenger::Get().SendAction(CAction(ACTION_STOP), WINDOW_SLIDESHOW);
     }
@@ -4533,7 +4616,9 @@ void CApplication::ActivateScreenSaver(bool forceType /*= false */)
     else if (m_pPlayer->IsPlayingAudio() && CSettings::Get().GetBool("screensaver.usemusicvisinstead") && !CSettings::Get().GetString("musicplayer.visualisation").empty())
     { // activate the visualisation
       m_screenSaver.reset(new CScreenSaver("visualization"));
-      g_windowManager.ActivateWindow(WINDOW_VISUALISATION);
+      // prevent music info popup if vis is already running
+      if (g_windowManager.GetActiveWindow() != WINDOW_VISUALISATION)
+        g_windowManager.ActivateWindow(WINDOW_VISUALISATION);
       return;
     }
   }
@@ -4841,10 +4926,13 @@ bool CApplication::OnMessage(CGUIMessage& message)
 bool CApplication::ExecuteXBMCAction(std::string actionStr)
 {
   // see if it is a user set string
-  CLog::Log(LOGDEBUG,"%s : Translating %s", __FUNCTION__, actionStr.c_str());
+
+  //We don't know if there is unsecure information in this yet, so we
+  //postpone any logging
+  const std::string in_actionStr(actionStr);
+  CLog::Log(LOGDEBUG,"%s : Translating action string", __FUNCTION__);
   CGUIInfoLabel info(actionStr, "");
   actionStr = info.GetLabel(0);
-  CLog::Log(LOGDEBUG,"%s : To %s", __FUNCTION__, actionStr.c_str());
 
   // user has asked for something to be executed
   if (CBuiltins::HasCommand(actionStr))
@@ -4871,7 +4959,12 @@ bool CApplication::ExecuteXBMCAction(std::string actionStr)
       PlayFile(item);
     }
     else
+    {
+      //At this point we have given up to translate, so even though
+      //there may be insecure information, we log it.
+      CLog::Log(LOGDEBUG,"%s : Tried translating, but failed to understand %s", __FUNCTION__, in_actionStr.c_str());
       return false;
+    }
   }
   return true;
 }
@@ -4939,10 +5032,15 @@ void CApplication::ProcessSlow()
   }
 #endif
 
-  // Resume low priority jobs when current item is not video
-  if (!CurrentFileItem().IsVideo())
+  // Temporarely pause pausable jobs when viewing video/picture
+  int currentWindow = g_windowManager.GetActiveWindow();
+  if (CurrentFileItem().IsVideo() || CurrentFileItem().IsPicture() || currentWindow == WINDOW_FULLSCREEN_VIDEO || currentWindow == WINDOW_SLIDESHOW)
   {
-    CJobManager::GetInstance().UnPause(CJob::PRIORITY_LOW);
+    CJobManager::GetInstance().PauseJobs();
+  }
+  else
+  {
+    CJobManager::GetInstance().UnPauseJobs();
   }
 
   // Store our file state for use on close()
@@ -5672,8 +5770,6 @@ bool CApplication::SetLanguage(const CStdString &strLanguage)
     }
     CSettings::Get().SetString("locale.language", strNewLanguage);
 
-    g_charsetConverter.reset();
-
     if (!g_localizeStrings.Load("special://xbmc/language/", strNewLanguage))
       return false;
 
@@ -5684,4 +5780,25 @@ bool CApplication::SetLanguage(const CStdString &strLanguage)
   }
 
   return true;
+}
+
+void CApplication::CloseNetworkShares()
+{
+  CLog::Log(LOGDEBUG,"CApplication::CloseNetworkShares: Closing all network shares");
+
+#if defined(HAS_FILESYSTEM_SMB) && !defined(TARGET_WINDOWS)
+  smb.Deinit();
+#endif
+  
+#ifdef HAS_FILESYSTEM_NFS
+  gNfsConnection.Deinit();
+#endif
+  
+#ifdef HAS_FILESYSTEM_AFP
+  gAfpConnection.Deinit();
+#endif
+  
+#ifdef HAS_FILESYSTEM_SFTP
+  CSFTPSessionManager::DisconnectAllSessions();
+#endif
 }

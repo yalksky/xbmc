@@ -32,6 +32,7 @@ struct COLOR {unsigned char b,g,r,x;};	// Windows GDI expects 4bytes per color
 
 class CTexture;
 class CGLTexture;
+class CPiTexture;
 class CDXTexture;
 
 /*!
@@ -101,7 +102,7 @@ public:
   void ClampToEdge();
 
   static unsigned int PadPow2(unsigned int x);
-  bool SwapBlueRed(unsigned char *pixels, unsigned int height, unsigned int pitch, unsigned int elements = 4, unsigned int offset=0);
+  static bool SwapBlueRed(unsigned char *pixels, unsigned int height, unsigned int pitch, unsigned int elements = 4, unsigned int offset=0);
 
 private:
   // no copy constructor
@@ -131,7 +132,10 @@ protected:
   bool m_hasAlpha;
 };
 
-#if defined(HAS_GL) || defined(HAS_GLES)
+#if defined(HAS_OMXPLAYER)
+#include "TexturePi.h"
+#define CTexture CPiTexture
+#elif defined(HAS_GL) || defined(HAS_GLES)
 #include "TextureGL.h"
 #define CTexture CGLTexture
 #elif defined(HAS_DX)
