@@ -93,9 +93,9 @@ bool CViewDatabase::UpdateOldVersion(int version)
       {
         std::string originalPath = m_pDS->fv(1).get_asString();
         std::string path = originalPath;
-        if (StringUtils::StartsWith(path, "musicdb://"))
+        if (StringUtils::StartsWithNoCase(path, "musicdb://"))
           path = CLegacyPathTranslation::TranslateMusicDbPath(path);
-        else if (StringUtils::StartsWith(path, "videodb://"))
+        else if (StringUtils::StartsWithNoCase(path, "videodb://"))
           path = CLegacyPathTranslation::TranslateVideoDbPath(path);
 
         if (!StringUtils::EqualsNoCase(path, originalPath))
@@ -207,7 +207,7 @@ bool CViewDatabase::SetViewState(const CStdString &path, int window, const CView
     { // add the view
       m_pDS->close();
       sql = PrepareSQL("insert into view (idView, path, window, viewMode, sortMethod, sortOrder, sortAttributes, skin) values(NULL, '%s', %i, %i, %i, %i, %i, '%s')",
-        path1.c_str(), window, state.m_viewMode, (int)state.m_sortDescription.sortOrder, (int)state.m_sortDescription.sortAttributes, skin.c_str());
+        path1.c_str(), window, state.m_viewMode, (int)state.m_sortDescription.sortBy, (int)state.m_sortDescription.sortOrder, (int)state.m_sortDescription.sortAttributes, skin.c_str());
       m_pDS->exec(sql.c_str());
     }
   }

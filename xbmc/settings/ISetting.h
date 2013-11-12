@@ -21,14 +21,7 @@
 #include <string>
 #include <vector>
 
-#include "SettingVisibility.h"
-
-#define XML_SETTING     "setting"
-
-#define XML_ATTR_ID     "id"
-#define XML_ATTR_LABEL  "label"
-#define XML_ATTR_HELP   "help"
-#define XML_ATTR_TYPE   "type"
+#include "SettingRequirement.h"
 
 class CSettingsManager;
 class TiXmlNode;
@@ -73,17 +66,30 @@ public:
 
    \return True if the setting object is visible, false otherwise
    */
-  bool IsVisible() const { return m_visible; }
-  /*!
-   \brief Updates the visibility state of the setting object.
-   */
-  void CheckVisible();
+  virtual bool IsVisible() const { return m_visible; }
   /*!
    \brief Sets the visibility state of the setting object.
 
    \param visible Whether the setting object shall be visible or not
    */
-  void SetVisible(bool visible) { m_visible = visible; }
+  virtual void SetVisible(bool visible) { m_visible = visible; }
+
+  /*!
+   \brief Whether the setting object meets all necessary requirements.
+
+   \return True if the setting object meets all necessary requirements, false otherwise
+   */
+  virtual bool MeetsRequirements() const { return m_meetsRequirements; }
+  /*!
+   \brief Checks if the setting object meets all necessary requirements.
+   */
+  virtual void CheckRequirements();
+  /*!
+   \brief Sets whether the setting object meets all necessary requirements.
+
+   \param visible Whether the setting object meets all necessary requirements or not
+   */
+  virtual void SetRequirementsMet(bool requirementsMet) { m_meetsRequirements = requirementsMet; }
 
   /*!
    \brief Deserializes the given XML node to retrieve a setting object's
@@ -101,5 +107,6 @@ protected:
 
 private:
   bool m_visible;
-  CSettingVisibility m_visibilityCondition;
+  bool m_meetsRequirements;
+  CSettingRequirement m_requirementCondition;
 };

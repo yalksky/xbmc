@@ -1,7 +1,7 @@
 #pragma once
 /*
  *      Copyright (C) 2005-2013 Team XBMC
- *      http://www.xbmc.org
+ *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -14,9 +14,8 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with XBMC; see the file COPYING.  If not, write to
- *  the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
- *  http://www.gnu.org/copyleft/gpl.html
+ *  along with XBMC; see the file COPYING.  If not, see
+ *  <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -52,6 +51,10 @@ extern "C" {
 /* Flag introduced without a version bump */
 #ifndef AVSEEK_FORCE
 #define AVSEEK_FORCE 0x20000
+#endif
+
+#if LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(55,12,100)
+#define AVFORMAT_HAS_STREAM_GET_R_FRAME_RATE
 #endif
 
 typedef int64_t offset_t;
@@ -100,6 +103,9 @@ public:
   virtual int avformat_write_header (AVFormatContext *s, AVDictionary **options)=0;
   virtual int av_write_trailer(AVFormatContext *s)=0;
   virtual int av_write_frame  (AVFormatContext *s, AVPacket *pkt)=0;
+#if defined(AVFORMAT_HAS_STREAM_GET_R_FRAME_RATE)
+  virtual AVRational av_stream_get_r_frame_rate(const AVStream *s)=0;
+#endif
 };
 
 #if (defined USE_EXTERNAL_FFMPEG) || (defined TARGET_DARWIN) 
@@ -157,6 +163,9 @@ public:
   virtual int avformat_write_header (AVFormatContext *s, AVDictionary **options) { return ::avformat_write_header (s, options); }
   virtual int av_write_trailer(AVFormatContext *s) { return ::av_write_trailer(s); }
   virtual int av_write_frame  (AVFormatContext *s, AVPacket *pkt) { return ::av_write_frame(s, pkt); }
+#if defined(AVFORMAT_HAS_STREAM_GET_R_FRAME_RATE)
+  virtual AVRational av_stream_get_r_frame_rate(const AVStream *s) { return ::av_stream_get_r_frame_rate(s); }
+#endif
 
   // DLL faking.
   virtual bool ResolveExports() { return true; }
@@ -225,6 +234,9 @@ class DllAvFormat : public DllDynamic, DllAvFormatInterface
   DEFINE_METHOD2(int, avformat_write_header , (AVFormatContext *p1, AVDictionary **p2))
   DEFINE_METHOD1(int, av_write_trailer, (AVFormatContext *p1))
   DEFINE_METHOD2(int, av_write_frame  , (AVFormatContext *p1, AVPacket *p2))
+#if defined(AVFORMAT_HAS_STREAM_GET_R_FRAME_RATE)
+  DEFINE_METHOD1(AVRational, av_stream_get_r_frame_rate, (const AVStream *p1))
+#endif
   BEGIN_METHOD_RESOLVE()
     RESOLVE_METHOD_RENAME(av_register_all, av_register_all_dont_call)
     RESOLVE_METHOD_RENAME(avformat_network_init,   avformat_network_init_dont_call)
@@ -261,6 +273,9 @@ class DllAvFormat : public DllDynamic, DllAvFormatInterface
     RESOLVE_METHOD(avformat_write_header)
     RESOLVE_METHOD(av_write_trailer)
     RESOLVE_METHOD(av_write_frame)
+#if defined(AVFORMAT_HAS_STREAM_GET_R_FRAME_RATE)
+    RESOLVE_METHOD(av_stream_get_r_frame_rate)
+#endif
   END_METHOD_RESOLVE()
 
   /* dependencies of libavformat */

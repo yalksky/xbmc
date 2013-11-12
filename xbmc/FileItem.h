@@ -113,7 +113,8 @@ public:
   const CFileItem& operator=(const CFileItem& item);
   virtual void Archive(CArchive& ar);
   virtual void Serialize(CVariant& value) const;
-  virtual void ToSortable(SortItem &sortable);
+  virtual void ToSortable(SortItem &sortable, Field field) const;
+  void ToSortable(SortItem &sortable, const Fields &fields) const;
   virtual bool IsFileItem() const { return true; };
 
   bool Exists(bool bUseCache = true) const;
@@ -147,6 +148,7 @@ public:
   bool IsInternetStream(const bool bStrictCheck = false) const;
   bool IsPlayList() const;
   bool IsSmartPlayList() const;
+  bool IsLibraryFolder() const;
   bool IsPythonScript() const;
   bool IsPlugin() const;
   bool IsScript() const;
