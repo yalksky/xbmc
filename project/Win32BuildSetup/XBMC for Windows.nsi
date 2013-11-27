@@ -49,8 +49,8 @@
   !define MUI_ICON "..\..\xbmc\win32\xbmc.ico"
   !define MUI_WELCOMEFINISHPAGE_BITMAP "xbmc-left.bmp"
   !define MUI_COMPONENTSPAGE_SMALLDESC
-  !define MUI_FINISHPAGE_LINK "Please visit http://xbmc.org for more information."
-  !define MUI_FINISHPAGE_LINK_LOCATION "http://xbmc.org"
+  !define MUI_FINISHPAGE_LINK "Please visit http://xbmc-korea.com for more information."
+  !define MUI_FINISHPAGE_LINK_LOCATION "http://xbmc-korea.com"
   !define MUI_FINISHPAGE_RUN "$INSTDIR\${APP_NAME}.exe"
   !define MUI_FINISHPAGE_RUN_NOTCHECKED
   !define MUI_ABORTWARNING  
@@ -80,7 +80,7 @@
 ;--------------------------------
 ;Languages
 
-  !insertmacro MUI_LANGUAGE "English"
+  !insertmacro MUI_LANGUAGE "Korean"
 
 ;--------------------------------
 ;Install levels

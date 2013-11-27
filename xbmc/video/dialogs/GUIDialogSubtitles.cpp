@@ -244,8 +244,10 @@ bool CGUIDialogSubtitles::SetService(const std::string &service)
 
     CGUIImage* image = (CGUIImage*)GetControl(CONTROL_NAMELOGO);
     if (image)
-      image->SetFileName(currentService->GetArt("thumb"));
-
+    {
+      std::string icon = URIUtils::AddFileToFolder(currentService->GetProperty("Addon.Path").asString(), "logo.png");
+      image->SetFileName(icon);
+    }
     if (g_application.m_pPlayer->GetSubtitleCount() == 0)
       SET_CONTROL_HIDDEN(CONTROL_SUBSEXIST);
     else
@@ -400,8 +402,7 @@ void CGUIDialogSubtitles::OnDownloadComplete(const CFileItemList *items, const s
 
   // construct subtitle path
   URIUtils::RemoveExtension(strFileName);
-  CStdString strSubName;
-  strSubName.Format("%s.%s%s", strFileName.c_str(), strSubLang.c_str(), strSubExt.c_str());
+  CStdString strSubName = StringUtils::Format("%s.%s%s", strFileName.c_str(), strSubLang.c_str(), strSubExt.c_str());
   CStdString strSubPath = URIUtils::AddFileToFolder(strDestPath, strSubName);
 
   // and copy the file across
