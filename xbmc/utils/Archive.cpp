@@ -31,7 +31,7 @@ CArchive::CArchive(CFile* pFile, int mode)
   m_pFile = pFile;
   m_iMode = mode;
 
-  m_pBuffer = new BYTE[BUFFER_MAX];
+  m_pBuffer = new uint8_t[BUFFER_MAX];
   memset(m_pBuffer, 0, BUFFER_MAX);
 
   m_BufferPos = 0;
@@ -241,6 +241,9 @@ CArchive& CArchive::operator<<(const CVariant& variant)
   case CVariant::VariantTypeString:
     *this << variant.asString();
     break;
+  case CVariant::VariantTypeWideString:
+    *this << variant.asWideString();
+    break;
   case CVariant::VariantTypeDouble:
     *this << variant.asDouble();
     break;
@@ -359,7 +362,7 @@ CArchive& CArchive::operator>>(std::wstring& wstr)
   *this >> iLength;
 
   wchar_t * const p = new wchar_t[iLength];
-  m_pFile->Read(p, iLength);
+  m_pFile->Read(p, iLength * sizeof(wchar_t));
   wstr.assign(p, iLength);
   delete[] p;
 
@@ -412,6 +415,13 @@ CArchive& CArchive::operator>>(CVariant& variant)
   case CVariant::VariantTypeString:
   {
     std::string value;
+    *this >> value;
+    variant = value;
+    break;
+  }
+  case CVariant::VariantTypeWideString:
+  {
+    std::wstring value;
     *this >> value;
     variant = value;
     break;
